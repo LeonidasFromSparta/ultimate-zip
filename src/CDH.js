@@ -12,8 +12,8 @@ export default class CDH {
         this.readGeneralPurposeBitFlag(buffer)
         this.readCompressionMethod(buffer)
         this.readLengthOfCD(buffer)
-        this.readCDOffsetWithStartingDiskNum(buffer)
-        this.readCommentLength(buffer)
+        this.readCRC32(buffer)
+        this.readCompressedSize(buffer)
         this.readComment(buffer)
     }
 
@@ -69,42 +69,133 @@ export default class CDH {
     }
 
     /**
-     * Read size of the central directory.
-     * Offset 12, 4 bytes (32 bit), LE.
+     * Read last mod file time.
+     * Offset 12, 2 bytes (16 bit).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readLengthOfCD(buffer) {
+    readLastModFileTime(buffer) {
 
-        this.lengthOfCD = buffer.readUInt32LE(12)
+        this.lastModFileTime = buffer.readUInt16BE(12)
     }
 
     /**
-     * Read offset of start of central directory with respect to the starting disk number.
-     * Offset 16, 4 bytes (32 bit), LE.
+     * Read last mod file date.
+     * Offset 14, 2 bytes (16 bit).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readCDOffsetWithStartingDiskNum(buffer) {
+    readLastModFileDate(buffer) {
 
-        this.offsetOfCDWithStartingDiskNum = buffer.readUInt32LE(16)
+        this.lastModFileDate = buffer.readUInt16BE(14)
     }
 
     /**
-     * Read .ZIP file comment length.
-     * Offset 20, 2 bytes (16 bit).
+     * Read crc-32.
+     * Offset 16, 4 bytes (32 bit).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readCommentLength(buffer) {
+    readCRC32(buffer) {
 
-        this.commentLength = buffer.readUInt16BE(20)
+        this.crc32 = buffer.readUInt32BE(16)
     }
 
     /**
-     * Read .ZIP file comment.
-     * Offset 22, variable size (up to 64kb).
+     * Read compressed size.
+     * Offset 20, 4 bytes (32 bit).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readComment(buffer) {
+    readCompressedSize(buffer) {
 
-        this.comment = buffer.toString('utf8', 22)
+        this.compressedSize = buffer.readUInt32BE(20)
+    }
+
+    /**
+     * Read uncompressed size.
+     * Offset 24, 4 bytes (32 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readUncompressedSize(buffer) {
+
+        this.uncompressedSize = buffer.readUInt32BE(20)
+    }
+
+    /**
+     * Read file name length.
+     * Offset 28, 2 bytes (16 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readFilenameLength(buffer) {
+
+        this.filenameLength = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read extra field length.
+     * Offset 30, 2 bytes (16 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readExtraFieldLength(buffer) {
+
+        this.extraFieldLength = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read file comment length.
+     * Offset 32, 2 bytes (16 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readFileCommentLength(buffer) {
+
+        this.fileCommentLength = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read disk number start.
+     * Offset 34, 2 bytes (16 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readDiskNumberStart(buffer) {
+
+        this.diskNumberStart = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read internal file attributes.
+     * Offset 36, 2 bytes (16 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readInternalFileAttributes(buffer) {
+
+        this.internalFileAttributes = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read external file attributes.
+     * Offset 38, 4 bytes (32 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readExternalFileAttributes(buffer) {
+
+        this.externalFileAttributes = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read relative offset of local header.
+     * Offset 42, 4 bytes (32 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     */
+    readRelativeOffsetOfLocalHeader(buffer) {
+
+        this.relativeOffsetOfLocalHeader = buffer.readUInt16BE(20)
+    }
+
+    /**
+     * Read relative offset of local header.
+     * Offset 42, 4 bytes (32 bit).
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * @param {buffer} length The length of the file name.
+     */
+    readFilename(buffer, length) {
+
+        this.relativeOffsetOfLocalHeader = buffer.readUInt16BE(20,)
     }
 }
