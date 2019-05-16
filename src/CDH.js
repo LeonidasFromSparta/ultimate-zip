@@ -226,7 +226,7 @@ export default class CDH {
      * Read file comment (variable size).
      * Offset 46 + filename length + extra field length, variable length.
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     * @param {buffer} addedOffset The exatra offset from file name and extra field lengths.
+     * @param {buffer} addedOffset The file name and extra field lengths additonal offset.
      * @param {buffer} length The length of the file comment.
      */
     readFileComment(buffer, addedOffset, length) {
