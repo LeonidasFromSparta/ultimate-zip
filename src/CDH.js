@@ -11,10 +11,21 @@ export default class CDH {
         this.readVersionNeededToExtract(buffer)
         this.readGeneralPurposeBitFlag(buffer)
         this.readCompressionMethod(buffer)
-        this.readLengthOfCD(buffer)
+        this.readLastModFileTime(buffer)
+        this.readLastModFileDate(buffer)
         this.readCRC32(buffer)
         this.readCompressedSize(buffer)
-        this.readComment(buffer)
+        this.readUncompressedSize(buffer)
+        this.readFilenameLength(buffer)
+        this.readExtraFieldLength(buffer)
+        this.readFileCommentLength(buffer)
+        this.readDiskNumberStart(buffer)
+        this.readInternalFileAttributes(buffer)
+        this.readRelativeOffsetOfLocalHeader(buffer)
+
+        this.readFilename(buffer, this.filenameLength)
+        this.readExtraField(buffer, this.filenameLength, this.fileCommentLength)
+        this.readFileComment(buffer, this.filenameLength + this.fileCommentLength, this.fileCommentLength)
     }
 
     /**
@@ -115,7 +126,7 @@ export default class CDH {
      */
     readUncompressedSize(buffer) {
 
-        this.uncompressedSize = buffer.readUInt32BE(20)
+        this.uncompressedSize = buffer.readUInt32BE(24)
     }
 
     /**
@@ -125,7 +136,7 @@ export default class CDH {
      */
     readFilenameLength(buffer) {
 
-        this.filenameLength = buffer.readUInt16BE(20)
+        this.filenameLength = buffer.readUInt16BE(28)
     }
 
     /**
@@ -135,7 +146,7 @@ export default class CDH {
      */
     readExtraFieldLength(buffer) {
 
-        this.extraFieldLength = buffer.readUInt16BE(20)
+        this.extraFieldLength = buffer.readUInt16BE(30)
     }
 
     /**
@@ -145,7 +156,7 @@ export default class CDH {
      */
     readFileCommentLength(buffer) {
 
-        this.fileCommentLength = buffer.readUInt16BE(20)
+        this.fileCommentLength = buffer.readUInt16BE(32)
     }
 
     /**
@@ -155,7 +166,7 @@ export default class CDH {
      */
     readDiskNumberStart(buffer) {
 
-        this.diskNumberStart = buffer.readUInt16BE(20)
+        this.diskNumberStart = buffer.readUInt16BE(34)
     }
 
     /**
@@ -165,7 +176,7 @@ export default class CDH {
      */
     readInternalFileAttributes(buffer) {
 
-        this.internalFileAttributes = buffer.readUInt16BE(20)
+        this.internalFileAttributes = buffer.readUInt16BE(36)
     }
 
     /**
@@ -175,7 +186,7 @@ export default class CDH {
      */
     readExternalFileAttributes(buffer) {
 
-        this.externalFileAttributes = buffer.readUInt16BE(20)
+        this.externalFileAttributes = buffer.readUInt32BE(38)
     }
 
     /**
@@ -185,17 +196,41 @@ export default class CDH {
      */
     readRelativeOffsetOfLocalHeader(buffer) {
 
-        this.relativeOffsetOfLocalHeader = buffer.readUInt16BE(20)
+        this.relativeOffsetOfLocalHeader = buffer.readUInt32BE(42)
     }
 
     /**
-     * Read relative offset of local header.
-     * Offset 42, 4 bytes (32 bit).
+     * Read file name (variable size).
+     * Offset 46, variable length.
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      * @param {buffer} length The length of the file name.
      */
     readFilename(buffer, length) {
 
-        this.relativeOffsetOfLocalHeader = buffer.readUInt16BE(20,)
+        this.filename = buffer.readUInt16BE(46, length)
+    }
+
+    /**
+     * Read extra field (variable size).
+     * Offset 46 + filename length, variable length
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * @param {buffer} addedOffset The filename length additional offset.
+     * @param {buffer} length The length of the extra field.
+     */
+    readExtraField(buffer, addedOffset, length) {
+
+        this.extraField = buffer.readUInt16BE(46 + addedOffset, length)
+    }
+
+    /**
+     * Read file comment (variable size).
+     * Offset 46 + filename length + extra field length, variable length.
+     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * @param {buffer} addedOffset The exatra offset from file name and extra field lengths.
+     * @param {buffer} length The length of the file comment.
+     */
+    readFileComment(buffer, addedOffset, length) {
+
+        this.fileComment = buffer.readUInt16BE(46 + addedOffset, length)
     }
 }
