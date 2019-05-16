@@ -1,7 +1,7 @@
 import {locate_EOCDR_offset, locate_CDR_offset} from './zip-utils'
 import {getBytesFromEndOfFile} from './file-utils'
 import EOCDR32 from './EOCDR32'
-import CDR from './CDR'
+import CDH from './CDH'
 
 export default class Zip {
 
@@ -17,7 +17,7 @@ export default class Zip {
 
         const cdrOffset = locate_CDR_offset(eocdBuffer)
 
-        this.CDR = new CDR(eocdBuffer.slice(cdrOffset))
+        this.CDR = new CDH(eocdBuffer.slice(cdrOffset))
 
 
     }
