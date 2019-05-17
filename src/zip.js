@@ -19,7 +19,7 @@ export default class Zip {
 
         this.CDR = new CDH(eocdBuffer.slice(cdrOffset))
 
-
+        debugger
     }
 
     read_EOCD_buffer(path) {

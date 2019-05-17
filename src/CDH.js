@@ -3,7 +3,10 @@ export default class CDH {
     static BYTES_LENGTH = 46
     static SIGNATURE = 0x02014b50
 
+
     constructor(buffer) {
+
+        debugger
 
         this.verifySignature(buffer)
 
@@ -24,8 +27,8 @@ export default class CDH {
         this.readRelativeOffsetOfLocalHeader(buffer)
 
         this.readFilename(buffer, this.filenameLength)
-        this.readExtraField(buffer, this.filenameLength, this.fileCommentLength)
-        this.readFileComment(buffer, this.filenameLength + this.fileCommentLength, this.fileCommentLength)
+        this.readExtraField(buffer, this.filenameLength, this.extraFieldLength)
+        this.readFileComment(buffer, this.filenameLength + this.extraFieldLength, this.fileCommentLength)
     }
 
     /**
@@ -131,22 +134,22 @@ export default class CDH {
 
     /**
      * Read file name length.
-     * Offset 28, 2 bytes (16 bit).
+     * Offset 28, 2 bytes (16 bit LE).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
     readFilenameLength(buffer) {
 
-        this.filenameLength = buffer.readUInt16BE(28)
+        this.filenameLength = buffer.readUInt16LE(28)
     }
 
     /**
      * Read extra field length.
-     * Offset 30, 2 bytes (16 bit).
+     * Offset 30, 2 bytes (16 bit LE).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
     readExtraFieldLength(buffer) {
 
-        this.extraFieldLength = buffer.readUInt16BE(30)
+        this.extraFieldLength = buffer.readUInt16LE(30)
     }
 
     /**
@@ -201,25 +204,38 @@ export default class CDH {
 
     /**
      * Read file name (variable size).
-     * Offset 46, variable length.
+     * Offset 46, varchar.
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      * @param {buffer} length The length of the file name.
      */
     readFilename(buffer, length) {
 
-        this.filename = buffer.readUInt16BE(46, length)
+        this.filename = buffer.toString('utf8', 46, 46 + length)
     }
 
     /**
      * Read extra field (variable size).
-     * Offset 46 + filename length, variable length
+     * Offset 46 + filename length.
+     * Header ID offset 0, 2 bytes (16 bit LE). Data Size offset 2, 2 bytes (16 bit LE)
+     *
+     * .ZIP File Format Specification: sections 4.4.28, 4.5.1, 4.5.2
+     *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      * @param {buffer} addedOffset The filename length additional offset.
      * @param {buffer} length The length of the extra field.
      */
     readExtraField(buffer, addedOffset, length) {
 
-        this.extraField = buffer.readUInt16BE(46 + addedOffset, length)
+        const extraFieldBuffer = buffer.slice(46 + addedOffset, 46 + addedOffset + length)
+
+        const headerId = `0x${extraFieldBuffer.readUInt16LE(0).toString(16).toUpperCase()}`
+        const headerIdFromMap = CDH.HEADER_ID_MAPPING[headerId]
+
+        this.mappedHeaderId = headerIdFromMap ? headerIdFromMap : `${headerId} - header id doesn't exists in .ZIP spec`
+        this.dataSize = extraFieldBuffer.readUInt16LE(2)
+        this.extraFieldContent = extraFieldBuffer.toString(undefined, 4)
+
+
     }
 
     /**
