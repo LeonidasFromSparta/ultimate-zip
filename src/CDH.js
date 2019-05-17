@@ -1,3 +1,5 @@
+import EFB from './EFB'
+
 export default class CDH {
 
     static BYTES_LENGTH = 46
@@ -204,7 +206,7 @@ export default class CDH {
 
     /**
      * Read file name (variable size).
-     * Offset 46, varchar.
+     * Offset 46.
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      * @param {buffer} length The length of the file name.
      */
@@ -226,16 +228,7 @@ export default class CDH {
      */
     readExtraField(buffer, addedOffset, length) {
 
-        const extraFieldBuffer = buffer.slice(46 + addedOffset, 46 + addedOffset + length)
-
-        const headerId = `0x${extraFieldBuffer.readUInt16LE(0).toString(16).toUpperCase()}`
-        const headerIdFromMap = CDH.HEADER_ID_MAPPING[headerId]
-
-        this.mappedHeaderId = headerIdFromMap ? headerIdFromMap : `${headerId} - header id doesn't exists in .ZIP spec`
-        this.dataSize = extraFieldBuffer.readUInt16LE(2)
-        this.extraFieldContent = extraFieldBuffer.toString(undefined, 4)
-
-
+        this.extraField = new EFB(buffer.slice(46 + addedOffset, 46 + addedOffset + length))
     }
 
     /**

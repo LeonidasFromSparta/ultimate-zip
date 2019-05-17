@@ -4,12 +4,9 @@ export default class NTFS {
 
         this.readTagBlockType(buffer)
         this.readSizeOfAttribute(buffer)
-        this.readVersionNeededToExtract(buffer)
-        this.readGeneralPurposeBitFlag(buffer)
-        this.readCompressionMethod(buffer)
-        this.readLastModFileTime(buffer)
-        this.readLastModFileDate(buffer)
-        this.readCRC32(buffer)
+        this.readFileLastModificationTime(buffer)
+        this.readFileLastAccessTime(buffer)
+        this.readFileCreationTime(buffer)
     }
 
     /**
