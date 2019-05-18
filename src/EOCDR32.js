@@ -2,14 +2,14 @@ import {locate_EOCDR_offset} from './zip-utils'
 
 export default class EOCDR32 {
 
-    static BYTES_LENGTH = 22
+    static HEADER_FIXED_LENGTH = 22
     static SIGNATURE = 0x06054b50
-    static MAX_ENTRIES = 0xFFFF
 
     constructor(buffer) {
 
-        this.verifySignature(buffer)
+        this.headerLength = buffer.length
 
+        this.verifySignature(buffer)
         this.readNumOfThisDisk(buffer)
         this.readNumOfDiskWithStartOfCD(buffer)
         this.readTotalEntriesInCDInDisk(buffer)
@@ -38,7 +38,7 @@ export default class EOCDR32 {
      */
     readNumOfThisDisk(buffer) {
 
-        this.numOfDisk = buffer.readUInt16BE(4)
+        this.numOfDisk = buffer.readUInt16LE(4)
     }
 
     /**
@@ -48,7 +48,7 @@ export default class EOCDR32 {
      */
     readNumOfDiskWithStartOfCD(buffer) {
 
-        this.numOfDiskFromStartCD = buffer.readUInt16BE(6)
+        this.numOfDiskFromCdStart = buffer.readUInt16LE(6)
     }
 
     /**
@@ -108,16 +108,36 @@ export default class EOCDR32 {
      */
     readCommentLength(buffer) {
 
-        this.commentLength = buffer.readUInt16BE(20)
+        this.commentLength = buffer.readUInt16LE(20)
     }
 
     /**
      * Read .ZIP file comment.
      * Offset 22, variable size (up to 64kb).
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * @param {Buffer} buffer The buffer in which all the data supposed to be in.
+     * @param {buffer} length The length of the file comment.
      */
-    readComment(buffer) {
+    readComment(buffer, length) {
 
         this.comment = buffer.toString('utf8', 22)
+    }
+
+    toString() {
+
+        let str = ''
+
+        str += `[ END OF CENTRAL DIRECTORY ]\n`
+        str += `Signature                         : 0x${EOCDR32.SIGNATURE.toString(16)}\n`
+        str += `Number of this disk               : ${this.numOfDisk} (0x${this.numOfDisk.toString(16).toUpperCase()})\n`
+        str += `Number of this disk from CD start : ${this.numOfDiskFromCdStart} (0x${this.numOfDiskFromCdStart.toString(16).toUpperCase()})\n`
+        str += `Total entries in CD on this disk  : ${this.entriesInCDInDisk} (0x${this.entriesInCDInDisk.toString(16).toUpperCase()})\n`
+        str += `Total entries in CD               : ${this.entriesInCD} (0x${this.entriesInCD.toString(16).toUpperCase()})\n`
+        str += `CD size                           : ${this.lengthOfCD} (0x${this.lengthOfCD.toString(16).toUpperCase()})\n`
+        str += `Starting disk CD offset           : ${this.offsetOfCDWithStartingDiskNum} (0x${this.offsetOfCDWithStartingDiskNum.toString(16).toUpperCase()})\n`
+        str += `Comment length                    : ${this.commentLength} (0x${this.commentLength.toString(16).toUpperCase()})\n`
+        str += `Comment                           : ${this.comment}\n`
+        str += `[ END OF CENTRAL DIRECTORY LENGTH ${this.headerLength} (0x${this.headerLength.toString(16).toUpperCase()}) ]`
+
+        return str
     }
 }

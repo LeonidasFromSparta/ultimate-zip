@@ -1,7 +1,7 @@
 
 import Zip from './zip'
 
-const zip = new Zip('wow.zip')
+const zip = new Zip('C:/Users/leonw/Desktop/ultimate-zip.js/res/7z-wow.zip')
 
 debugger
 

@@ -1,5 +1,3 @@
-import NTFS from "./efattr/ntfs";
-
 export default class EFH {
 
     static HEADER_ID_MAPPING = {
@@ -35,8 +33,6 @@ export default class EFH {
 
     constructor(buffer) {
 
-        debugger
-
         this.readHeaderId(buffer)
         this.readDataSize(buffer)
         this.readDataBlock(buffer, this.headerId)
@@ -70,11 +66,15 @@ export default class EFH {
      */
     readDataBlock(buffer, headerId) {
 
+        /*
         switch (headerId) {
 
             case 10: this.dataBlock = new NTFS(buffer.slice(4))
 
             default: this.dataBlock = buffer.toString('hex', 4)
         }
+        */
+
+        this.dataBlock = buffer.slice(4).toString()
     }
 }

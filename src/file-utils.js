@@ -14,3 +14,12 @@ export const getBytesFromEndOfFile = (path, bytes) => {
 
     return buffer
 }
+
+export const getFileSize = (path) => {
+
+    const fd = fs.openSync (path, 'r')
+    const fileSize = fs.fstatSync(fd).size
+    fs.closeSync(fd)
+
+    return fileSize
+}
