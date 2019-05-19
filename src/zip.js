@@ -1,32 +1,32 @@
 import {locate_EOCDR_offset, locate_CDR_offset, locate_LFH_offset} from './zip-utils'
-import {getBytesFromEndOfFile, getFileSize} from './file-utils'
 import EOCDR32 from './EOCDR32'
 import CDH from './CDH'
 import fs from 'fs'
 import CDStream from './cd-stream'
 import LFH from './LFH'
+import File from './file'
 
 export default class Zip {
 
     constructor(path) {
 
-        const fileSize = getFileSize(path)
+        this.file = new File(path)
 
+        const lastBytesBuf = this.file.readLastBytes(EOCDR32.HEADER_FIXED_LENGTH + EOCDR32.MAX_FILE_COMMENT_LENGTH)
+        const eocdr32Offset = EOCDR32.locateHeaderStartPos(lastBytesBuf)
 
-        console.log(fileSize)
+        this.eocdr32 = new EOCDR32(lastBytesBuf.slice(eocdr32Offset))
 
-        const eocdBuffer = this.read_EOCD_buffer(path)
+        console.log(this.eocdr32.toString())
 
+        debugger
 
-        const eocdr32Offset = locate_EOCDR_offset(eocdBuffer)
+        const cdStream = new CDStream(this.eocdr32.entriesInCD)
+        const readable = this.file.createReadStream(this.eocdr32.offsetOfCDWithStartingDiskNum, this.eocdr32.lengthOfCD)
+        fs.createReadStream(path, {start: this.eocdr32.offsetOfCDWithStartingDiskNum}).pipe(cdStream)
+        console.log(cdStream.CDRS)
 
-        const eocdr32 = new EOCDR32(eocdBuffer.slice(eocdr32Offset))
-
-        console.log(eocdr32.toString() + '\n\n\n\n')
-
-        const cdStream = new CDStream(eocdr32.entriesInCD)
-        fs.createReadStream(path, {start: eocdr32.offsetOfCDWithStartingDiskNum, highWaterMark: 20}).pipe(cdStream)
-
+        /*
         const cdrOffset = locate_CDR_offset(eocdBuffer)
 
         const cdr = new CDH(eocdBuffer.slice(cdrOffset))
@@ -39,13 +39,6 @@ export default class Zip {
 
         const lfh = new LFH(eocdBuffer.slice(87))
         console.log(lfh.toString())
-    }
-
-    read_EOCD_buffer(path) {
-
-        const bufferSize = 65536 + EOCDR32.HEADER_FIXED_LENGTH
-        const buffer = getBytesFromEndOfFile(path, bufferSize)
-
-        return buffer
+        */
     }
 }

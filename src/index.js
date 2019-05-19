@@ -3,8 +3,6 @@ import Zip from './zip'
 
 const zip = new Zip('C:/Users/leonw/Desktop/ultimate-zip.js/res/7z-wow.zip')
 
-debugger
-
 /*
 const _64kb = 65536 + 22
 const buff = findLastBytes('wow.zip', _64kb)

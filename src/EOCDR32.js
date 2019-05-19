@@ -3,6 +3,7 @@ import {locate_EOCDR_offset} from './zip-utils'
 export default class EOCDR32 {
 
     static HEADER_FIXED_LENGTH = 22
+    static MAX_FILE_COMMENT_LENGTH = 65536
     static SIGNATURE = 0x06054b50
 
     constructor(buffer) {
@@ -112,8 +113,8 @@ export default class EOCDR32 {
     }
 
     /**
-     * Read .ZIP file comment.
-     * Offset 22, variable size (up to 64kb).
+     * Read zip file comment.
+     * Offset 22, variable size (max 64kb).
      * @param {Buffer} buffer The buffer in which all the data supposed to be in.
      * @param {buffer} length The length of the file comment.
      */
@@ -139,5 +140,19 @@ export default class EOCDR32 {
         str += `[ END OF CENTRAL DIRECTORY LENGTH ${this.headerLength} (0x${this.headerLength.toString(16).toUpperCase()}) ]`
 
         return str
+    }
+
+    /**
+     * This static method locates the start position of the 'End of Central Directory Record'.
+     * @param {Buffer} buffer The buffer which should contain the header. Max header length will be 65558 bytes.
+     * @returns {int} The position in which header signature located.
+     */
+    static locateHeaderStartPos(buffer) {
+
+        for (let offset = buffer.length - (EOCDR32.HEADER_FIXED_LENGTH - 4); offset !== -1; offset--)
+            if (buffer.readUInt32LE(offset) === EOCDR32.SIGNATURE)
+                return offset
+
+        throw `Could not locate 'End of Central Directory Record' signature ${EOCDR32.SIGNATURE}`
     }
 }
