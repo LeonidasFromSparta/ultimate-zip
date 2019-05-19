@@ -1,9 +1,10 @@
-import {locate_EOCDR_offset, locate_CDR_offset} from './zip-utils'
+import {locate_EOCDR_offset, locate_CDR_offset, locate_LFH_offset} from './zip-utils'
 import {getBytesFromEndOfFile, getFileSize} from './file-utils'
 import EOCDR32 from './EOCDR32'
 import CDH from './CDH'
 import fs from 'fs'
 import CDStream from './cd-stream'
+import LFH from './LFH'
 
 export default class Zip {
 
@@ -16,6 +17,7 @@ export default class Zip {
 
         const eocdBuffer = this.read_EOCD_buffer(path)
 
+
         const eocdr32Offset = locate_EOCDR_offset(eocdBuffer)
 
         const eocdr32 = new EOCDR32(eocdBuffer.slice(eocdr32Offset))
@@ -25,15 +27,18 @@ export default class Zip {
         const cdStream = new CDStream(eocdr32.entriesInCD)
         fs.createReadStream(path, {start: eocdr32.offsetOfCDWithStartingDiskNum, highWaterMark: 20}).pipe(cdStream)
 
-        /*
         const cdrOffset = locate_CDR_offset(eocdBuffer)
 
         const cdr = new CDH(eocdBuffer.slice(cdrOffset))
 
         console.log(cdr.toString())
-        */
 
         debugger
+
+        const lfhOffset = locate_LFH_offset(eocdBuffer)
+
+        const lfh = new LFH(eocdBuffer.slice(87))
+        console.log(lfh.toString())
     }
 
     read_EOCD_buffer(path) {
