@@ -60,7 +60,7 @@ export default class File {
      * @param {int} length Length of bytes to read.
      * @returns {buffer} The buffer which contains data read from the file.
      */
-    readBytes(position, length) {
+    readBytesSync(position, length) {
 
         const buffer = Buffer.allocUnsafe(length)
         fs.readSync(Number(this.fd), buffer, 0, length, position)

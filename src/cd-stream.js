@@ -1,5 +1,5 @@
 import {Writable} from 'stream'
-import CDH from './CDH'
+import CentralFileHeader from './CentralFileHeader'
 
 export default class CDStream extends Writable {
 
@@ -22,7 +22,7 @@ export default class CDStream extends Writable {
         for (let i = 0; i < chunk.length; i++) {
 
             if (this.fixedLengthBuf === null)
-                this.fixedLengthBuf = new Buffer.allocUnsafe(CDH.HEADER_FIXED_LENGTH)
+                this.fixedLengthBuf = new Buffer.allocUnsafe(CentralFileHeader.HEADER_FIXED_LENGTH)
 
             if (this.fixedLengthBufIndex < this.fixedLengthBuf.length) {
 
@@ -33,7 +33,7 @@ export default class CDStream extends Writable {
 
             if (this.fixedLengthBufIndex === this.fixedLengthBuf.length) {
 
-                this.tmpCDR = new CDH(this.fixedLengthBuf)
+                this.tmpCDR = new CentralFileHeader(this.fixedLengthBuf)
                 this.variableLengthBuf = new Buffer.allocUnsafe(this.tmpCDR.variableHeaderLength)
                 this.fixedLengthBufIndex++
             }

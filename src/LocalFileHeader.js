@@ -1,5 +1,5 @@
 import os from 'os'
-import {ZIP_FORMAT_VERSIONS_MAPPING, COMPRESSION_METHOD_MAPPING} from './mappings'
+import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING} from './mappings'
 
 export default class LFH {
 
@@ -113,7 +113,7 @@ export default class LFH {
 
     getVersionNeededToExtractInfo() {
 
-        return `(${this.toHex(this.versionNeededToExtract)}) - ${(this.versionNeededToExtract / 10).toFixed(1)} ${ZIP_FORMAT_VERSIONS_MAPPING[this.versionNeededToExtract] ? ZIP_FORMAT_VERSIONS_MAPPING[this.versionNeededToExtract] : 'not specified by APPNOTE.TXT - .ZIP File Format Specification'}`
+        return `(${this.toHex(this.versionNeededToExtract)}) - ${(this.versionNeededToExtract / 10).toFixed(1)} ${VERSION_MAPPING[this.versionNeededToExtract] ? VERSION_MAPPING[this.versionNeededToExtract] : 'not specified by APPNOTE.TXT - .ZIP File Format Specification'}`
     }
 
     /**

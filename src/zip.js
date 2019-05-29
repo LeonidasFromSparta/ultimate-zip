@@ -1,9 +1,9 @@
 import {locate_EOCDR_offset, locate_CDR_offset, locate_LFH_offset} from './zip-utils'
-import EOCDR32 from './EOCDR32'
-import CDH from './CDH'
+import CentralHeader32 from './CentralHeader32'
+import CentralFileHeader from './CentralFileHeader'
 import fs from 'fs'
 import CDStream from './cd-stream'
-import LFH from './LFH'
+import LFH from './LocalFileHeader'
 import File from './file'
 
 export default class Zip {
@@ -12,46 +12,59 @@ export default class Zip {
 
         this.file = new File(path)
 
-/*
+        const lastBytesBuf = this.file.readLastBytes(CentralHeader32.HEADER_FIXED_LENGTH + CentralHeader32.MAX_ZIP_COMMENT_LENGTH)
+        const eocdr32Offset = CentralHeader32.locateHeaderStartPos(lastBytesBuf)
+        this.eocdr32 = new CentralHeader32(lastBytesBuf.slice(eocdr32Offset))
 
-        console.log(this.eocdr32.toString())
-
-        debugger
-
-
-
-        debugger
-
-        const lfhOffset = locate_LFH_offset(eocdBuffer)
-
-        const lfh = new LFH(eocdBuffer.slice(87))
-        console.log(lfh.toString())
-*/
+        this.readCentralFileHeadersSync()
     }
 
-    async getInfo() {
+    readCentralFileHeadersSync() {
 
-        const lastBytesBuf = this.file.readLastBytes(EOCDR32.HEADER_FIXED_LENGTH + EOCDR32.MAX_ZIP_COMMENT_LENGTH)
-        const eocdr32Offset = EOCDR32.locateHeaderStartPos(lastBytesBuf)
-        const eocdr32 = new EOCDR32(lastBytesBuf.slice(eocdr32Offset))
+        this.file.openFile()
+        const buffer = this.file.readBytesSync(this.eocdr32.offsetOfCDWithStartingDiskNum, this.eocdr32.lengthOfCD)
+        this.file.closeFile()
 
-        const prom = new Promise((resolve, reject) => {
+        this.centralFileHeaders = []
+        let totalBytesRead = 0
 
-            const stream = fs.createReadStream(this.file.path, {start: eocdr32.offsetOfCDWithStartingDiskNum})
-            const cdStream = new CDStream(eocdr32.entriesInCD)
+        for (let i = 0; i < this.eocdr32.entriesInCD; i++) {
 
-            stream.pipe(cdStream)
-            stream.on('end', () => resolve(cdStream.CDRS))
-        })
+            const cdh = new CentralFileHeader(buffer.slice(totalBytesRead))
+            this.centralFileHeaders.push(cdh)
+            totalBytesRead += cdh.totalHeaderLength
+        }
 
-        return await prom
+        console.log(this.centralFileHeaders[0].toString())
+        console.log(this.centralFileHeaders[1].toString())
+    }
+
+    readLocalFileHeadersSync() {
+
+        this.file.openFile()
+        const buffer = this.file.readBytesSync(this.eocdr32.offsetOfCDWithStartingDiskNum, this.eocdr32.lengthOfCD)
+
+        this.centralFileHeaders = []
+        let totalBytesRead = 0
+
+        for (let i = 0; i < this.eocdr32.entriesInCD; i++) {
+
+            const cdh = new CentralFileHeader(buffer.slice(totalBytesRead))
+            this.centralFileHeaders.push(cdh)
+            totalBytesRead += cdh.totalHeaderLength
+        }
+
+        console.log(this.centralFileHeaders[0].toString())
+        console.log(this.centralFileHeaders[1].toString())
+
+        this.file.closeFile()
     }
 
     async getInfo2() {
 
-        const lastBytesBuf = this.file.readLastBytes(EOCDR32.HEADER_FIXED_LENGTH + EOCDR32.MAX_ZIP_COMMENT_LENGTH)
-        const eocdr32Offset = EOCDR32.locateHeaderStartPos(lastBytesBuf)
-        const eocdr32 = new EOCDR32(lastBytesBuf.slice(eocdr32Offset))
+        const lastBytesBuf = this.file.readLastBytes(CentralHeader32.HEADER_FIXED_LENGTH + CentralHeader32.MAX_ZIP_COMMENT_LENGTH)
+        const eocdr32Offset = CentralHeader32.locateHeaderStartPos(lastBytesBuf)
+        const eocdr32 = new CentralHeader32(lastBytesBuf.slice(eocdr32Offset))
 
         const prom = new Promise((resolve, reject) => {
 
