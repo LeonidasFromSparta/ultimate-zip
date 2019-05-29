@@ -3,7 +3,7 @@ import {locate_EOCDR_offset} from './zip-utils'
 export default class EOCDR32 {
 
     static HEADER_FIXED_LENGTH = 22
-    static MAX_FILE_COMMENT_LENGTH = 65536
+    static MAX_ZIP_COMMENT_LENGTH = 65536
     static SIGNATURE = 0x06054b50
 
     constructor(buffer) {

@@ -1,8 +1,10 @@
 import os from 'os'
+import {ZIP_FORMAT_VERSIONS_MAPPING, COMPRESSION_METHOD_MAPPING} from './mappings'
 
 export default class LFH {
 
     static HEADER_FIXED_LENGTH = 30
+    static HEADER_MAX_VARIABLE_LENGTH = 65535 + 65535
     static SIGNATURE = 0x04034b50
 
     static PLATFORM_MAPPING = {
@@ -29,23 +31,7 @@ export default class LFH {
         19: 'OS X (Darwin)'
     }
 
-    static VERSION_NEEDED_TO_EXTRACT = {
 
-        10: ['Default value'],
-        11: ['File is a volume label'],
-        20: ['File is a folder (directory)', 'File is compressed using Deflate compression', 'File is encrypted using traditional PKWARE encryption'],
-        21: ['File is compressed using Deflate64(tm)'],
-        25: ['File is compressed using PKWARE DCL Implode'],
-        27: ['File is a patch data set'],
-        45: ['File uses ZIP64 format extensions'],
-        46: ['File is compressed using BZIP2 compression*'],
-        50: ['File is encrypted using DES, File is encrypted using 3DES', 'File is encrypted using original RC2 encryption', 'File is encrypted using RC4 encryption'],
-        51: ['File is encrypted using AES encryption', 'File is encrypted using corrected RC2 encryption**'],
-        52: ['File is encrypted using corrected RC2-64 encryption**'],
-        61: ['File is encrypted using non-OAEP key wrapping***'],
-        62: ['Central directory encryption'],
-        63: ['File is compressed using LZMA', 'File is compressed using PPMd+', 'File is encrypted using Blowfish', 'File is encrypted using Twofish']
-    }
 
     static GENERAL_PURPOSE_BIT_FLAG_MAPPING = {
 
@@ -67,33 +53,7 @@ export default class LFH {
         32768: 'Bit 15'
     }
 
-    static COMPRESSION_METHOD_MAPPING = {
 
-        0: 'The file is stored (no compression)',
-        1: 'The file is Shrunk',
-        2: 'The file is Reduced with compression factor 1',
-        3: 'The file is Reduced with compression factor 2',
-        4: 'The file is Reduced with compression factor 3',
-        5: 'The file is Reduced with compression factor 4',
-        6: 'The file is Imploded',
-        7: 'Reserved for Tokenizing compression algorithm',
-        8: 'The file is Deflated',
-        9: 'Enhanced Deflating using Deflate64(tm)',
-       10: 'PKWARE Data Compression Library Imploding (old IBM TERSE)',
-       11: 'Reserved by PKWARE',
-       12: 'File is compressed using BZIP2 algorithm',
-       13: 'Reserved by PKWARE',
-       14: 'LZMA',
-       15: 'Reserved by PKWARE',
-       16: 'IBM z/OS CMPSC Compression',
-       17: 'Reserved by PKWARE',
-       18: 'File is compressed using IBM TERSE (new)',
-       19: 'IBM LZ77 z Architecture (PFS)',
-       96: 'JPEG variant',
-       97: 'WavPack compressed data',
-       98: 'PPMd version I, Rev 1',
-       99: 'AE-x encryption marker (see APPENDIX E)'
-    }
 
     static INTERNAL_ATTRIBUTES_MAPPING = {
 
@@ -114,7 +74,7 @@ export default class LFH {
         this.readCRC32(buffer)
         this.readCompressedSize(buffer)
         this.readUncompressedSize(buffer)
-        this.readFilenameLength(buffer)
+        this.readFileNameLength(buffer)
         this.readExtraFieldLength(buffer)
 
         this.variableHeaderLength = this.fileNameLength + this.extraFieldLength
@@ -148,10 +108,12 @@ export default class LFH {
      */
     readVersionNeededToExtract(buffer) {
 
-        const value = buffer.readUInt16LE(4)
-        const info = LFH.VERSION_NEEDED_TO_EXTRACT[value] ? LFH.VERSION_NEEDED_TO_EXTRACT[value] : ['not specified by APPNOTE.TXT - .ZIP File Format Specification']
+        this.versionNeededToExtract = buffer.readUInt8(4)
+    }
 
-        this.versionNeededToExtract = {value, info}
+    getVersionNeededToExtractInfo() {
+
+        return `(${this.toHex(this.versionNeededToExtract)}) - ${(this.versionNeededToExtract / 10).toFixed(1)} ${ZIP_FORMAT_VERSIONS_MAPPING[this.versionNeededToExtract] ? ZIP_FORMAT_VERSIONS_MAPPING[this.versionNeededToExtract] : 'not specified by APPNOTE.TXT - .ZIP File Format Specification'}`
     }
 
     /**
@@ -187,7 +149,11 @@ export default class LFH {
     readCompressionMethod(buffer) {
 
         this.compressionMethod = buffer.readUInt16LE(8)
-        this.compressionMethodInfo = LFH.COMPRESSION_METHOD_MAPPING[this.compressionMethod] ? LFH.COMPRESSION_METHOD_MAPPING[this.compressionMethod] : 'not specified by APPNOTE.TXT - .ZIP File Format Specification'
+    }
+
+    getCompressionMethodInfo(buffer) {
+
+        return `(${this.toHex(this.compressionMethod)}) - ${COMPRESSION_METHOD_MAPPING[this.compressionMethod] ? COMPRESSION_METHOD_MAPPING[this.compressionMethod] : 'not specified by APPNOTE.TXT - .ZIP File Format Specification'}`
     }
 
     /**
@@ -202,12 +168,15 @@ export default class LFH {
     readLastModFileTime(buffer) {
 
         this.lastModFileTime = buffer.readUInt16LE(10)
+    }
+
+    getLastModFileTimeInfo() {
 
         const seconds = this.lastModFileTime & 0x1F
         const minutes = (this.lastModFileTime & 0x7E0) >>> 5
         const hours = (this.lastModFileTime & 0xF800) >>> 11
 
-        this.lastModFileTimeInfo = `${hours}:${minutes}:${seconds}`
+        return `(${this.toHex(this.lastModFileTime)}) - ${hours}:${minutes}:${seconds}`
     }
 
     /**
@@ -229,6 +198,15 @@ export default class LFH {
         this.lastModFileDateInfo = `${day}/${month}/${year}`
     }
 
+    getLastModFileDateInfo() {
+
+        const day = this.lastModFileDate & 0x1F
+        const month = (this.lastModFileDate & 0x1E0) >>> 5
+        const year = ((this.lastModFileDate & 0xFE00) >>> 9) + 1980
+
+        return `(${this.toHex(this.lastModFileDate)}) - ${day}/${month}/${year}`
+    }
+
     /**
      * Read crc-32.
      * Offset 14, 4 bytes (32 bit).
@@ -240,6 +218,11 @@ export default class LFH {
     readCRC32(buffer) {
 
         this.crc32 = buffer.readUInt32LE(14)
+    }
+
+    getCRC32Info() {
+
+        return `(${this.toHex(this.crc32)})`
     }
 
     /**
@@ -255,6 +238,11 @@ export default class LFH {
         this.compressedSize = buffer.readUInt32LE(18)
     }
 
+    getCompressedSizeInfo() {
+
+        return `(${this.toHex(this.compressedSize)})`
+    }
+
     /**
      * Read uncompressed size.
      * Offset 22, 4 bytes (32 bit).
@@ -268,6 +256,11 @@ export default class LFH {
         this.uncompressedSize = buffer.readUInt32LE(22)
     }
 
+    getUncompressedSizeInfo() {
+
+        return `(${this.toHex(this.uncompressedSize)})`
+    }
+
     /**
      * Read file name length.
      * Offset 26, 2 bytes (16 bit).
@@ -276,9 +269,14 @@ export default class LFH {
      *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readFilenameLength(buffer) {
+    readFileNameLength(buffer) {
 
         this.fileNameLength = buffer.readUInt16LE(26)
+    }
+
+    getFileNameLengthInfo(buffer) {
+
+        return `(${this.toHex(this.fileNameLength)})`
     }
 
     /**
@@ -292,6 +290,11 @@ export default class LFH {
     readExtraFieldLength(buffer) {
 
         this.extraFieldLength = buffer.readUInt16LE(28)
+    }
+
+    getExtraFieldLengthInfo(buffer) {
+
+        return `(${this.toHex(this.extraFieldLength)})`
     }
 
     /**
@@ -346,26 +349,21 @@ export default class LFH {
 
         str += `[ LOCAL FILE HEADER ]${os.EOL}`
         str += `Signature                         : ${this.toHex(LFH.SIGNATURE)}${os.EOL}`
-        str += `Version needed to extract         : ${this.versionNeededToExtract.value} (${this.toHex(this.versionNeededToExtract.value)})${os.EOL}`
-        str += this.versionNeededToExtract.info.reduce((accu, obj) => accu += `${' '.repeat(36)}${obj}${os.EOL}`, '')
+        str += `Version needed to extract         : ${this.versionNeededToExtract} ${this.getVersionNeededToExtractInfo()} ${os.EOL}`
         str += `General purpose bit flag          : ${this.generalPurposeBitFlag} (0x${this.generalPurposeBitFlag.toString(16).toUpperCase()})${os.EOL}`
         str += this.generalPurposeBitFlagInfo.reduce((accu, obj) => accu += `${' '.repeat(36)}${obj}${os.EOL}`, '')
-        str += `Compression method                : ${this.compressionMethod} (0x${this.compressionMethod.toString(16).toUpperCase()})${os.EOL}`
-        str += `                                    ${this.compressionMethodInfo}${os.EOL}`
-        str += `Last mod file time                : ${this.lastModFileTime} (0x${this.lastModFileTime.toString(16).toUpperCase()})${os.EOL}`
-        str += `                                    ${this.lastModFileTimeInfo}${os.EOL}`
-        str += `Last mod file date                : ${this.lastModFileDate} (0x${this.lastModFileDate.toString(16).toUpperCase()})${os.EOL}`
-        str += `                                    ${this.lastModFileDateInfo}${os.EOL}`
-        str += `CRC-32                            : ${this.crc32} (0x${this.crc32.toString(16).toUpperCase()})${os.EOL}`
-        str += `Compressed size                   : ${this.compressedSize} (0x${this.compressedSize.toString(16).toUpperCase()})${os.EOL}`
-        str += `Uncompressed size                 : ${this.uncompressedSize} (0x${this.uncompressedSize.toString(16).toUpperCase()})${os.EOL}`
-        str += `File name legth                   : ${this.fileNameLength} (0x${this.fileNameLength.toString(16).toUpperCase()})${os.EOL}`
-        str += `Extra field length                : ${this.extraFieldLength} (0x${this.extraFieldLength.toString(16).toUpperCase()})${os.EOL}`
+        str += `Compression method                : ${this.compressionMethod} ${this.getCompressionMethodInfo()}${os.EOL}`
+        str += `Last mod file time                : ${this.lastModFileTime} ${this.getLastModFileTimeInfo()}${os.EOL}`
+        str += `Last mod file date                : ${this.lastModFileDate} ${this.getLastModFileDateInfo()}${os.EOL}`
+        str += `CRC-32                            : ${this.crc32} ${this.getCRC32Info()}${os.EOL}`
+        str += `Compressed size                   : ${this.compressedSize} ${this.getCompressedSizeInfo()}${os.EOL}`
+        str += `Uncompressed size                 : ${this.uncompressedSize} ${this.getUncompressedSizeInfo()}${os.EOL}`
+        str += `File name length                  : ${this.fileNameLength} ${this.getFileNameLengthInfo()}${os.EOL}`
+        str += `Extra field length                : ${this.extraFieldLength} ${this.getExtraFieldLengthInfo()}${os.EOL}`
         str += `File name                         : ${this.fileName}${os.EOL}`
         str += `Extra field                       : ${this.extraField}${os.EOL}`
-        str += `[ LOCAL FILE HEADER LENGTH ${this.totalHeaderLength} (0x${this.totalHeaderLength.toString(16).toUpperCase()}) ]`
 
-
+        str += `[ LOCAL FILE HEADER LENGTH ${this.totalHeaderLength} (${this.toHex(this.totalHeaderLength)}) ]`
 
         return str
     }

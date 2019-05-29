@@ -14,7 +14,7 @@ export default class File {
      */
     readLastBytes(length) {
 
-        const fd = fs.openSync (this.path, 'r')
+        const fd = fs.openSync(this.path, 'r')
         const stats = fs.fstatSync(fd)
 
         const numBytesToRead = stats.size < length ? stats.size : length
@@ -36,6 +36,36 @@ export default class File {
     createReadStream(startPos, endPos) {
 
         return fs.createReadStream(this.path, {start: startPos, end: endPos})
+    }
+
+    /**
+     * Method opens file descriptor.
+     */
+    openFile() {
+
+        this.fd = fs.openSync(this.path, 'r')
+    }
+
+    /**
+     * Method closes file descriptor.
+     */
+    closeFile() {
+
+        fs.closeSync(this.fd)
+    }
+
+    /**
+     * Method reads specific bytes while assuming the file is opened.
+     * @param {int} pos The start position in the file.
+     * @param {int} length Length of bytes to read.
+     * @returns {buffer} The buffer which contains data read from the file.
+     */
+    readBytes(position, length) {
+
+        const buffer = Buffer.allocUnsafe(length)
+        fs.readSync(Number(this.fd), buffer, 0, length, position)
+
+        return buffer
     }
 
     getFileSize() {

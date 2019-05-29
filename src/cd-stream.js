@@ -49,8 +49,6 @@ export default class CDStream extends Writable {
                 this.tmpCDR.readVariableData(this.variableLengthBuf)
                 this.CDRS.push(this.tmpCDR)
 
-                console.log(this.tmpCDR.toString())
-
                 if (this.CDRS.length === this.totalCDEntries)
                     this.end()
 
