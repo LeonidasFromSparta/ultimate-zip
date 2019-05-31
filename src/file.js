@@ -39,11 +39,6 @@ export default class File {
         return fs.createReadStream(this.path, {start: startPos, end: endPos})
     }
 
-    createReadStream() {
-
-        return fs.createReadStream(this.path)
-    }
-
     /**
      * Method opens file descriptor.
      */

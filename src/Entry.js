@@ -1,5 +1,5 @@
 import crc32 from './crc32'
-import FileHeader from './FileHeader'
+import FileHeader from './file-header'
 import FileContent from './FileContent'
 
 export default class Entry {

@@ -1,7 +1,7 @@
 import Zip32Header from './Zip32Header'
 import CentralFileHeader from './CentralFileHeader'
 import fs from 'fs'
-import FileHeader from './FileHeader'
+import FileHeader from './file-header'
 import File from './file'
 import Entry from './Entry'
 import FileContent from './FileContent'
@@ -78,11 +78,11 @@ export default class UZip {
         this.file.closeFile()
     }
 
-    async extractAll(path) {
+    extractAll(path) {
 
-        const prom = new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
-            const readStream = this.file.createReadStream()
+            const readStream = this.file.createReadStream(0, this.eocdr32.offsetOfCDWithStartingDiskNum)
 
             let entry = new Entry()
 
@@ -100,15 +100,39 @@ export default class UZip {
                 }
             })
 
-            readStream.on('end', () => {
+            readStream.on('end', () => resolve())
+        })
+    }
 
-                console.log('keke done')
+    extractByRegex(path, regex) {
+
+        return new Promise((resolve, reject) => {
+
+            this.
+            const readStream = this.file.createReadStream(0, this.eocdr32.offsetOfCDWithStartingDiskNum)
+
+            let entry = new Entry()
+
+            readStream.on('data', (chunk) => {
+
+                for (const byte of chunk) {
+
+                    entry.feedByte(byte)
+
+                    if (entry.isFeedingDone()) {
+
+                        entry.extract()
+                        entry = new Entry()
+                    }
+                }
             })
+
+            readStream.on('end', () => resolve())
         })
     }
 
     toString() {
 
-        return this.centralFileHeaders.reduce((acc, cfh) => acc + cfh.toString() + '\n', '') + this.readLocalFileHeadersSync().reduce((acc, lfh) => acc + lfh.toString() + '\n', '')
+        return this.eocdr32.toString() + '\n' + this.centralFileHeaders.reduce((acc, cfh) => acc + cfh.toString() + '\n', '') + this.readLocalFileHeadersSync().reduce((acc, lfh) => acc + lfh.toString() + '\n', '')
     }
 }
