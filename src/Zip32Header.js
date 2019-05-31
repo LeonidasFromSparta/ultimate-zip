@@ -1,5 +1,3 @@
-import {locate_EOCDR_offset} from './zip-utils'
-
 export default class Zip32Header {
 
     static HEADER_FIXED_LENGTH = 22

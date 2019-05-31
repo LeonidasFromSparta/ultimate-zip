@@ -5,9 +5,8 @@ import FileHeader from './FileHeader'
 import File from './file'
 import Entry from './Entry'
 import FileContent from './FileContent'
-import { isNull } from 'util';
 
-export default class Zip {
+export default class UZip {
 
     constructor(path) {
 
@@ -85,31 +84,18 @@ export default class Zip {
 
             const readStream = this.file.createReadStream()
 
-            let fileHeader = new FileHeader()
-            let fileContent = null
+            let entry = new Entry()
 
             readStream.on('data', (chunk) => {
 
                 for (const byte of chunk) {
 
-                    if (!fileHeader.isHeaderComplete()) {
+                    entry.feedByte(byte)
 
-                        fileHeader.feedByte(byte)
-                        continue
-                    }
+                    if (entry.isFeedingDone()) {
 
-                    if (fileContent === null)
-                        fileContent = new FileContent(fileHeader.readCompressedSize().value)
-
-                    if (!fileContent.isContentComplete()) {
-
-                        fileContent.feedByte(byte)
-                        continue
-                    }
-
-                    if (fileContent.isContentComplete()) {
-
-                        fileContent.extract()
+                        entry.extract()
+                        entry = new Entry()
                     }
                 }
             })
