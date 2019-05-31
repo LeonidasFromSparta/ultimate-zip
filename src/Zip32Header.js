@@ -26,8 +26,8 @@ export default class Zip32Header {
      */
     checkSignature = () => {
 
-        if (Zip32Header.SIGNATURE !== this.#buffer.readUInt32LE(0))
-            throw `End of Central Directory Record' header signature could not be verified: expected ${Zip32Header.SIGNATURE}, actual ${this.#buffer.readUInt32LE(0).toString(16)}`
+        if (Zip32Header.SIGNATURE !== this.getSignature())
+            throw `End of Central Directory Record' header signature could not be verified: expected ${Zip32Header.SIGNATURE}, actual ${this.getSignature()}`
     }
 
     /**
@@ -152,7 +152,7 @@ export default class Zip32Header {
 
     #getHeaderLengthInfo = () => '(' + this.#toHex(this.#getHeaderLength()) + ')'
 
-    toString() {
+    toString = () => {
 
         let str = ''
 

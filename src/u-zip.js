@@ -75,7 +75,7 @@ export default class UZip {
 
                     if (entry.isFeedingDone()) {
 
-                        entry.extract()
+                        entry.test()
                         entry = new Entry()
                     }
                 }

@@ -28,8 +28,13 @@ export default class FileContent {
         if (this.buffer.length === 0)
             return
 
-        const keke = inflateRawSync(this.buffer)
+        this.buffer = inflateRawSync(this.buffer)
 
         console.log(keke.toString())
+    }
+
+    calculateCrc32() {
+
+        return crc32(this.buffer)
     }
 }

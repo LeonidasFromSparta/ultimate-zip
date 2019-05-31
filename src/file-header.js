@@ -1,4 +1,4 @@
-import os from 'os'
+import {EOL} from 'os'
 import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING} from './mappings'
 
 export default class FileHeader {
@@ -100,297 +100,236 @@ export default class FileHeader {
     }
 
     /**
-     * Verify local file header (LFH) signature.
-     * Offset 0, 4 bytes (32 bit).
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * Method checks header signature.
      */
-    checkSignature() {
+    checkSignature = () => {
 
-        if (FileHeader.SIGNATURE !== this.buffer.readUInt32LE(0))
-            console.log('kekekeke1!!!  ')
+        if (FileHeader.SIGNATURE !== this.getSignature())
+            throw `Loca File' header signature could not be verified: expected ${FileHeader.SIGNATURE}, actual ${this.getSignature()}`
     }
 
     /**
-     * Read version needed to extract.
+     * Method reads header signature.
+     * Offset 0, 4 bytes (32 bit).
+     */
+    getSignature = () => this.#buffer.readUInt32LE(0)
+
+    #getSignatureInfo = () => {
+
+        const value = this.getSignature()
+        return '(' + this.#toHex(value) + ')'
+    }
+
+    /**
+     * Method reads version needed to extract.
      * Offset 4, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.3
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readVersionNeededToExtract() {
+    getVersionNeededToExtract = () => this.buffer.readUInt16LE(4)
 
-        const value = this.buffer.readUInt16LE(4)
+    #getVersionNeededToExtractInfo = () => {
 
-        const info = () => {
+        const value = this.getVersionNeededToExtract()
 
-            const version = (value / 10).toFixed(1)
-            const versionInfo = VERSION_MAPPING[value] ? VERSION_MAPPING[value] : 'Unknown version'
+        const version = (value / 10).toFixed(1)
+        const versionInfo = VERSION_MAPPING[value] ? VERSION_MAPPING[value] : 'Unknown ZIP spec version'
 
-            return '(' + this.toHex(value) + ')' + ' - Version ' + version + ' ' + versionInfo
-        }
-
-        return {value, info}
+        return '(' + this.#toHex(value) + ')' + ' - Version ' + version + ' ' + versionInfo
     }
 
     /**
-     * Read general purpose bit flag.
+     * Method reads general purpose bit flag.
      * Offset 6, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.4
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readGeneralPurposeBitFlag(buffer) {
+    readGeneralPurposeBitFlag = () => this.buffer.readUInt16LE(6)
 
-        this.generalPurposeBitFlag = buffer.readUInt16LE(6)
-        this.generalPurposeBitFlagInfo = []
+    #readGeneralPurposeBitFlagInfo = () => {
+
+        const value = this.readGeneralPurposeBitFlag()
+        const generalPurposeBitFlagInfo = []
 
         for (let i = 0; i < 16; i++) {
 
-            const bit = this.generalPurposeBitFlag & Math.pow(2, i)
+            const bit = value & Math.pow(2, i)
 
             if (FileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit] !== undefined)
-                this.generalPurposeBitFlagInfo.push(FileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit])
+                generalPurposeBitFlagInfo.push(FileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit])
         }
     }
 
     /**
-     * Read compression method.
+     * Method reads compression method.
      * Offset 8, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.5
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readCompressionMethod() {
+    readCompressionMethod = () => this.buffer.readUInt16LE(8)
 
-        const value = this.buffer.readUInt16LE(8)
+    #readCompressionMethodInfo = () => {
 
-        const info = () => {
-
-            const info = COMPRESSION_METHOD_MAPPING[value] ? COMPRESSION_METHOD_MAPPING[value] : 'Unknown compression method'
-
-            return '(' + this.toHex(value) + ')' + ' - ' + info
-        }
-
-        return {value, info}
+        const value = this.readCompressionMethod()
+        return '(' + this.#toHex(value) + ')' + ' - ' + info
     }
 
     /**
-     * Read last mod file time.
+     * Method reads last mod file time.
      * Offset 10, 2 bytes (16 bit).
      *
      * MS-DOS Time/Date specification http://www.vsft.com/hal/dostime.htm
      * .ZIP File Format Specification: sections 4.4.6
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readLastModFileTime() {
+    getLastModFileTime = () => this.buffer.readUInt16LE(10)
 
-        const value = this.buffer.readUInt16LE(10)
+    #getLastModFileTimeInfo = () => {
 
-        const info = () => {
+        const value = this.getLastModFileTime()
 
-            const seconds = value & 0x1F
-            const minutes = (value & 0x7E0) >>> 5
-            const hours = (value & 0xF800) >>> 11
+        const seconds = value & 0x1F
+        const minutes = (value & 0x7E0) >>> 5
+        const hours = (value & 0xF800) >>> 11
 
-            return '(' + this.toHex(value) + ')' + ' - ' + hours + ':' + minutes + ':' + seconds
-        }
-
-        return {value, info}
+        return '(' + this.#toHex(value) + ')' + ' - ' + hours + ':' + minutes + ':' + seconds
     }
 
     /**
-     * Read last mod file date.
+     * Method reads last mod file date.
      * Offset 12, 2 bytes (16 bit).
      *
+     * MS-DOS Time/Date specification http://www.vsft.com/hal/dostime.htm
      * .ZIP File Format Specification: sections 4.4.6
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readLastModFileDate(buffer) {
+    getLastModFileDate = () => {
 
-        const value = this.buffer.readUInt16LE(12)
+        const value = this.getLastModFileDateInfo()
+    }
 
-        const info = () => {
+    #getLastModFileDateInfo = () => {
 
-            const day = value & 0x1F
-            const month = (value & 0x1E0) >>> 5
-            const year = ((value & 0xFE00) >>> 9) + 1980
+        const value = this.getLastModFileDate()
 
-            return '(' + this.toHex(value) + ')' + ' - ' + day + '/' + month + '/' + year
-        }
+        const day = value & 0x1F
+        const month = (value & 0x1E0) >>> 5
+        const year = ((value & 0xFE00) >>> 9) + 1980
 
-        return {value, info}
+        return '(' + this.#toHex(value) + ')' + ' - ' + day + '/' + month + '/' + year
     }
 
     /**
-     * Read crc-32.
+     * Method reads crc-32.
      * Offset 14, 4 bytes (32 bit).
      *
      * .ZIP File Format Specification: sections 4.4.7
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readCRC32() {
+    getCRC32 = () => this.buffer.readUInt32LE(14)
 
-        const value = this.buffer.readUInt32LE(14)
+    #getCRC32Info = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.getCRC32()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read compressed size.
+     * Method reads compressed size.
      * Offset 18, 4 bytes (32 bit).
      *
      * .ZIP File Format Specification: sections 4.4.8
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readCompressedSize() {
+    getCompressedSize = () => this.buffer.readUInt32LE(18)
 
-        const value = this.buffer.readUInt32LE(18)
+    #getCompressedSizeInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.getCompressedSize()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read uncompressed size.
+     * Method reads uncompressed size.
      * Offset 22, 4 bytes (32 bit).
      *
      * .ZIP File Format Specification: sections 4.4.9
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readUncompressedSize() {
+    getUncompressedSize = () => this.buffer.readUInt32LE(22)
 
-        const value = this.buffer.readUInt32LE(22)
+    #getUncompressedSizeInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.readUncompressedSize()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read file name length.
+     * Method reads file name length.
      * Offset 26, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.10
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readFileNameLength() {
+    getFileNameLength = () => this.buffer.readUInt16LE(26)
 
-        const value =  this.buffer.readUInt16LE(26)
+    #getFileNameLengthInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value =  this.readFileNameLength()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read extra field length.
+     * Method reads extra field length.
      * Offset 28, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.11
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readExtraFieldLength() {
+    getExtraFieldLength = () => this.buffer.readUInt16LE(28)
 
-        const value = this.buffer.readUInt16LE(28)
+    #getExtraFieldLengthInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.readExtraFieldLength()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read file name (variable size).
+     * Method reads file name.
+     * Offset 30, variable size (max 64kb).
      *
      * .ZIP File Format Specification: sections 4.4.17
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     * @param {buffer} length The length of the file name.
      */
-    readFileName() {
-
-        return this.buffer.toString('utf8', 30, 30 + this.readFileNameLength().value)
-    }
+    getFileName = () => this.buffer.toString('utf8', 30, 30 + this.getFileNameLength())
 
     /**
-     * Read extra field (variable size).
-     * ofset 30
-     * .ZIP File Format Specification: sections 4.4.28, 4.5.1, 4.5.2
+     * Method reads extra field.
+     * offset 30 + filename length, variable size (max 64kb)
      *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     * @param {buffer} addedOffset The filename length additional offset.
-     * @param {buffer} length The length of the extra field.
+     * .ZIP File Format Specification: sections 4.4.28, 4.5.1, 4.5.2
      */
-    readExtraField() {
+    getExtraField = () => this.buffer.toString('hex', 30 + this.getFileNameLength(), 30 + this.getFileNameLength() + this.getExtraFieldLength())
 
-        return this.buffer.toString('hex', 30 + this.readFileNameLength().value, 30 + this.readFileNameLength().value + this.readExtraFieldLength().value)
-    }
+    #getHeaderLength = () => FileHeader.HEADER_FIXED_LENGTH + this.getFileNameLength() + this.getExtraFieldLength()
 
-    readTotalHeaderLength() {
+    #getHeaderLengthInfo = () => '(' + this.#toHex(this.#getHeaderLength()) + ')'
 
-        const value = FileHeader.HEADER_FIXED_LENGTH + this.readFileNameLength().value + this.readExtraFieldLength().value
+    #toHex = (value) => `0x${value.toString(16).toUpperCase()}`
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
-    }
-
-    toHex(value) {
-
-        return `0x${value.toString(16).toUpperCase()}`
-    }
-
-    toString() {
+    toString = () => {
 
         let str = ''
 
-        str += '[ LOCAL FILE HEADER ]' + os.EOL
-        str += 'Signature                         : ' + this.toHex(FileHeader.SIGNATURE)                                                              + os.EOL
-        str += 'Version needed to extract         : ' + this.readVersionNeededToExtract().value      + ' ' + this.readVersionNeededToExtract().info()      + os.EOL
-        // str += `General purpose bit flag          : ${this.generalPurposeBitFlag} (0x${this.generalPurposeBitFlag.toString(16).toUpperCase()})${os.EOL}`
-        // str += this.generalPurposeBitFlagInfo.reduce((accu, obj) => accu += `${' '.repeat(36)}${obj}${os.EOL}`, '')
-        str += 'Compression method                : ' + this.readCompressionMethod().value           + ' ' + this.readCompressionMethod().info()           + os.EOL
-        str += 'Last mod file time                : ' + this.readLastModFileTime().value             + ' ' + this.readLastModFileTime().info()             + os.EOL
-        str += 'Last mod file date                : ' + this.readLastModFileDate().value             + ' ' + this.readLastModFileDate().info()             + os.EOL
-        str += 'CRC-32                            : ' + this.readCRC32().value                       + ' ' + this.readCRC32().info()                       + os.EOL
-        str += 'Compressed size                   : ' + this.readCompressedSize().value              + ' ' + this.readCompressedSize().info()              + os.EOL
-        str += 'Uncompressed size                 : ' + this.readUncompressedSize().value            + ' ' + this.readUncompressedSize().info()            + os.EOL
-        str += 'File name legth                   : ' + this.readFileNameLength().value              + ' ' + this.readFileNameLength().info()              + os.EOL
-        str += 'Extra field length                : ' + this.readExtraFieldLength().value            + ' ' + this.readExtraFieldLength().info()            + os.EOL
-        str += 'File name                         : ' + this.readFileName()                                                                                + os.EOL
-        str += 'Extra field                       : ' + this.readExtraField()                                                                              + os.EOL
+        str += '[ LOCAL FILE HEADER ]' + EOL
+        str += 'Signature                         : ' + this.getSignatureInfo()                                                        + EOL
+        str += 'Version needed to extract         : ' + this.getVersionNeededToExtract()      + ' ' + this.#getVersionNeededToExtractInfo()      + EOL
+        // str += `General purpose bit flag          : ${this.generalPurposeBitFlag} (0x${this.generalPurposeBitFlag.toString(16).toUpperCase()})${EOL}`
+        // str += this.generalPurposeBitFlagInfo.reduce((accu, obj) => accu += `${' '.repeat(36)}${obj}${EOL}`, '')
+        str += 'Compression method                : ' + this.getCompressionMethod()           + ' ' + this.#getCompressionMethodInfo()           + EOL
+        str += 'Last mod file time                : ' + this.getLastModFileTime()             + ' ' + this.#getLastModFileTimeInfo()             + EOL
+        str += 'Last mod file date                : ' + this.getLastModFileDate()             + ' ' + this.#getLastModFileDateInfo()             + EOL
+        str += 'CRC-32                            : ' + this.getCRC32()                       + ' ' + this.#getCRC32Info()                       + EOL
+        str += 'Compressed size                   : ' + this.getCompressedSize()              + ' ' + this.#getCompressedSizeInfo()             + EOL
+        str += 'Uncompressed size                 : ' + this.getUncompressedSize()            + ' ' + this.#getUncompressedSizeInfo()            + EOL
+        str += 'File name legth                   : ' + this.getFileNameLength()              + ' ' + this.#getFileNameLengthInfo()              + EOL
+        str += 'Extra field length                : ' + this.getExtraFieldLength()            + ' ' + this.#getExtraFieldLengthInfo()            + EOL
+        str += 'File name                         : ' + this.getFileName()                                                                                + EOL
+        str += 'Extra field                       : ' + this.getExtraField()                                                                              + EOL
 
-        str += '[ LOCAL FILE HEADER LENGTH ' + this.readTotalHeaderLength().value + ' ' + this.readTotalHeaderLength().info() + ' ]'                       + os.EOL
+        str += '[ LOCAL FILE HEADER LENGTH ' + this.#getTotalHeaderLength() + ' ' + this.#getTotalHeaderLengthInfo() + ' ]'                       + EOL
 
         return str
     }

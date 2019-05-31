@@ -19,7 +19,7 @@ export default class Entry {
         }
 
         if (this.fileContent === null)
-            this.fileContent = new FileContent(this.fileHeader.readCompressedSize().value)
+            this.fileContent = new FileContent(this.fileHeader.getCompressedSize().value)
 
         if (!this.fileContent.isContentComplete())
             this.fileContent.feedByte(byte)
@@ -37,5 +37,13 @@ export default class Entry {
     extract() {
 
         this.fileContent.extract()
+    }
+
+    test() {
+
+        this.fileContent.extract()
+        const calculatedCrc32 = this.fileContentcalculateCrc32()
+
+        if (this.fileHeader.get)
     }
 }
