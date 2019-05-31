@@ -4,6 +4,7 @@ export default class File {
 
     constructor(path) {
 
+        debugger
         this.path = path
     }
 
@@ -36,6 +37,11 @@ export default class File {
     createReadStream(startPos, endPos) {
 
         return fs.createReadStream(this.path, {start: startPos, end: endPos})
+    }
+
+    createReadStream() {
+
+        return fs.createReadStream(this.path)
     }
 
     /**

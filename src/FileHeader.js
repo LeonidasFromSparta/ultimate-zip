@@ -1,10 +1,35 @@
 import os from 'os'
-import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING, PLATFORM_MAPPING} from './mappings'
+import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING} from './mappings'
 
-export default class CentralFileHeader {
+export default class FileHeader {
 
-    static HEADER_FIXED_LENGTH = 46
-    static SIGNATURE = 0x02014b50
+    static HEADER_FIXED_LENGTH = 30
+    static HEADER_MAX_LENGTH = 30 + 65535 + 65535
+    static SIGNATURE = 0x04034b50
+
+    static PLATFORM_MAPPING = {
+
+        0:  'MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)',
+        1:  'Amiga',
+        2:  'OpenVMS',
+        3:  'UNIX',
+        4:  'VM/CMS',
+        5:  'Atari ST',
+        6:  'OS/2 H.P.F.S.',
+        7:  'Macintosh',
+        8:  'Z-System',
+        9:  'CP/M',
+        10: 'Windows NTFS',
+        11: 'MVS (OS/390 - Z/OS)',
+        12: 'VSE',
+        13: 'Acorn Risc',
+        14: 'VFAT',
+        15: 'alternate MVS',
+        16: 'BeOS',
+        17: 'Tandem',
+        18: 'OS/400',
+        19: 'OS X (Darwin)'
+    }
 
     static GENERAL_PURPOSE_BIT_FLAG_MAPPING = {
 
@@ -36,57 +61,58 @@ export default class CentralFileHeader {
 
     constructor(buffer) {
 
+        if (arguments.length === 0) {
+
+            this.buffer = Buffer.allocUnsafe(FileHeader.HEADER_MAX_LENGTH)
+            this.bufferOffset = 0
+
+            return
+        }
+
         this.buffer = buffer
 
         this.checkSignature()
-        this.totalHeaderLength = CentralFileHeader.HEADER_FIXED_LENGTH + this.readFilenameLength().value + this.readExtraFieldLength().value + this.readFileCommentLength().value
+        const totalHeaderLength = this.readTotalHeaderLength().value
 
-        const newBuffer = Buffer.allocUnsafe(this.totalHeaderLength)
-        this.buffer.copy(newBuffer, 0, 0, this.totalHeaderLength)
+        const newBuffer = Buffer.allocUnsafe(totalHeaderLength)
+        buffer.copy(newBuffer, 0, 0, totalHeaderLength)
 
         this.buffer = newBuffer
     }
 
+    feedByte(byte) {
+
+        this.buffer.writeUInt8(byte, this.bufferOffset)
+        this.bufferOffset++
+    }
+
+    isHeaderComplete() {
+
+        if (this.bufferOffset >= FileHeader.HEADER_FIXED_LENGTH) {
+
+            const totalHeaderLength = this.readTotalHeaderLength().value
+
+            if (this.bufferOffset >= totalHeaderLength)
+                return true
+        }
+
+        return false
+    }
+
     /**
-     * Verify central directory header (CDH) signature.
+     * Verify local file header (LFH) signature.
      * Offset 0, 4 bytes (32 bit).
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
     checkSignature() {
 
-        if (CentralFileHeader.SIGNATURE !== this.buffer.readUInt32LE(0))
-            console.log('kekekeke1!!!')
-    }
-
-    /**
-     * Read version made by.
-     * Offset 4, 2 bytes (16 bit).
-     *
-     * .ZIP File Format Specification: sections 4.4.2
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     */
-    readVersionMadeBy() {
-
-        const value = this.buffer.readUInt16LE(4)
-
-        const info = () => {
-
-            const versionValue = this.buffer.readUInt16LE(4)
-            const version = (this.buffer.readUInt16LE(4) / 10).toFixed(1)
-
-            const platformValue = this.buffer.readUInt8(5)
-            const platform = PLATFORM_MAPPING[platformValue] ? PLATFORM_MAPPING[platformValue] : 'Unknown compatible platform'
-
-            return '(' + this.toHex(value) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
-        }
-
-        return {value, info}
+        if (FileHeader.SIGNATURE !== this.buffer.readUInt32LE(0))
+            console.log('kekekeke1!!!  ' + buffer.readUInt32LE(0).toString(16))
     }
 
     /**
      * Read version needed to extract.
-     * Offset 6, 2 bytes (16 bit).
+     * Offset 4, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.3
      *
@@ -94,7 +120,7 @@ export default class CentralFileHeader {
      */
     readVersionNeededToExtract() {
 
-        const value = this.buffer.readUInt16LE(6)
+        const value = this.buffer.readUInt16LE(4)
 
         const info = () => {
 
@@ -109,7 +135,7 @@ export default class CentralFileHeader {
 
     /**
      * Read general purpose bit flag.
-     * Offset 8, 2 bytes (16 bit).
+     * Offset 6, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.4
      *
@@ -117,21 +143,21 @@ export default class CentralFileHeader {
      */
     readGeneralPurposeBitFlag(buffer) {
 
-        this.generalPurposeBitFlag = buffer.readUInt16LE(8)
+        this.generalPurposeBitFlag = buffer.readUInt16LE(6)
         this.generalPurposeBitFlagInfo = []
 
         for (let i = 0; i < 16; i++) {
 
             const bit = this.generalPurposeBitFlag & Math.pow(2, i)
 
-            if (CentralFileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit] !== undefined)
-                this.generalPurposeBitFlagInfo.push(CentralFileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit])
+            if (FileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit] !== undefined)
+                this.generalPurposeBitFlagInfo.push(FileHeader.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit])
         }
     }
 
     /**
      * Read compression method.
-     * Offset 10, 2 bytes (16 bit).
+     * Offset 8, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.5
      *
@@ -139,7 +165,7 @@ export default class CentralFileHeader {
      */
     readCompressionMethod() {
 
-        const value = this.buffer.readUInt16LE(10)
+        const value = this.buffer.readUInt16LE(8)
 
         const info = () => {
 
@@ -153,7 +179,7 @@ export default class CentralFileHeader {
 
     /**
      * Read last mod file time.
-     * Offset 12, 2 bytes (16 bit).
+     * Offset 10, 2 bytes (16 bit).
      *
      * MS-DOS Time/Date specification http://www.vsft.com/hal/dostime.htm
      * .ZIP File Format Specification: sections 4.4.6
@@ -162,7 +188,7 @@ export default class CentralFileHeader {
      */
     readLastModFileTime() {
 
-        const value = this.buffer.readUInt16LE(12)
+        const value = this.buffer.readUInt16LE(10)
 
         const info = () => {
 
@@ -178,7 +204,7 @@ export default class CentralFileHeader {
 
     /**
      * Read last mod file date.
-     * Offset 14, 2 bytes (16 bit).
+     * Offset 12, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.6
      *
@@ -186,7 +212,7 @@ export default class CentralFileHeader {
      */
     readLastModFileDate(buffer) {
 
-        const value = this.buffer.readUInt16LE(14)
+        const value = this.buffer.readUInt16LE(12)
 
         const info = () => {
 
@@ -202,7 +228,7 @@ export default class CentralFileHeader {
 
     /**
      * Read crc-32.
-     * Offset 16, 4 bytes (32 bit).
+     * Offset 14, 4 bytes (32 bit).
      *
      * .ZIP File Format Specification: sections 4.4.7
      *
@@ -210,7 +236,7 @@ export default class CentralFileHeader {
      */
     readCRC32() {
 
-        const value = this.buffer.readUInt32LE(16)
+        const value = this.buffer.readUInt32LE(14)
 
         const info = () => {
 
@@ -222,7 +248,7 @@ export default class CentralFileHeader {
 
     /**
      * Read compressed size.
-     * Offset 20, 4 bytes (32 bit).
+     * Offset 18, 4 bytes (32 bit).
      *
      * .ZIP File Format Specification: sections 4.4.8
      *
@@ -230,7 +256,7 @@ export default class CentralFileHeader {
      */
     readCompressedSize() {
 
-        const value = this.buffer.readUInt32LE(20)
+        const value = this.buffer.readUInt32LE(18)
 
         const info = () => {
 
@@ -242,7 +268,7 @@ export default class CentralFileHeader {
 
     /**
      * Read uncompressed size.
-     * Offset 24, 4 bytes (32 bit).
+     * Offset 22, 4 bytes (32 bit).
      *
      * .ZIP File Format Specification: sections 4.4.9
      *
@@ -250,7 +276,7 @@ export default class CentralFileHeader {
      */
     readUncompressedSize() {
 
-        const value = this.buffer.readUInt32LE(24)
+        const value = this.buffer.readUInt32LE(22)
 
         const info = () => {
 
@@ -262,15 +288,15 @@ export default class CentralFileHeader {
 
     /**
      * Read file name length.
-     * Offset 28, 2 bytes (16 bit).
+     * Offset 26, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.10
      *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readFilenameLength() {
+    readFileNameLength() {
 
-        const value =  this.buffer.readUInt16LE(28)
+        const value =  this.buffer.readUInt16LE(26)
 
         const info = () => {
 
@@ -282,7 +308,7 @@ export default class CentralFileHeader {
 
     /**
      * Read extra field length.
-     * Offset 30, 2 bytes (16 bit).
+     * Offset 28, 2 bytes (16 bit).
      *
      * .ZIP File Format Specification: sections 4.4.11
      *
@@ -290,110 +316,7 @@ export default class CentralFileHeader {
      */
     readExtraFieldLength() {
 
-        const value = this.buffer.readUInt16LE(30)
-
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
-    }
-
-    /**
-     * Read file comment length.
-     * Offset 32, 2 bytes (16 bit).
-     *
-     * .ZIP File Format Specification: sections 4.4.12
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     */
-    readFileCommentLength() {
-
-        const value = this.buffer.readUInt16LE(32)
-
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
-    }
-
-    /**
-     * Read disk number start.
-     * Offset 34, 2 bytes (16 bit).
-     *
-     * .ZIP File Format Specification: sections 4.4.13
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     */
-    readDiskNumberStart() {
-
-        const value = this.buffer.readUInt16LE(34)
-
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
-    }
-
-    /**
-     * Read internal file attributes.
-     * Offset 36, 2 bytes (16 bit).
-     *
-     * .ZIP File Format Specification: sections 4.4.14
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     */
-    readInternalFileAttributes(buffer) {
-
-        this.internalFileAttributes = buffer.readUInt16LE(36)
-
-        this.internalFileAttributesInfo = []
-
-        for (let i = 0; i < 16; i++) {
-
-            const bit = this.internalFileAttributes & Math.pow(2, i)
-
-            if (CentralFileHeader.INTERNAL_ATTRIBUTES_MAPPING[bit] !== undefined)
-                this.internalFileAttributesInfo.push(CentralFileHeader.INTERNAL_ATTRIBUTES_MAPPING[bit])
-        }
-    }
-
-    /**
-     * Read external file attributes.
-     * Offset 38, 4 bytes (32 bit).
-     *
-     * .ZIP File Format Specification: sections 4.4.15
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     */
-    readExternalFileAttributes(buffer) {
-
-        const value = this.buffer.readUInt32LE(38)
-
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
-    }
-
-    /**
-     * Read relative offset of local header.
-     * Offset 42, 4 bytes (32 bit).
-     *
-     * .ZIP File Format Specification: sections 4.4.16
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     */
-    readRelativeOffsetOfLocalHeader(buffer) {
-
-        const value = this.buffer.readUInt32LE(42)
+        const value = this.buffer.readUInt16LE(28)
 
         const info = () => {
 
@@ -413,12 +336,12 @@ export default class CentralFileHeader {
      */
     readFileName() {
 
-        return this.buffer.toString('utf8', 46, 46 + this.readFilenameLength().value)
+        return this.buffer.toString('utf8', 30, 30 + this.readFileNameLength().value)
     }
 
     /**
      * Read extra field (variable size).
-     *
+     * ofset 30
      * .ZIP File Format Specification: sections 4.4.28, 4.5.1, 4.5.2
      *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
@@ -427,18 +350,19 @@ export default class CentralFileHeader {
      */
     readExtraField() {
 
-        return this.buffer.toString('hex', 46 + this.readFilenameLength().value, 46 + this.readFilenameLength().value + this.readExtraFieldLength().value)
+        return this.buffer.toString('hex', 30 + this.readFileNameLength().value, 30 + this.readFileNameLength().value + this.readExtraFieldLength().value)
     }
 
-    /**
-     * Read file comment (variable size).
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
-     * @param {buffer} addedOffset The file name and extra field lengths additonal offset.
-     * @param {buffer} length The length of the file comment.
-     */
-    readFileComment() {
+    readTotalHeaderLength() {
 
-        return this.buffer.toString('utf8', 46 + this.readFilenameLength().value + this.readExtraFieldLength().value, 46 + this.readFilenameLength().value + this.readExtraFieldLength().value + this.readFileCommentLength().value)
+        const value = FileHeader.HEADER_FIXED_LENGTH + this.readFileNameLength().value + this.readExtraFieldLength().value
+
+        const info = () => {
+
+            return '(' + this.toHex(value) + ')'
+        }
+
+        return {value, info}
     }
 
     toHex(value) {
@@ -450,30 +374,23 @@ export default class CentralFileHeader {
 
         let str = ''
 
-        str += `[ CENTRAL DIRECTORY ]${os.EOL}`
-
-        str += 'Signature                         : ' + this.toHex(CentralFileHeader.SIGNATURE)                                                            + os.EOL
-        str += 'Version made by                   : ' + this.readVersionMadeBy().value               + ' ' + this.readVersionMadeBy().info()               + os.EOL
+        str += '[ LOCAL FILE HEADER ]' + os.EOL
+        str += 'Signature                         : ' + this.toHex(FileHeader.SIGNATURE)                                                              + os.EOL
         str += 'Version needed to extract         : ' + this.readVersionNeededToExtract().value      + ' ' + this.readVersionNeededToExtract().info()      + os.EOL
-        // str += `General purpose bit flag
+        // str += `General purpose bit flag          : ${this.generalPurposeBitFlag} (0x${this.generalPurposeBitFlag.toString(16).toUpperCase()})${os.EOL}`
+        // str += this.generalPurposeBitFlagInfo.reduce((accu, obj) => accu += `${' '.repeat(36)}${obj}${os.EOL}`, '')
         str += 'Compression method                : ' + this.readCompressionMethod().value           + ' ' + this.readCompressionMethod().info()           + os.EOL
         str += 'Last mod file time                : ' + this.readLastModFileTime().value             + ' ' + this.readLastModFileTime().info()             + os.EOL
         str += 'Last mod file date                : ' + this.readLastModFileDate().value             + ' ' + this.readLastModFileDate().info()             + os.EOL
         str += 'CRC-32                            : ' + this.readCRC32().value                       + ' ' + this.readCRC32().info()                       + os.EOL
         str += 'Compressed size                   : ' + this.readCompressedSize().value              + ' ' + this.readCompressedSize().info()              + os.EOL
         str += 'Uncompressed size                 : ' + this.readUncompressedSize().value            + ' ' + this.readUncompressedSize().info()            + os.EOL
-        str += 'File name length                  : ' + this.readFilenameLength().value              + ' ' + this.readFilenameLength().info()              + os.EOL
+        str += 'File name legth                   : ' + this.readFileNameLength().value              + ' ' + this.readFileNameLength().info()              + os.EOL
         str += 'Extra field length                : ' + this.readExtraFieldLength().value            + ' ' + this.readExtraFieldLength().info()            + os.EOL
-        str += 'File comment length               : ' + this.readFileCommentLength().value           + ' ' + this.readFileCommentLength().info()           + os.EOL
-        str += 'Disk number start                 : ' + this.readDiskNumberStart().value             + ' ' + this.readDiskNumberStart().info()             + os.EOL
-        // str += `Internal file attributes
-        str += 'External file attributes          : ' + this.readExternalFileAttributes().value      + ' ' + this.readExternalFileAttributes().info()      + os.EOL
-        str += 'Relative offset of local header   : ' + this.readRelativeOffsetOfLocalHeader().value + ' ' + this.readRelativeOffsetOfLocalHeader().info() + os.EOL
         str += 'File name                         : ' + this.readFileName()                                                                                + os.EOL
         str += 'Extra field                       : ' + this.readExtraField()                                                                              + os.EOL
-        str += 'File comment                      : ' + this.readFileComment()                                                                             + os.EOL
 
-        str += `[ CENTRAL DIRECTORY LENGTH ${this.totalHeaderLength} (0x${this.totalHeaderLength.toString(16).toUpperCase()}) ]`                           + os.EOL
+        str += '[ LOCAL FILE HEADER LENGTH ' + this.readTotalHeaderLength().value + ' ' + this.readTotalHeaderLength().info() + ' ]'                       + os.EOL
 
         return str
     }

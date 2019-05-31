@@ -1,6 +1,6 @@
 import {locate_EOCDR_offset} from './zip-utils'
 
-export default class CentralHeader32 {
+export default class Zip32Header {
 
     static HEADER_FIXED_LENGTH = 22
     static MAX_ZIP_COMMENT_LENGTH = 65536
@@ -28,7 +28,7 @@ export default class CentralHeader32 {
      */
     verifySignature(buffer) {
 
-        if (CentralHeader32.SIGNATURE !== buffer.readUInt32LE(0))
+        if (Zip32Header.SIGNATURE !== buffer.readUInt32LE(0))
             console.log('kekekeke1!!!')
     }
 
@@ -128,7 +128,7 @@ export default class CentralHeader32 {
         let str = ''
 
         str += `[ END OF CENTRAL DIRECTORY ]\n`
-        str += `Signature                         : 0x${CentralHeader32.SIGNATURE.toString(16)}\n`
+        str += `Signature                         : 0x${Zip32Header.SIGNATURE.toString(16)}\n`
         str += `Number of this disk               : ${this.numOfDisk} (0x${this.numOfDisk.toString(16).toUpperCase()})\n`
         str += `Number of this disk from CD start : ${this.numOfDiskFromCdStart} (0x${this.numOfDiskFromCdStart.toString(16).toUpperCase()})\n`
         str += `Total entries in CD on this disk  : ${this.entriesInCDInDisk} (0x${this.entriesInCDInDisk.toString(16).toUpperCase()})\n`
@@ -149,10 +149,10 @@ export default class CentralHeader32 {
      */
     static locateHeaderStartPos(buffer) {
 
-        for (let offset = buffer.length - (CentralHeader32.HEADER_FIXED_LENGTH - 4); offset !== -1; offset--)
-            if (buffer.readUInt32LE(offset) === CentralHeader32.SIGNATURE)
+        for (let offset = buffer.length - (Zip32Header.HEADER_FIXED_LENGTH - 4); offset !== -1; offset--)
+            if (buffer.readUInt32LE(offset) === Zip32Header.SIGNATURE)
                 return offset
 
-        throw `Could not locate 'End of Central Directory Record' signature ${CentralHeader32.SIGNATURE}`
+        throw `Could not locate 'End of Central Directory Record' signature ${Zip32Header.SIGNATURE}`
     }
 }
