@@ -135,7 +135,7 @@ export default class Zip32Header {
         str += `Starting disk CD offset           : ${this.offsetOfCDWithStartingDiskNum} (0x${this.offsetOfCDWithStartingDiskNum.toString(16).toUpperCase()})\n`
         str += `Comment length                    : ${this.commentLength} (0x${this.commentLength.toString(16).toUpperCase()})\n`
         str += `Comment                           : ${this.comment}\n`
-        str += `[ END OF CENTRAL DIRECTORY LENGTH ${this.headerLength} (0x${this.headerLength.toString(16).toUpperCase()}) ]`
+        str += `[ END OF CENTRAL DIRECTORY LENGTH ${this.headerLength} (0x${this.headerLength.toString(16).toUpperCase()}) ]\n`
 
         return str
     }

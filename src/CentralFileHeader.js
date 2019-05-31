@@ -34,17 +34,19 @@ export default class CentralFileHeader {
         1:     '(Bit 15) File is an ASCII or text file'
     }
 
+    #kekeika
+
     constructor(buffer) {
 
-        this.buffer = buffer
+        this.#kekeika = buffer
 
         this.checkSignature()
         this.totalHeaderLength = CentralFileHeader.HEADER_FIXED_LENGTH + this.readFilenameLength().value + this.readExtraFieldLength().value + this.readFileCommentLength().value
 
         const newBuffer = Buffer.allocUnsafe(this.totalHeaderLength)
-        this.buffer.copy(newBuffer, 0, 0, this.totalHeaderLength)
+        this.#kekeika.copy(newBuffer, 0, 0, this.totalHeaderLength)
 
-        this.buffer = newBuffer
+        this.#kekeika = newBuffer
     }
 
     /**
@@ -54,7 +56,7 @@ export default class CentralFileHeader {
      */
     checkSignature() {
 
-        if (CentralFileHeader.SIGNATURE !== this.buffer.readUInt32LE(0))
+        if (CentralFileHeader.SIGNATURE !== this.#kekeika.readUInt32LE(0))
             console.log('kekekeke1!!!')
     }
 
@@ -68,14 +70,14 @@ export default class CentralFileHeader {
      */
     readVersionMadeBy() {
 
-        const value = this.buffer.readUInt16LE(4)
+        const value = this.#kekeika.readUInt16LE(4)
 
         const info = () => {
 
-            const versionValue = this.buffer.readUInt16LE(4)
-            const version = (this.buffer.readUInt16LE(4) / 10).toFixed(1)
+            const versionValue = this.#kekeika.readUInt16LE(4)
+            const version = (this.#kekeika.readUInt16LE(4) / 10).toFixed(1)
 
-            const platformValue = this.buffer.readUInt8(5)
+            const platformValue = this.#kekeika.readUInt8(5)
             const platform = PLATFORM_MAPPING[platformValue] ? PLATFORM_MAPPING[platformValue] : 'Unknown compatible platform'
 
             return '(' + this.toHex(value) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
@@ -94,7 +96,7 @@ export default class CentralFileHeader {
      */
     readVersionNeededToExtract() {
 
-        const value = this.buffer.readUInt16LE(6)
+        const value = this.#kekeika.readUInt16LE(6)
 
         const info = () => {
 
@@ -139,7 +141,7 @@ export default class CentralFileHeader {
      */
     readCompressionMethod() {
 
-        const value = this.buffer.readUInt16LE(10)
+        const value = this.#kekeika.readUInt16LE(10)
 
         const info = () => {
 
@@ -162,7 +164,7 @@ export default class CentralFileHeader {
      */
     readLastModFileTime() {
 
-        const value = this.buffer.readUInt16LE(12)
+        const value = this.#kekeika.readUInt16LE(12)
 
         const info = () => {
 
@@ -186,7 +188,7 @@ export default class CentralFileHeader {
      */
     readLastModFileDate(buffer) {
 
-        const value = this.buffer.readUInt16LE(14)
+        const value = this.#kekeika.readUInt16LE(14)
 
         const info = () => {
 
@@ -210,7 +212,7 @@ export default class CentralFileHeader {
      */
     readCRC32() {
 
-        const value = this.buffer.readUInt32LE(16)
+        const value = this.#kekeika.readUInt32LE(16)
 
         const info = () => {
 
@@ -228,16 +230,12 @@ export default class CentralFileHeader {
      *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readCompressedSize() {
+    getCompressedSize = () => this.#kekeika.readUInt32LE(20)
 
-        const value = this.buffer.readUInt32LE(20)
+    #getCompressedSizeInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.getCompressedSize()
+        return '(' + this.toHex(value) + ')'
     }
 
     /**
@@ -248,16 +246,12 @@ export default class CentralFileHeader {
      *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readUncompressedSize() {
+    getUncompressedSize = () => this.#kekeika.readUInt32LE(24)
 
-        const value = this.buffer.readUInt32LE(24)
+    #getUncompressedSizeInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.getUncompressedSize()
+        return '(' + this.toHex(value) + ')'
     }
 
     /**
@@ -270,7 +264,7 @@ export default class CentralFileHeader {
      */
     readFilenameLength() {
 
-        const value =  this.buffer.readUInt16LE(28)
+        const value =  this.#kekeika.readUInt16LE(28)
 
         const info = () => {
 
@@ -290,7 +284,7 @@ export default class CentralFileHeader {
      */
     readExtraFieldLength() {
 
-        const value = this.buffer.readUInt16LE(30)
+        const value = this.#kekeika.readUInt16LE(30)
 
         const info = () => {
 
@@ -310,7 +304,7 @@ export default class CentralFileHeader {
      */
     readFileCommentLength() {
 
-        const value = this.buffer.readUInt16LE(32)
+        const value = this.#kekeika.readUInt16LE(32)
 
         const info = () => {
 
@@ -330,7 +324,7 @@ export default class CentralFileHeader {
      */
     readDiskNumberStart() {
 
-        const value = this.buffer.readUInt16LE(34)
+        const value = this.#kekeika.readUInt16LE(34)
 
         const info = () => {
 
@@ -373,7 +367,7 @@ export default class CentralFileHeader {
      */
     readExternalFileAttributes(buffer) {
 
-        const value = this.buffer.readUInt32LE(38)
+        const value = this.#kekeika.readUInt32LE(38)
 
         const info = () => {
 
@@ -391,16 +385,12 @@ export default class CentralFileHeader {
      *
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      */
-    readRelativeOffsetOfLocalHeader(buffer) {
+    getOffsetOfLocalFileHeader = () => this.#kekeika.readUInt32LE(42)
 
-        const value = this.buffer.readUInt32LE(42)
+    #getOffsetOfLocalFileHeaderInfo = () => {
 
-        const info = () => {
-
-            return '(' + this.toHex(value) + ')'
-        }
-
-        return {value, info}
+        const value = this.getOffsetOfLocalFileHeader()
+        return '(' + this.toHex(value) + ')'
     }
 
     /**
@@ -411,10 +401,7 @@ export default class CentralFileHeader {
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      * @param {buffer} length The length of the file name.
      */
-    readFileName() {
-
-        return this.buffer.toString('utf8', 46, 46 + this.readFilenameLength().value)
-    }
+    getFilename = () => this.#kekeika.toString('utf8', 46, 46 + this.readFilenameLength().value)
 
     /**
      * Read extra field (variable size).
@@ -427,7 +414,7 @@ export default class CentralFileHeader {
      */
     readExtraField() {
 
-        return this.buffer.toString('hex', 46 + this.readFilenameLength().value, 46 + this.readFilenameLength().value + this.readExtraFieldLength().value)
+        return this.#kekeika.toString('hex', 46 + this.readFilenameLength().value, 46 + this.readFilenameLength().value + this.readExtraFieldLength().value)
     }
 
     /**
@@ -438,7 +425,7 @@ export default class CentralFileHeader {
      */
     readFileComment() {
 
-        return this.buffer.toString('utf8', 46 + this.readFilenameLength().value + this.readExtraFieldLength().value, 46 + this.readFilenameLength().value + this.readExtraFieldLength().value + this.readFileCommentLength().value)
+        return this.#kekeika.toString('utf8', 46 + this.readFilenameLength().value + this.readExtraFieldLength().value, 46 + this.readFilenameLength().value + this.readExtraFieldLength().value + this.readFileCommentLength().value)
     }
 
     toHex(value) {
@@ -460,16 +447,16 @@ export default class CentralFileHeader {
         str += 'Last mod file time                : ' + this.readLastModFileTime().value             + ' ' + this.readLastModFileTime().info()             + os.EOL
         str += 'Last mod file date                : ' + this.readLastModFileDate().value             + ' ' + this.readLastModFileDate().info()             + os.EOL
         str += 'CRC-32                            : ' + this.readCRC32().value                       + ' ' + this.readCRC32().info()                       + os.EOL
-        str += 'Compressed size                   : ' + this.readCompressedSize().value              + ' ' + this.readCompressedSize().info()              + os.EOL
-        str += 'Uncompressed size                 : ' + this.readUncompressedSize().value            + ' ' + this.readUncompressedSize().info()            + os.EOL
+        str += 'Compressed size                   : ' + this.getCompressedSize()                     + ' ' + this.#getCompressedSizeInfo()                 + os.EOL
+        str += 'Uncompressed size                 : ' + this.getUncompressedSize()                   + ' ' + this.#getUncompressedSizeInfo()               + os.EOL
         str += 'File name length                  : ' + this.readFilenameLength().value              + ' ' + this.readFilenameLength().info()              + os.EOL
         str += 'Extra field length                : ' + this.readExtraFieldLength().value            + ' ' + this.readExtraFieldLength().info()            + os.EOL
         str += 'File comment length               : ' + this.readFileCommentLength().value           + ' ' + this.readFileCommentLength().info()           + os.EOL
         str += 'Disk number start                 : ' + this.readDiskNumberStart().value             + ' ' + this.readDiskNumberStart().info()             + os.EOL
         // str += `Internal file attributes
         str += 'External file attributes          : ' + this.readExternalFileAttributes().value      + ' ' + this.readExternalFileAttributes().info()      + os.EOL
-        str += 'Relative offset of local header   : ' + this.readRelativeOffsetOfLocalHeader().value + ' ' + this.readRelativeOffsetOfLocalHeader().info() + os.EOL
-        str += 'File name                         : ' + this.readFileName()                                                                                + os.EOL
+        str += 'Relative offset of local header   : ' + this.getOffsetOfLocalFileHeader()            + ' ' + this.#getOffsetOfLocalFileHeaderInfo()        + os.EOL
+        str += 'File name                         : ' + this.getFilename()                                                                                 + os.EOL
         str += 'Extra field                       : ' + this.readExtraField()                                                                              + os.EOL
         str += 'File comment                      : ' + this.readFileComment()                                                                             + os.EOL
 

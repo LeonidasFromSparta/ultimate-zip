@@ -107,7 +107,7 @@ export default class FileHeader {
     checkSignature() {
 
         if (FileHeader.SIGNATURE !== this.buffer.readUInt32LE(0))
-            console.log('kekekeke1!!!  ' + buffer.readUInt32LE(0).toString(16))
+            console.log('kekekeke1!!!  ')
     }
 
     /**
