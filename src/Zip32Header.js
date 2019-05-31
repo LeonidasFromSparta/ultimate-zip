@@ -1,141 +1,174 @@
+import {EOL} from 'os'
+
 export default class Zip32Header {
 
     static HEADER_FIXED_LENGTH = 22
     static MAX_ZIP_COMMENT_LENGTH = 65536
     static SIGNATURE = 0x06054b50
 
+    #buffer
+
     constructor(buffer) {
 
-        this.headerLength = buffer.length
+        this.#buffer = buffer
+        this.checkSignature()
 
-        this.verifySignature(buffer)
-        this.readNumOfThisDisk(buffer)
-        this.readNumOfDiskWithStartOfCD(buffer)
-        this.readTotalEntriesInCDInDisk(buffer)
-        this.readTotalEntriesInCD(buffer)
-        this.readLengthOfCD(buffer)
-        this.readCDOffsetWithStartingDiskNum(buffer)
-        this.readCommentLength(buffer)
-        this.readComment(buffer)
+        if (this.#getHeaderLength() < buffer.length) {
+
+            const correctedSizeBuffer = Buffer.allocUnsafe(this.#getHeaderLength())
+            this.#buffer.copy(correctedSizeBuffer)
+            this.#buffer = correctedSizeBuffer
+        }
     }
 
     /**
-     * Verify end of central directory record (EOCDR) signature.
-     * Offset 0, 4 bytes (32 bit), LE.
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * Method checks header signature.
      */
-    verifySignature(buffer) {
+    checkSignature = () => {
 
-        if (Zip32Header.SIGNATURE !== buffer.readUInt32LE(0))
-            console.log('kekekeke1!!!')
+        if (Zip32Header.SIGNATURE !== this.#buffer.readUInt32LE(0))
+            throw `End of Central Directory Record' header signature could not be verified: expected ${Zip32Header.SIGNATURE}, actual ${this.#buffer.readUInt32LE(0).toString(16)}`
     }
 
     /**
-     * Read number of this disk.
+     * Method reads header signature.
+     * Offset 0, 4 bytes (32 bit).
+     */
+    getSignature = () => this.#buffer.readUInt32LE(0)
+
+    #getSignatureInfo = () => {
+
+        const value = this.getSignature()
+        return '(' + this.#toHex(value) + ')'
+    }
+
+    /**
+     * Method reads number of this disk.
      * Offset 4, 2 bytes (16 bit).
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     *
+     * .ZIP File Format Specification: sections 4.4.19
      */
-    readNumOfThisDisk(buffer) {
+    getNumberOfThisDisk = () => this.#buffer.readUInt16LE(4)
 
-        this.numOfDisk = buffer.readUInt16LE(4)
+    #getNumberOfThisDiskInfo = () => {
+
+        const value = this.getNumberOfThisDisk()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read number of the disk with the start of the central directory.
+     * Method reads number of the disk where central directory starts.
      * Offset 6, 2 bytes (16 bit).
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     *
+     * .ZIP File Format Specification: sections 4.4.20
      */
-    readNumOfDiskWithStartOfCD(buffer) {
+    getNumberOfDiskWhereCentralDirectoriesStart = () => this.#buffer.readUInt16LE(6)
 
-        this.numOfDiskFromCdStart = buffer.readUInt16LE(6)
+    #getNumberOfDiskWhereCentralDirectoriesStartInfo = () => {
+
+        const value = this.getNumberOfDiskWhereCentralDirectoriesStart()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read total number of entries in the central directory on this disk.
-     * Offset 8, 2 bytes (16 bit), LE.
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * Method reads total number of central directories on this disk.
+     * Offset 8, 2 bytes (16 bit).
+     *
+     * .ZIP File Format Specification: sections 4.4.21
      */
-    readTotalEntriesInCDInDisk(buffer) {
+    getTotalCentralDirectoriesOnThisDisk = () => this.#buffer.readUInt16LE(8)
 
-        this.entriesInCDInDisk = buffer.readUInt16LE(8)
+    #getTotalCentralDirectoriesOnThisDiskInfo = () => {
+
+        const value = this.getTotalCentralDirectoriesOnThisDisk()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read total number of entries in the central directory.
+     * Method reads total number of central directories.
+     * Offset 10, 2 bytes (16 bit).
      *
-     * The total number of files in the .ZIP file. If an archive is in ZIP64 format and the value in this field is 0xFFFF,
-     * the size will be in the corresponding 8 byte zip64 end of central directory field.
-     *
-     * Offset 10, 2 bytes (16 bit), LE.
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * .ZIP File Format Specification: sections 4.4.22
      */
-    readTotalEntriesInCD(buffer) {
+    getTotalNumberOfCentralDirectories = () => this.#buffer.readUInt16LE(10)
 
-        this.entriesInCD = buffer.readUInt16LE(10)
+    #getTotalNumberOfCentralDirectoriesInfo = () => {
+
+        const value = this.getTotalNumberOfCentralDirectories()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read size of the central directory.
+     * Method reads total size of the central directories.
+     * Offset 12, 4 bytes (32 bit).
      *
-     * The size (in bytes) of the entire central directory. If an archive is in ZIP64 format and the value in this field is 0xFFFFFFFF,
-     * the size will be in the corresponding 8 byte zip64 end of central directory field.
-     *
-     * Offset 12, 4 bytes (32 bit), LE.
-     *
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * .ZIP File Format Specification: sections 4.4.23
      */
-    readLengthOfCD(buffer) {
+    getTotalSizeOfCentralDirectories = () => this.#buffer.readUInt32LE(12)
 
-        this.lengthOfCD = buffer.readUInt32LE(12)
+    #getTotalSizeOfCentralDirectoriesInfo = () => {
+
+        const value = this.getTotalSizeOfCentralDirectories()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read offset of start of central directory with respect to the starting disk number.
-     * Offset 16, 4 bytes (32 bit), LE.
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     * Method reads offset of start of central directory with respect to the starting disk number.
+     * Offset 16, 4 bytes (32 bit).
+     *
+     * .ZIP File Format Specification: sections 4.4.24
      */
-    readCDOffsetWithStartingDiskNum(buffer) {
+    getCentralDirectoriesOffsetWithStartingDisk = () => this.#buffer.readUInt32LE(16)
 
-        this.offsetOfCDWithStartingDiskNum = buffer.readUInt32LE(16)
+    #getCentralDirectoriesOffsetWithStartingDiskInfo = () => {
+
+        const value = this.getCentralDirectoriesOffsetWithStartingDisk()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read .ZIP file comment length.
+     * MEthod reads .ZIP file comment length.
      * Offset 20, 2 bytes (16 bit).
-     * @param {buffer} buffer The buffer in which all the data supposed to be in.
+     *
+     * .ZIP File Format Specification: sections 4.4.25
      */
-    readCommentLength(buffer) {
+    getZipFileCommentLength = () => this.#buffer.readUInt16LE(20)
 
-        this.commentLength = buffer.readUInt16LE(20)
+    #getZipFileCommentLengthInfo = () => {
+
+        const value = this.getZipFileCommentLength()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
-     * Read zip file comment.
+     * Method reads zip file comment.
      * Offset 22, variable size (max 64kb).
-     * @param {Buffer} buffer The buffer in which all the data supposed to be in.
-     * @param {buffer} length The length of the file comment.
      */
-    readComment(buffer, length) {
+    getZipFileComment = () => this.#buffer.toString('utf8', 22, this.getZipFileCommentLength())
 
-        this.comment = buffer.toString('utf8', 22)
-    }
+    #toHex = (value) => `0x${value.toString(16).toUpperCase()}`
+
+    #getHeaderLength = () => Zip32Header.HEADER_FIXED_LENGTH + this.getZipFileCommentLength()
+
+    #getHeaderLengthInfo = () => '(' + this.#toHex(this.#getHeaderLength()) + ')'
 
     toString() {
 
         let str = ''
 
-        str += `[ END OF CENTRAL DIRECTORY ]\n`
-        str += `Signature                         : 0x${Zip32Header.SIGNATURE.toString(16)}\n`
-        str += `Number of this disk               : ${this.numOfDisk} (0x${this.numOfDisk.toString(16).toUpperCase()})\n`
-        str += `Number of this disk from CD start : ${this.numOfDiskFromCdStart} (0x${this.numOfDiskFromCdStart.toString(16).toUpperCase()})\n`
-        str += `Total entries in CD on this disk  : ${this.entriesInCDInDisk} (0x${this.entriesInCDInDisk.toString(16).toUpperCase()})\n`
-        str += `Total entries in CD               : ${this.entriesInCD} (0x${this.entriesInCD.toString(16).toUpperCase()})\n`
-        str += `CD size                           : ${this.lengthOfCD} (0x${this.lengthOfCD.toString(16).toUpperCase()})\n`
-        str += `Starting disk CD offset           : ${this.offsetOfCDWithStartingDiskNum} (0x${this.offsetOfCDWithStartingDiskNum.toString(16).toUpperCase()})\n`
-        str += `Comment length                    : ${this.commentLength} (0x${this.commentLength.toString(16).toUpperCase()})\n`
-        str += `Comment                           : ${this.comment}\n`
-        str += `[ END OF CENTRAL DIRECTORY LENGTH ${this.headerLength} (0x${this.headerLength.toString(16).toUpperCase()}) ]\n`
+        str += '[ END OF CENTRAL DIRECTORY HEADER ]' + EOL
+
+        str += 'Signature                                      : ' + this.#getSignatureInfo()                                                                                           + EOL
+        str += 'Number of this disk                            : ' + this.getNumberOfThisDisk()                         + ' ' + this.#getNumberOfThisDiskInfo()                         + EOL
+        str += 'Number of disk where central directories start : ' + this.getNumberOfDiskWhereCentralDirectoriesStart() + ' ' + this.#getNumberOfDiskWhereCentralDirectoriesStartInfo() + EOL
+        str += 'Total number central directories on this disk  : ' + this.getTotalCentralDirectoriesOnThisDisk()        + ' ' + this.#getTotalCentralDirectoriesOnThisDiskInfo()        + EOL
+        str += 'Total number of central directories            : ' + this.getTotalNumberOfCentralDirectories()          + ' ' + this.#getTotalNumberOfCentralDirectoriesInfo()          + EOL
+        str += 'Total size of central directories              : ' + this.getTotalSizeOfCentralDirectories()            + ' ' + this.#getTotalSizeOfCentralDirectoriesInfo()             + EOL
+        str += 'Central directories offset with starting disk  : ' + this.getCentralDirectoriesOffsetWithStartingDisk() + ' ' + this.#getCentralDirectoriesOffsetWithStartingDiskInfo() + EOL
+        str += 'ZIP file comment length                        : ' + this.getZipFileCommentLength()                     + ' ' + this.#getZipFileCommentLengthInfo()                + EOL
+        str += 'Zip file comment                               : ' + this.getZipFileComment()                                                                                           + EOL
+
+        str += '[ END OF CENTRAL DIRECTORY HEADER | LENGTH ' + this.#getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL
 
         return str
     }

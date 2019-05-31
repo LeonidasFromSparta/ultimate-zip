@@ -1,5 +1,5 @@
 import Zip32Header from './Zip32Header'
-import CentralFileHeader from './CentralFileHeader'
+import CentralFileHeader from './central-file-header'
 import fs from 'fs'
 import FileHeader from './file-header'
 import File from './file'
@@ -25,7 +25,7 @@ export default class UZip {
     readCentralFileHeaders() {
 
         this.file.openFile()
-        const buffer = this.file.readBytesSync(this.zip32Header.offsetOfCDWithStartingDiskNum, this.zip32Header.lengthOfCD)
+        const buffer = this.file.readBytesSync(this.zip32Header.offsetOfCDWithStartingDiskNum, this.zip32Header.getTotalSizeOfCentralDirectories())
         this.file.closeFile()
 
         const centralFileHeaders = []
@@ -59,26 +59,30 @@ export default class UZip {
         return localFileHeaders
     }
 
-    testArchiveSync() {
+    testArchive = () => {
 
-        this.file.openFile()
+        return new Promise((resolve, reject) => {
 
-        for (const cfh of this.centralFileHeaders) {
+            const readStream = this.file.createReadStream(0, this.zip32Header.offsetOfCDWithStartingDiskNum)
 
-            const headerPosition = cfh.getOffsetOfLocalFileHeader().value
-            const headerLength = FileHeader.HEADER_MAX_LENGTH
+            let entry = new Entry()
 
-            const headerBuffer = this.file.readBytesSync(headerPosition, headerLength)
-            const localFileHeader = new FileHeader(headerBuffer)
+            readStream.on('data', (chunk) => {
 
-            const dataPosition = cfh.getOffsetOfLocalFileHeader().value + localFileHeader.readTotalHeaderLength().value
-            const dataLength = localFileHeader.readCompressedSize().value
-            const dataBuffer = this.file.readBytesSync(dataPosition, dataLength)
+                for (const byte of chunk) {
 
-            new Entry(localFileHeader, dataBuffer).test()
-        }
+                    entry.feedByte(byte)
 
-        this.file.closeFile()
+                    if (entry.isFeedingDone()) {
+
+                        entry.extract()
+                        entry = new Entry()
+                    }
+                }
+            })
+
+            readStream.on('end', () => resolve())
+        })
     }
 
     extractAll(path) {
