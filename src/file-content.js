@@ -22,7 +22,7 @@ export default class FileContent {
         return false
     }
 
-    extract() {
+    extract = () => {
 
         if (this.buffer.length === 0)
             return
