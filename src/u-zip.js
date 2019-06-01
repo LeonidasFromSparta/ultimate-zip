@@ -1,6 +1,7 @@
 import {EOL} from 'os'
 import Zip32Header from './Zip32Header'
-import CentralFileHeader from './central-file-header'
+import CentralHeader from './central-header'
+import ExtCentralHeader from './ext-central-header'
 import fs from 'fs'
 import FileHeader from './file-header'
 import File from './file'
@@ -21,11 +22,6 @@ export default class UZip {
         if (options !== undefined)
             if (options.cacheHeaders !== undefined && options.cacheHeaders === true)
                 this.centralFileHeaders = this.readCentralFileHeaders()
-    }
-
-    readCentralFileHeaders() {
-
-
     }
 
     readLocalFileHeaders() {
@@ -135,66 +131,47 @@ export default class UZip {
         }
     }
 
-    async #readCentralFileHeaders = () => {
+    async readCentralFileHeaders() {
 
         const startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
         const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getTotalSizeOfCentralDirectories()
 
-        await new Promise((resolve, reject) => {
+        debugger
+
+        return await new Promise((resolve, reject) => {
 
             const readStream = this.file.createReadStream(startPos, endPos)
 
-            const entry = new Entry()
+            const exCentralHeadersArray = []
+            let extCentralHeader = new ExtCentralHeader()
 
             readStream.on('data', (chunk) => {
 
                 for (const byte of chunk) {
 
-                    entry.feedByte(byte)
+                    extCentralHeader.addByte(byte)
 
-                    if (entry.isFeedingDone()) {
+                    if (extCentralHeader.isDone()) {
 
-                        entry.extract()
-                        readStream.destroy()
-                        return
+                        extCentralHeader.finalize()
+                        exCentralHeadersArray.push(extCentralHeader)
+
+                        console.log(extCentralHeader.toString())
+
+                        extCentralHeader = new ExtCentralHeader()
                     }
                 }
             })
 
-            readStream.on('end', () => resolve())
+            readStream.on('end', () => resolve(exCentralHeadersArray))
         })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        const centralFileHeaders = []
-        let totalBytesRead = 0
-
-        for (let i = 0; i < this.zip32Header.entriesInCD; i++) {
-
-            const centralFileHeader = new CentralFileHeader(buffer.slice(totalBytesRead))
-            centralFileHeaders.push(centralFileHeader)
-            totalBytesRead += centralFileHeader.totalHeaderLength
-        }
-
-        return centralFileHeaders
     }
 
-    toString() {
+    getInfo = async () => {
 
-        const centralFileHeaders = this.centralFileHeaders === undefined ? this.readCentralFileHeaders() : this.centralFileHeaders
+        // const centralFileHeaders = this.centralFileHeaders === undefined ? this.readCentralFileHeaders() : this.centralFileHeaders
+
+        const centralFileHeaders = await this.readCentralFileHeaders()
         const localFileHeaders = this.readLocalFileHeaders()
 
         return this.zip32Header.toString() + EOL + centralFileHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
