@@ -1,4 +1,3 @@
-import {expect} from 'Chai'
 import {Should} from 'chai'
 import Zip32Header from './../src/zip-32-header'
 
