@@ -55,20 +55,6 @@ export default class File {
         fs.closeSync(this.fd)
     }
 
-    /**
-     * Method reads specific bytes while assuming the file is opened.
-     * @param {int} pos The start position in the file.
-     * @param {int} length Length of bytes to read.
-     * @returns {buffer} The buffer which contains data read from the file.
-     */
-    readBytesSync(position, length) {
-
-        const buffer = Buffer.allocUnsafe(length)
-        fs.readSync(Number(this.fd), buffer, 0, length, position)
-
-        return buffer
-    }
-
     getFileSize() {
 
         const fd = fs.openSync (path, 'r')

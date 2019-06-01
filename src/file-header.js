@@ -59,17 +59,19 @@ export default class FileHeader {
         1:     '(Bit 15) File is an ASCII or text file'
     }
 
+    #kekeika
+
     constructor(buffer) {
 
         if (arguments.length === 0) {
 
-            this.buffer = Buffer.allocUnsafe(FileHeader.HEADER_MAX_LENGTH)
+            this.#kekeika = Buffer.allocUnsafe(FileHeader.HEADER_MAX_LENGTH)
             this.bufferOffset = 0
 
             return
         }
 
-        this.buffer = buffer
+        this.#kekeika = buffer
 
         this.checkSignature()
         const totalHeaderLength = this.readTotalHeaderLength().value
@@ -77,12 +79,12 @@ export default class FileHeader {
         const newBuffer = Buffer.allocUnsafe(totalHeaderLength)
         buffer.copy(newBuffer, 0, 0, totalHeaderLength)
 
-        this.buffer = newBuffer
+        this.#kekeika = newBuffer
     }
 
     feedByte(byte) {
 
-        this.buffer.writeUInt8(byte, this.bufferOffset)
+        this.#kekeika.writeUInt8(byte, this.bufferOffset)
         this.bufferOffset++
     }
 
@@ -112,7 +114,7 @@ export default class FileHeader {
      * Method reads header signature.
      * Offset 0, 4 bytes (32 bit).
      */
-    getSignature = () => this.#buffer.readUInt32LE(0)
+    getSignature = () => this.#kekeika.readUInt32LE(0)
 
     #getSignatureInfo = () => {
 
@@ -126,7 +128,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.3
      */
-    getVersionNeededToExtract = () => this.buffer.readUInt16LE(4)
+    getVersionNeededToExtract = () => this.#kekeika.readUInt16LE(4)
 
     #getVersionNeededToExtractInfo = () => {
 
@@ -144,9 +146,9 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.4
      */
-    readGeneralPurposeBitFlag = () => this.buffer.readUInt16LE(6)
+    getGeneralPurposeBitFlag = () => this.#kekeika.readUInt16LE(6)
 
-    #readGeneralPurposeBitFlagInfo = () => {
+    #getGeneralPurposeBitFlagInfo = () => {
 
         const value = this.readGeneralPurposeBitFlag()
         const generalPurposeBitFlagInfo = []
@@ -166,11 +168,11 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.5
      */
-    readCompressionMethod = () => this.buffer.readUInt16LE(8)
+    getCompressionMethod = () => this.#kekeika.readUInt16LE(8)
 
-    #readCompressionMethodInfo = () => {
+    #getCompressionMethodInfo = () => {
 
-        const value = this.readCompressionMethod()
+        const value = this.getCompressionMethod()
         return '(' + this.#toHex(value) + ')' + ' - ' + info
     }
 
@@ -181,7 +183,7 @@ export default class FileHeader {
      * MS-DOS Time/Date specification http://www.vsft.com/hal/dostime.htm
      * .ZIP File Format Specification: sections 4.4.6
      */
-    getLastModFileTime = () => this.buffer.readUInt16LE(10)
+    getLastModFileTime = () => this.#kekeika.readUInt16LE(10)
 
     #getLastModFileTimeInfo = () => {
 
@@ -223,7 +225,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.7
      */
-    getCRC32 = () => this.buffer.readUInt32LE(14)
+    getCRC32 = () => this.#kekeika.readUInt32LE(14)
 
     #getCRC32Info = () => {
 
@@ -237,7 +239,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.8
      */
-    getCompressedSize = () => this.buffer.readUInt32LE(18)
+    getCompressedSize = () => this.#kekeika.readUInt32LE(18)
 
     #getCompressedSizeInfo = () => {
 
@@ -251,7 +253,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.9
      */
-    getUncompressedSize = () => this.buffer.readUInt32LE(22)
+    getUncompressedSize = () => this.#kekeika.readUInt32LE(22)
 
     #getUncompressedSizeInfo = () => {
 
@@ -265,7 +267,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.10
      */
-    getFileNameLength = () => this.buffer.readUInt16LE(26)
+    getFileNameLength = () => this.#kekeika.readUInt16LE(26)
 
     #getFileNameLengthInfo = () => {
 
@@ -279,7 +281,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.11
      */
-    getExtraFieldLength = () => this.buffer.readUInt16LE(28)
+    getExtraFieldLength = () => this.#kekeika.readUInt16LE(28)
 
     #getExtraFieldLengthInfo = () => {
 
@@ -293,7 +295,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.17
      */
-    getFileName = () => this.buffer.toString('utf8', 30, 30 + this.getFileNameLength())
+    getFileName = () => this.#kekeika.toString('utf8', 30, 30 + this.getFileNameLength())
 
     /**
      * Method reads extra field.
@@ -301,7 +303,7 @@ export default class FileHeader {
      *
      * .ZIP File Format Specification: sections 4.4.28, 4.5.1, 4.5.2
      */
-    getExtraField = () => this.buffer.toString('hex', 30 + this.getFileNameLength(), 30 + this.getFileNameLength() + this.getExtraFieldLength())
+    getExtraField = () => this.#kekeika.toString('hex', 30 + this.getFileNameLength(), 30 + this.getFileNameLength() + this.getExtraFieldLength())
 
     #getHeaderLength = () => FileHeader.HEADER_FIXED_LENGTH + this.getFileNameLength() + this.getExtraFieldLength()
 
@@ -315,21 +317,20 @@ export default class FileHeader {
 
         str += '[ LOCAL FILE HEADER ]' + EOL
         str += 'Signature                         : ' + this.getSignatureInfo()                                                        + EOL
-        str += 'Version needed to extract         : ' + this.getVersionNeededToExtract()      + ' ' + this.#getVersionNeededToExtractInfo()      + EOL
-        // str += `General purpose bit flag          : ${this.generalPurposeBitFlag} (0x${this.generalPurposeBitFlag.toString(16).toUpperCase()})${EOL}`
-        // str += this.generalPurposeBitFlagInfo.reduce((accu, obj) => accu += `${' '.repeat(36)}${obj}${EOL}`, '')
-        str += 'Compression method                : ' + this.getCompressionMethod()           + ' ' + this.#getCompressionMethodInfo()           + EOL
-        str += 'Last mod file time                : ' + this.getLastModFileTime()             + ' ' + this.#getLastModFileTimeInfo()             + EOL
-        str += 'Last mod file date                : ' + this.getLastModFileDate()             + ' ' + this.#getLastModFileDateInfo()             + EOL
-        str += 'CRC-32                            : ' + this.getCRC32()                       + ' ' + this.#getCRC32Info()                       + EOL
-        str += 'Compressed size                   : ' + this.getCompressedSize()              + ' ' + this.#getCompressedSizeInfo()             + EOL
-        str += 'Uncompressed size                 : ' + this.getUncompressedSize()            + ' ' + this.#getUncompressedSizeInfo()            + EOL
-        str += 'File name legth                   : ' + this.getFileNameLength()              + ' ' + this.#getFileNameLengthInfo()              + EOL
-        str += 'Extra field length                : ' + this.getExtraFieldLength()            + ' ' + this.#getExtraFieldLengthInfo()            + EOL
-        str += 'File name                         : ' + this.getFileName()                                                                                + EOL
-        str += 'Extra field                       : ' + this.getExtraField()                                                                              + EOL
+        str += 'Version needed to extract         : ' + this.getVersionNeededToExtract() + ' ' + this.#getVersionNeededToExtractInfo() + EOL
+        str += 'General purpose bit flag          : ' + this.getGeneralPurposeBitFlag()  + ' ' +                                         EOL
+        str += 'Compression method                : ' + this.getCompressionMethod()      + ' ' + this.#getCompressionMethodInfo()      + EOL
+        str += 'Last mod file time                : ' + this.getLastModFileTime()        + ' ' + this.#getLastModFileTimeInfo()        + EOL
+        str += 'Last mod file date                : ' + this.getLastModFileDate()        + ' ' + this.#getLastModFileDateInfo()        + EOL
+        str += 'CRC-32                            : ' + this.getCRC32()                  + ' ' + this.#getCRC32Info()                  + EOL
+        str += 'Compressed size                   : ' + this.getCompressedSize()         + ' ' + this.#getCompressedSizeInfo()         + EOL
+        str += 'Uncompressed size                 : ' + this.getUncompressedSize()       + ' ' + this.#getUncompressedSizeInfo()       + EOL
+        str += 'File name legth                   : ' + this.getFileNameLength()         + ' ' + this.#getFileNameLengthInfo()         + EOL
+        str += 'Extra field length                : ' + this.getExtraFieldLength()       + ' ' + this.#getExtraFieldLengthInfo()       + EOL
+        str += 'File name                         : ' + this.getFileName()                                                             + EOL
+        str += 'Extra field                       : ' + this.getExtraField()                                                           + EOL
 
-        str += '[ LOCAL FILE HEADER LENGTH ' + this.#getTotalHeaderLength() + ' ' + this.#getTotalHeaderLengthInfo() + ' ]'                       + EOL
+        str += '[ LOCAL FILE HEADER | LENGTH ' + this.#getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL
 
         return str
     }

@@ -44,6 +44,6 @@ export default class Entry {
         this.fileContent.extract()
         const calculatedCrc32 = this.fileContentcalculateCrc32()
 
-        if (this.fileHeader.get)
+        // if (this.fileHeader.get)
     }
 }

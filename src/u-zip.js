@@ -1,3 +1,4 @@
+import {EOL} from 'os'
 import Zip32Header from './Zip32Header'
 import CentralFileHeader from './central-file-header'
 import fs from 'fs'
@@ -24,24 +25,10 @@ export default class UZip {
 
     readCentralFileHeaders() {
 
-        this.file.openFile()
-        const buffer = this.file.readBytesSync(this.zip32Header.offsetOfCDWithStartingDiskNum, this.zip32Header.getTotalSizeOfCentralDirectories())
-        this.file.closeFile()
 
-        const centralFileHeaders = []
-        let totalBytesRead = 0
-
-        for (let i = 0; i < this.zip32Header.entriesInCD; i++) {
-
-            const centralFileHeader = new CentralFileHeader(buffer.slice(totalBytesRead))
-            centralFileHeaders.push(centralFileHeader)
-            totalBytesRead += centralFileHeader.totalHeaderLength
-        }
-
-        return centralFileHeaders
     }
 
-    readLocalFileHeadersSync() {
+    readLocalFileHeaders() {
 
         this.file.openFile()
 
@@ -148,9 +135,68 @@ export default class UZip {
         }
     }
 
+    async #readCentralFileHeaders = () => {
+
+        const startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
+        const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getTotalSizeOfCentralDirectories()
+
+        await new Promise((resolve, reject) => {
+
+            const readStream = this.file.createReadStream(startPos, endPos)
+
+            const entry = new Entry()
+
+            readStream.on('data', (chunk) => {
+
+                for (const byte of chunk) {
+
+                    entry.feedByte(byte)
+
+                    if (entry.isFeedingDone()) {
+
+                        entry.extract()
+                        readStream.destroy()
+                        return
+                    }
+                }
+            })
+
+            readStream.on('end', () => resolve())
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        const centralFileHeaders = []
+        let totalBytesRead = 0
+
+        for (let i = 0; i < this.zip32Header.entriesInCD; i++) {
+
+            const centralFileHeader = new CentralFileHeader(buffer.slice(totalBytesRead))
+            centralFileHeaders.push(centralFileHeader)
+            totalBytesRead += centralFileHeader.totalHeaderLength
+        }
+
+        return centralFileHeaders
+    }
+
     toString() {
 
-        // return this.eocdr32.toString() + '\n' + this.centralFileHeaders.reduce((acc, cfh) => acc + cfh.toString() + '\n', '') + this.readLocalFileHeadersSync().reduce((acc, lfh) => acc + lfh.toString() + '\n', '')
-        return this.zip32Header.toString() + '\n' + this.centralFileHeaders.reduce((acc, cfh) => acc + cfh.toString() + '\n', '')
+        const centralFileHeaders = this.centralFileHeaders === undefined ? this.readCentralFileHeaders() : this.centralFileHeaders
+        const localFileHeaders = this.readLocalFileHeaders()
+
+        return this.zip32Header.toString() + EOL + centralFileHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
     }
 }

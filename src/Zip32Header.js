@@ -163,9 +163,9 @@ export default class Zip32Header {
         str += 'Number of disk where central directories start : ' + this.getNumberOfDiskWhereCentralDirectoriesStart() + ' ' + this.#getNumberOfDiskWhereCentralDirectoriesStartInfo() + EOL
         str += 'Total number central directories on this disk  : ' + this.getTotalCentralDirectoriesOnThisDisk()        + ' ' + this.#getTotalCentralDirectoriesOnThisDiskInfo()        + EOL
         str += 'Total number of central directories            : ' + this.getTotalNumberOfCentralDirectories()          + ' ' + this.#getTotalNumberOfCentralDirectoriesInfo()          + EOL
-        str += 'Total size of central directories              : ' + this.getTotalSizeOfCentralDirectories()            + ' ' + this.#getTotalSizeOfCentralDirectoriesInfo()             + EOL
+        str += 'Total size of central directories              : ' + this.getTotalSizeOfCentralDirectories()            + ' ' + this.#getTotalSizeOfCentralDirectoriesInfo()            + EOL
         str += 'Central directories offset with starting disk  : ' + this.getCentralDirectoriesOffsetWithStartingDisk() + ' ' + this.#getCentralDirectoriesOffsetWithStartingDiskInfo() + EOL
-        str += 'ZIP file comment length                        : ' + this.getZipFileCommentLength()                     + ' ' + this.#getZipFileCommentLengthInfo()                + EOL
+        str += 'ZIP file comment length                        : ' + this.getZipFileCommentLength()                     + ' ' + this.#getZipFileCommentLengthInfo()                     + EOL
         str += 'Zip file comment                               : ' + this.getZipFileComment()                                                                                           + EOL
 
         str += '[ END OF CENTRAL DIRECTORY HEADER | LENGTH ' + this.#getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL

@@ -11,12 +11,12 @@ zip.extractAll().then(() => {
 })
 */
 
-
+/*
 zip.extractByRegex('asd', /Eam ex.txt/).then(() => {
 
 
 
 })
-
+*/
 
 // zip.testArchiveSync()
