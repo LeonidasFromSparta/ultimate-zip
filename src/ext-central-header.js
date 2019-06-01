@@ -17,7 +17,7 @@ export default class ExtCentralHeader {
 
     isDone = () => {
 
-        if (this.#offset >== CentralHeader.HEADER_FIXED_LENGTH)
+        if (this.#offset >= CentralHeader.HEADER_FIXED_LENGTH)
             if (this.#offset === this.getHeaderLength())
                 return true
 
@@ -31,8 +31,8 @@ export default class ExtCentralHeader {
 
         this.#centralHeader = new CentralHeader(newBuffer)
 
-        delete this.#offset
-        delete this.#buffer
+        this.#offset = 0
+        this.#buffer = null
     }
 
     checkSignature = () => this.#centralHeader.checkSignature()
@@ -71,7 +71,7 @@ export default class ExtCentralHeader {
 
     getOffsetOfLocalFileHeader = () => this.#centralHeader.getOffsetOfLocalFileHeader()
 
-    getFilename = () => this.#centralHeader.getFilename()
+    getFileName = () => this.#centralHeader.getFilename()
 
     getExtraField = () => this.#centralHeader.getExtraField()
 

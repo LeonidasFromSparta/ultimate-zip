@@ -1,4 +1,4 @@
-import os from 'os'
+import {EOL} from 'os'
 import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING, PLATFORM_MAPPING} from './mappings'
 
 export default class CentralHeader {
@@ -82,7 +82,7 @@ export default class CentralHeader {
         const platformValue = this.#buffer.readUInt8(5)
         const platform = PLATFORM_MAPPING[platformValue] ? PLATFORM_MAPPING[platformValue] : 'Unknown compatible platform'
 
-        return '(' + this.toHex(value) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
+        return '(' + this.#toHex(value) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
     }
 
     /**
@@ -93,14 +93,14 @@ export default class CentralHeader {
      */
     getVersionNeededToExtract = () => this.#buffer.readUInt16LE(6)
 
-    #readVersionNeededToExtractInfo = () => {
+    #getVersionNeededToExtractInfo = () => {
 
         const value = this.getVersionNeededToExtract()
 
         const version = (value / 10).toFixed(1)
         const versionInfo = VERSION_MAPPING[value] ? VERSION_MAPPING[value] : 'Unknown version'
 
-        return '(' + this.toHex(value) + ')' + ' - Version ' + version + ' ' + versionInfo
+        return '(' + this.#toHex(value) + ')' + ' - Version ' + version + ' ' + versionInfo
     }
 
     /**
@@ -133,12 +133,12 @@ export default class CentralHeader {
      */
     getCompressionMethod = () => this.#buffer.readUInt16LE(10)
 
-    #getCompressionMethod = () => {
+    #getCompressionMethodInfo = () => {
 
         const value = this.getCompressionMethod()
 
         const info = COMPRESSION_METHOD_MAPPING[value] ? COMPRESSION_METHOD_MAPPING[value] : 'Unknown compression method'
-        return '(' + this.toHex(value) + ')' + ' - ' + info
+        return '(' + this.#toHex(value) + ')' + ' - ' + info
     }
 
     /**
@@ -150,7 +150,7 @@ export default class CentralHeader {
      */
     getLastModFileTime = () => this.#buffer.readUInt16LE(12)
 
-    #getLastModFileTime = () => {
+    #getLastModFileTimeInfo = () => {
 
         const value = this.getLastModFileTime()
 
@@ -158,7 +158,7 @@ export default class CentralHeader {
         const minutes = (value & 0x7E0) >>> 5
         const hours = (value & 0xF800) >>> 11
 
-        return '(' + this.toHex(value) + ')' + ' - ' + hours + ':' + minutes + ':' + seconds
+        return '(' + this.#toHex(value) + ')' + ' - ' + hours + ':' + minutes + ':' + seconds
     }
 
     /**
@@ -169,7 +169,7 @@ export default class CentralHeader {
      */
     getLastModFileDate = () => this.#buffer.readUInt16LE(14)
 
-    #getLastModFileDate = () => {
+    #getLastModFileDateInfo = () => {
 
         const value = this.getLastModFileDate()
 
@@ -177,7 +177,7 @@ export default class CentralHeader {
         const month = (value & 0x1E0) >>> 5
         const year = ((value & 0xFE00) >>> 9) + 1980
 
-        return '(' + this.toHex(value) + ')' + ' - ' + day + '/' + month + '/' + year
+        return '(' + this.#toHex(value) + ')' + ' - ' + day + '/' + month + '/' + year
     }
 
     /**
@@ -191,7 +191,7 @@ export default class CentralHeader {
     #getCRC32Info = () => {
 
         const value = this.getCRC32()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -205,7 +205,7 @@ export default class CentralHeader {
     #getCompressedSizeInfo = () => {
 
         const value = this.getCompressedSize()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -219,7 +219,7 @@ export default class CentralHeader {
     #getUncompressedSizeInfo = () => {
 
         const value = this.getUncompressedSize()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -228,12 +228,12 @@ export default class CentralHeader {
      *
      * .ZIP File Format Specification: sections 4.4.10
      */
-    getFilenameLength = () => this.#buffer.readUInt16LE(28)
+    getFileNameLength = () => this.#buffer.readUInt16LE(28)
 
-    #getFilenameLength = () => {
+    #getFileNameLengthInfo = () => {
 
-        const value =  this.getFilenameLength()
-        return '(' + this.toHex(value) + ')'
+        const value =  this.getFileNameLength()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -244,10 +244,10 @@ export default class CentralHeader {
      */
     getExtraFieldLength = () => this.#buffer.readUInt16LE(30)
 
-    #getExtraFieldLength = () => {
+    #getExtraFieldLengthInfo = () => {
 
-        const value = this.getExtraFieldLength
-        return '(' + this.toHex(value) + ')'
+        const value = this.getExtraFieldLength()
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -258,10 +258,10 @@ export default class CentralHeader {
      */
     getFileCommentLength = () => this.#buffer.readUInt16LE(32)
 
-    #getFileCommentLength = () => {
+    #getFileCommentLengthInfo = () => {
 
         const value = this.getFileCommentLength()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -275,7 +275,7 @@ export default class CentralHeader {
     #getDiskNumberStartInfo = () => {
 
         const value = this.getDiskNumberStart()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -312,7 +312,7 @@ export default class CentralHeader {
     #getExternalFileAttributesInfo = () => {
 
         const value = this.getExternalFileAttributes()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -326,7 +326,7 @@ export default class CentralHeader {
     #getOffsetOfLocalFileHeaderInfo = () => {
 
         const value = this.getOffsetOfLocalFileHeader()
-        return '(' + this.toHex(value) + ')'
+        return '(' + this.#toHex(value) + ')'
     }
 
     /**
@@ -335,7 +335,7 @@ export default class CentralHeader {
      *
      * .ZIP File Format Specification: sections 4.4.17
      */
-    getFilename = () => this.#buffer.toString('utf8', 46, 46 + this.getFilenameLength())
+    getFileName = () => this.#buffer.toString('utf8', 46, 46 + this.getFileNameLength())
 
     /**
      * Method reads extra field.
@@ -343,7 +343,7 @@ export default class CentralHeader {
      *
      * .ZIP File Format Specification: sections 4.4.28, 4.5.1, 4.5.2
      */
-    getExtraField = () => this.#buffer.toString('hex', 46 + this.getFilenameLength(), 46 + this.getFilenameLength() + this.getExtraFieldLength())
+    getExtraField = () => this.#buffer.toString('hex', 46 + this.getFileNameLength(), 46 + this.getFileNameLength() + this.getExtraFieldLength())
 
     /**
      * Method reads file comment.
@@ -351,11 +351,11 @@ export default class CentralHeader {
      *
      * .ZIP File Format Specification: sections 4.4.18
      */
-    getFileComment = () => this.#buffer.toString('utf8', 46 + this.getFilenameLength() + this.getExtraFieldLength(), 46 + this.getFilenameLength() + this.getExtraFieldLength() + this.getFileCommentLength())
+    getFileComment = () => this.#buffer.toString('utf8', 46 + this.getFileNameLength() + this.getExtraFieldLength(), 46 + this.getFileNameLength() + this.getExtraFieldLength() + this.getFileCommentLength())
 
     getHeaderLength = () => CentralHeader.HEADER_FIXED_LENGTH + this.getFileNameLength() + this.getExtraFieldLength() + this.getFileCommentLength()
 
-    #getHeaderLengthInfo = () => '(' + this.#toHex(this.#getHeaderLength()) + ')'
+    #getHeaderLengthInfo = () => '(' + this.#toHex(this.getHeaderLength()) + ')'
 
     #toHex = (value) => `0x${value.toString(16).toUpperCase()}`
 
@@ -363,30 +363,30 @@ export default class CentralHeader {
 
         let str = ''
 
-        str += `[ CENTRAL DIRECTORY ]${os.EOL}`
+        str += '[ CENTRAL FILE HEADER ]' + EOL
 
-        str += 'Signature                         : ' + this.toHex(CentralHeader.SIGNATURE)                                                            + os.EOL
-        str += 'Version made by                   : ' + this.readVersionMadeBy().value               + ' ' + this.readVersionMadeBy().info()               + os.EOL
-        str += 'Version needed to extract         : ' + this.readVersionNeededToExtract().value      + ' ' + this.readVersionNeededToExtract().info()      + os.EOL
-        // str += `General purpose bit flag
-        str += 'Compression method                : ' + this.readCompressionMethod().value           + ' ' + this.readCompressionMethod().info()           + os.EOL
-        str += 'Last mod file time                : ' + this.readLastModFileTime().value             + ' ' + this.readLastModFileTime().info()             + os.EOL
-        str += 'Last mod file date                : ' + this.readLastModFileDate().value             + ' ' + this.readLastModFileDate().info()             + os.EOL
-        str += 'CRC-32                            : ' + this.readCRC32().value                       + ' ' + this.readCRC32().info()                       + os.EOL
-        str += 'Compressed size                   : ' + this.getCompressedSize()                     + ' ' + this.#getCompressedSizeInfo()                 + os.EOL
-        str += 'Uncompressed size                 : ' + this.getUncompressedSize()                   + ' ' + this.#getUncompressedSizeInfo()               + os.EOL
-        str += 'File name length                  : ' + this.readFilenameLength().value              + ' ' + this.readFilenameLength().info()              + os.EOL
-        str += 'Extra field length                : ' + this.readExtraFieldLength().value            + ' ' + this.readExtraFieldLength().info()            + os.EOL
-        str += 'File comment length               : ' + this.readFileCommentLength().value           + ' ' + this.readFileCommentLength().info()           + os.EOL
-        str += 'Disk number start                 : ' + this.readDiskNumberStart().value             + ' ' + this.readDiskNumberStart().info()             + os.EOL
-        // str += `Internal file attributes
-        str += 'External file attributes          : ' + this.readExternalFileAttributes().value      + ' ' + this.readExternalFileAttributes().info()      + os.EOL
-        str += 'Relative offset of local header   : ' + this.getOffsetOfLocalFileHeader()            + ' ' + this.#getOffsetOfLocalFileHeaderInfo()        + os.EOL
-        str += 'File name                         : ' + this.getFilename()                                                                                 + os.EOL
-        str += 'Extra field                       : ' + this.readExtraField()                                                                              + os.EOL
-        str += 'File comment                      : ' + this.readFileComment()                                                                             + os.EOL
+        str += 'Signature                         : ' + this.#getSignatureInfo()                                                                           + EOL
+        str += 'Version made by                   : ' + this.getVersionMadeBy()                      + ' ' + this.#getVersionMadeByInfo()                  + EOL
+        str += 'Version needed to extract         : ' + this.getVersionNeededToExtract()             + ' ' + this.#getVersionNeededToExtractInfo()         + EOL
+        str += 'General purpose bit flag          : ' + this.getGeneralPurposeBitFlag()              + ' ' +                                                 EOL
+        str += 'Compression method                : ' + this.getCompressionMethod()                  + ' ' + this.#getCompressionMethodInfo()              + EOL
+        str += 'Last mod file time                : ' + this.getLastModFileTime()                    + ' ' + this.#getLastModFileTimeInfo()                + EOL
+        str += 'Last mod file date                : ' + this.getLastModFileDate()                    + ' ' + this.#getLastModFileDateInfo()                + EOL
+        str += 'CRC-32                            : ' + this.getCRC32()                              + ' ' + this.#getCRC32Info()                          + EOL
+        str += 'Compressed size                   : ' + this.getCompressedSize()                     + ' ' + this.#getCompressedSizeInfo()                 + EOL
+        str += 'Uncompressed size                 : ' + this.getUncompressedSize()                   + ' ' + this.#getUncompressedSizeInfo()               + EOL
+        str += 'File name length                  : ' + this.getFileNameLength()                     + ' ' + this.#getFileNameLengthInfo()                 + EOL
+        str += 'Extra field length                : ' + this.getExtraFieldLength()                   + ' ' + this.#getExtraFieldLengthInfo()               + EOL
+        str += 'File comment length               : ' + this.getFileCommentLength()                  + ' ' + this.#getFileCommentLengthInfo()              + EOL
+        str += 'Disk number start                 : ' + this.getDiskNumberStart()                    + ' ' + this.#getDiskNumberStartInfo()                + EOL
+        str += 'Internal file attributes          : ' + this.getInternalFileAttributes()             + ' ' +                                                 EOL
+        str += 'External file attributes          : ' + this.getExternalFileAttributes()             + ' ' + this.#getExternalFileAttributesInfo()         + EOL
+        str += 'Relative offset of local header   : ' + this.getOffsetOfLocalFileHeader()            + ' ' + this.#getOffsetOfLocalFileHeaderInfo()        + EOL
+        str += 'File name                         : ' + this.getFileName()                                                                                 + EOL
+        str += 'Extra field                       : ' + this.getExtraField()                                                                               + EOL
+        str += 'File comment                      : ' + this.getFileComment()                                                                              + EOL
 
-        str += `[ CENTRAL DIRECTORY LENGTH ${this.totalHeaderLength} (0x${this.totalHeaderLength.toString(16).toUpperCase()}) ]`                           + os.EOL
+        str += '[ CENTRAL FILE HEADER | LENGTH ' + this.getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL
 
         return str
     }

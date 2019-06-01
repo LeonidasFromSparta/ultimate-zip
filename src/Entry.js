@@ -1,12 +1,12 @@
 import crc32 from './crc32'
-import FileHeader from './file-header'
+import LocalHeader from './local-header'
 import FileContent from './FileContent'
 
 export default class Entry {
 
     constructor() {
 
-        this.fileHeader = new FileHeader()
+        this.fileHeader = new LocalHeader()
         this.fileContent = null
     }
 

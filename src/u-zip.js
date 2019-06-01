@@ -2,13 +2,16 @@ import {EOL} from 'os'
 import Zip32Header from './Zip32Header'
 import CentralHeader from './central-header'
 import ExtCentralHeader from './ext-central-header'
-import fs from 'fs'
-import FileHeader from './file-header'
+import LocalHeader from './local-header'
+import ExtLocalHeader from './ext-local-header'
 import File from './file'
 import Entry from './Entry'
 import FileContent from './FileContent'
 
 export default class UZip {
+
+    #options = {}
+    #centralHeaders = null
 
     constructor(path, options) {
 
@@ -17,29 +20,8 @@ export default class UZip {
         const lastBytesBuf = this.file.readLastBytes(Zip32Header.HEADER_FIXED_LENGTH + Zip32Header.MAX_ZIP_COMMENT_LENGTH)
         const eocdr32Offset = Zip32Header.locateHeaderStartPos(lastBytesBuf)
 
+        this.#options = options
         this.zip32Header = new Zip32Header(lastBytesBuf.slice(eocdr32Offset))
-
-        if (options !== undefined)
-            if (options.cacheHeaders !== undefined && options.cacheHeaders === true)
-                this.centralFileHeaders = this.readCentralFileHeaders()
-    }
-
-    readLocalFileHeaders() {
-
-        this.file.openFile()
-
-        const localFileHeaders = this.centralFileHeaders.map((cfh) => {
-
-            const position = cfh.getOffsetOfLocalFileHeader().value
-            const length = FileHeader.HEADER_MAX_LENGTH
-
-            const buffer = this.file.readBytesSync(position, length)
-            return new FileHeader(buffer)
-        })
-
-        this.file.closeFile()
-
-        return localFileHeaders
     }
 
     testArchive = () => {
@@ -99,7 +81,7 @@ export default class UZip {
         let filteredCentralFileHeaders
 
         if (this.centralFileHeaders === undefined)
-            filteredCentralFileHeaders = this.readCentralFileHeaders().filter((cfh) => regex.test(cfh.getFilename()))
+            filteredCentralFileHeaders = this.readCentralHeaders().filter((cfh) => regex.test(cfh.getFilename()))
         else
             filteredCentralFileHeaders = this.centralFileHeaders.filter((cfh) => regex.test(cfh.getFilename()))
 
@@ -107,7 +89,7 @@ export default class UZip {
 
             await new Promise((resolve, reject) => {
 
-                const readStream = this.file.createReadStream(centralHeader.getOffsetOfLocalFileHeader(), FileHeader.HEADER_MAX_LENGTH + centralHeader.getCompressedSize())
+                const readStream = this.file.createReadStream(centralHeader.getOffsetOfLocalFileHeader(), LocalHeader.HEADER_MAX_LENGTH + centralHeader.getCompressedSize())
 
                 const entry = new Entry()
 
@@ -131,18 +113,19 @@ export default class UZip {
         }
     }
 
-    async readCentralFileHeaders() {
+    async readCentralHeaders() {
+
+        if (this.#centralHeaders !== null)
+            return this.#centralHeaders
 
         const startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
         const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getTotalSizeOfCentralDirectories()
 
-        debugger
-
-        return await new Promise((resolve, reject) => {
+        const promise = new Promise((resolve, reject) => {
 
             const readStream = this.file.createReadStream(startPos, endPos)
 
-            const exCentralHeadersArray = []
+            const exCentralHeaders = []
             let extCentralHeader = new ExtCentralHeader()
 
             readStream.on('data', (chunk) => {
@@ -154,26 +137,75 @@ export default class UZip {
                     if (extCentralHeader.isDone()) {
 
                         extCentralHeader.finalize()
-                        exCentralHeadersArray.push(extCentralHeader)
-
-                        console.log(extCentralHeader.toString())
+                        exCentralHeaders.push(extCentralHeader)
 
                         extCentralHeader = new ExtCentralHeader()
                     }
                 }
             })
 
-            readStream.on('end', () => resolve(exCentralHeadersArray))
+            readStream.on('end', () => resolve(exCentralHeaders))
         })
+
+        const centralHeaders = await promise
+
+        if (this.#options.cacheHeaders !== undefined)
+            this.#centralHeaders = centralHeaders
+
+        return centralHeaders
     }
 
-    getInfo = async () => {
+    async readLocalFileHeaders() {
 
-        // const centralFileHeaders = this.centralFileHeaders === undefined ? this.readCentralFileHeaders() : this.centralFileHeaders
+        const extLocalHeaders = []
+        const centralHeaders = await this.readCentralHeaders()
 
-        const centralFileHeaders = await this.readCentralFileHeaders()
-        const localFileHeaders = this.readLocalFileHeaders()
+        for (const centralHeader of centralHeaders) {
 
-        return this.zip32Header.toString() + EOL + centralFileHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
+            const promise = new Promise((resolve, reject) => {
+
+                const startPos = centralHeader.getOffsetOfLocalFileHeader()
+                const endPos = centralHeader.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_MAX_LENGTH
+
+                const extLocalHeader = new ExtLocalHeader()
+
+                const readStream = this.file.createReadStream(startPos, endPos)
+
+                readStream.on('data', (chunk) => {
+
+                    for (const byte of chunk) {
+
+                        extLocalHeader.addByte(byte)
+
+                        if (extLocalHeader.isDone()) {
+
+                            extLocalHeader.finalize()
+                            readStream.destroy()
+                            return
+                        }
+                    }
+                })
+
+                readStream.on('end', () => {
+
+                    // ERROR
+                })
+
+                readStream.on('close', () => resolve(extLocalHeader))
+            })
+
+            const result = await promise
+            extLocalHeaders.push(result)
+        }
+
+        return extLocalHeaders
+    }
+
+    async getInfo() {
+
+        const centralHeaders = await this.readCentralHeaders()
+        const localFileHeaders = await this.readLocalFileHeaders()
+
+        return this.zip32Header.toString() + EOL + centralHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
     }
 }
