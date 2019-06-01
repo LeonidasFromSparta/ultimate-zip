@@ -4,7 +4,6 @@ export default class File {
 
     constructor(path) {
 
-        debugger
         this.path = path
     }
 

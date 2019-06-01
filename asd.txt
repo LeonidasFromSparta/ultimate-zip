@@ -1,0 +1,11 @@
+[ END OF CENTRAL DIRECTORY HEADER ]
+Signature                                      : (0x6054B50)
+Number of this disk                            : 0 (0x0)
+Number of disk where central directories start : 0 (0x0)
+Total number central directories on this disk  : 3 (0x3)
+Total number of central directories            : 3 (0x3)
+Total size of central directories              : 281 (0x119)
+Central directories offset with starting disk  : 829 (0x33D)
+ZIP file comment length                        : 0 (0x0)
+Zip file comment                               : 
+[ END OF CENTRAL DIRECTORY HEADER | LENGTH 22 (0x16) ]

@@ -1,5 +1,5 @@
 import {EOL} from 'os'
-import Zip32Header from './Zip32Header'
+import Zip32Header from './zip-32-header'
 import CentralHeader from './central-header'
 import ExtCentralHeader from './ext-central-header'
 import LocalHeader from './local-header'
@@ -76,6 +76,40 @@ export default class UZip {
         })
     }
 
+    async extractFile(fileName) {
+
+        const centralHeader = (await this.readCentralHeaders()).filter((centralHeader) => centralHeader.getFileName() === fileName)[0]
+
+        if (centralHeader.length === 0)
+            console.log('error')
+
+        const startPos = centralHeader.getOffsetOfLocalFileHeader()
+        const endPos = centralHeader.getOffsetOfLocalFileHeader() + centralHeader.getCompressedSize() + LocalHeader.HEADER_MAX_LENGTH
+
+        const promise = new Promise((resolve, reject) => {
+
+            const readStream = this.file.createReadStream(startPos, endPos)
+
+            let entry = new Entry()
+
+            readStream.on('data', (chunk) => {
+
+                for (const byte of chunk) {
+
+                    entry.feedByte(byte)
+
+                    if (entry.isFeedingDone()) {
+
+                        entry.extract()
+                        entry = new Entry()
+                    }
+                }
+            })
+
+            readStream.on('end', () => resolve())
+        })
+    }
+
     async extractByRegex(path, regex) {
 
         let filteredCentralFileHeaders
@@ -119,7 +153,7 @@ export default class UZip {
             return this.#centralHeaders
 
         const startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
-        const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getTotalSizeOfCentralDirectories()
+        const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories()
 
         const promise = new Promise((resolve, reject) => {
 

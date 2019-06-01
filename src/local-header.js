@@ -280,6 +280,7 @@ export default class LocalHeader {
         let str = ''
 
         str += '[ LOCAL FILE HEADER ]' + EOL
+
         str += 'Signature                         : ' + this.#getSignatureInfo()                                                       + EOL
         str += 'Version needed to extract         : ' + this.getVersionNeededToExtract() + ' ' + this.#getVersionNeededToExtractInfo() + EOL
         str += 'General purpose bit flag          : ' + this.getGeneralPurposeBitFlag()  + ' ' +                                         EOL

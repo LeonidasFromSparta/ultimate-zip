@@ -76,11 +76,11 @@ export default class Zip32Header {
      *
      * .ZIP File Format Specification: sections 4.4.21
      */
-    getTotalCentralDirectoriesOnThisDisk = () => this.#buffer.readUInt16LE(8)
+    getNumberOfCentralDirectoriesOnThisDisk = () => this.#buffer.readUInt16LE(8)
 
-    #getTotalCentralDirectoriesOnThisDiskInfo = () => {
+    #getNumberOfCentralDirectoriesOnThisDiskInfo = () => {
 
-        const value = this.getTotalCentralDirectoriesOnThisDisk()
+        const value = this.getNumberOfCentralDirectoriesOnThisDisk()
         return '(' + this.#toHex(value) + ')'
     }
 
@@ -90,11 +90,11 @@ export default class Zip32Header {
      *
      * .ZIP File Format Specification: sections 4.4.22
      */
-    getTotalNumberOfCentralDirectories = () => this.#buffer.readUInt16LE(10)
+    getNumberOfCentralDirectories = () => this.#buffer.readUInt16LE(10)
 
-    #getTotalNumberOfCentralDirectoriesInfo = () => {
+    #getNumberOfCentralDirectoriesInfo = () => {
 
-        const value = this.getTotalNumberOfCentralDirectories()
+        const value = this.getNumberOfCentralDirectories()
         return '(' + this.#toHex(value) + ')'
     }
 
@@ -104,11 +104,11 @@ export default class Zip32Header {
      *
      * .ZIP File Format Specification: sections 4.4.23
      */
-    getTotalSizeOfCentralDirectories = () => this.#buffer.readUInt32LE(12)
+    getSizeOfCentralDirectories = () => this.#buffer.readUInt32LE(12)
 
-    #getTotalSizeOfCentralDirectoriesInfo = () => {
+    #getSizeOfCentralDirectoriesInfo = () => {
 
-        const value = this.getTotalSizeOfCentralDirectories()
+        const value = this.getSizeOfCentralDirectories()
         return '(' + this.#toHex(value) + ')'
     }
 
@@ -154,6 +154,10 @@ export default class Zip32Header {
 
     toString = () => {
 
+        debugger
+
+        console.log(this.#buffer)
+
         let str = ''
 
         str += '[ END OF CENTRAL DIRECTORY HEADER ]' + EOL
@@ -161,12 +165,12 @@ export default class Zip32Header {
         str += 'Signature                                      : ' + this.#getSignatureInfo()                                                                                           + EOL
         str += 'Number of this disk                            : ' + this.getNumberOfThisDisk()                         + ' ' + this.#getNumberOfThisDiskInfo()                         + EOL
         str += 'Number of disk where central directories start : ' + this.getNumberOfDiskWhereCentralDirectoriesStart() + ' ' + this.#getNumberOfDiskWhereCentralDirectoriesStartInfo() + EOL
-        str += 'Total number central directories on this disk  : ' + this.getTotalCentralDirectoriesOnThisDisk()        + ' ' + this.#getTotalCentralDirectoriesOnThisDiskInfo()        + EOL
-        str += 'Total number of central directories            : ' + this.getTotalNumberOfCentralDirectories()          + ' ' + this.#getTotalNumberOfCentralDirectoriesInfo()          + EOL
-        str += 'Total size of central directories              : ' + this.getTotalSizeOfCentralDirectories()            + ' ' + this.#getTotalSizeOfCentralDirectoriesInfo()            + EOL
+        str += 'Number of central directories on this disk     : ' + this.getNumberOfCentralDirectoriesOnThisDisk()     + ' ' + this.#getNumberOfCentralDirectoriesOnThisDiskInfo()     + EOL
+        str += 'Number of central directories                  : ' + this.getNumberOfCentralDirectories()               + ' ' + this.#getNumberOfCentralDirectoriesInfo()               + EOL
+        str += 'Size of central directories                    : ' + this.getSizeOfCentralDirectories()                 + ' ' + this.#getSizeOfCentralDirectoriesInfo()                 + EOL
         str += 'Central directories offset with starting disk  : ' + this.getCentralDirectoriesOffsetWithStartingDisk() + ' ' + this.#getCentralDirectoriesOffsetWithStartingDiskInfo() + EOL
         str += 'ZIP file comment length                        : ' + this.getZipFileCommentLength()                     + ' ' + this.#getZipFileCommentLengthInfo()                     + EOL
-        str += 'Zip file comment                               : ' + this.getZipFileComment()                                                                                           + EOL
+        str += 'ZIP file comment                               : ' + this.getZipFileComment()                                                                                           + EOL
 
         str += '[ END OF CENTRAL DIRECTORY HEADER | LENGTH ' + this.#getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL
 
