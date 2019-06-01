@@ -1,35 +1,35 @@
 import crc32 from './crc32'
 import LocalHeader from './local-header'
-import FileContent from './FileContent'
+import ExtLocalHeader from './ext-local-header'
+import FileContent from './file-content'
 
 export default class Entry {
 
     constructor() {
 
-        this.fileHeader = new LocalHeader()
+        this.extLocalHeader = new ExtLocalHeader()
         this.fileContent = null
     }
 
-    feedByte(byte) {
+    addByte = (byte) => {
 
-        if (!this.fileHeader.isHeaderComplete()) {
+        if (!this.extLocalHeader.isDone()) {
 
-            this.fileHeader.feedByte(byte)
+            this.extLocalHeader.addByte(byte)
             return
         }
 
-        if (this.fileContent === null)
-            this.fileContent = new FileContent(this.fileHeader.getCompressedSize().value)
+        if (this.extLocalHeader.isDone() && this.fileContent === null)
+            this.fileContent = new FileContent(this.extLocalHeader.getCompressedSize())
 
-        if (!this.fileContent.isContentComplete())
-            this.fileContent.feedByte(byte)
+        if (!this.fileContent.isDone())
+            this.fileContent.addByte(byte)
     }
 
-    isFeedingDone() {
+    isDone = () => {
 
-        if (this.fileHeader.isHeaderComplete() && this.fileContent !== null)
-            if (this.fileContent.isContentComplete())
-                return true
+        if (this.extLocalHeader.isDone() && this.fileContent !== null && this.fileContent.isDone())
+            return true
 
         return false
     }
@@ -39,11 +39,8 @@ export default class Entry {
         this.fileContent.extract()
     }
 
-    test() {
+    test = () => {
 
-        this.fileContent.extract()
-        const calculatedCrc32 = this.fileContentcalculateCrc32()
-
-        // if (this.fileHeader.get)
+        this.fileContent.test(this.extLocalHeader.getCRC32())
     }
 }

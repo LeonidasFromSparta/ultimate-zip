@@ -11,14 +11,6 @@ export default class Zip32Header {
     constructor(buffer) {
 
         this.#buffer = buffer
-        this.checkSignature()
-
-        if (this.#getHeaderLength() < buffer.length) {
-
-            const correctedSizeBuffer = Buffer.allocUnsafe(this.#getHeaderLength())
-            this.#buffer.copy(correctedSizeBuffer)
-            this.#buffer = correctedSizeBuffer
-        }
     }
 
     /**
@@ -153,10 +145,6 @@ export default class Zip32Header {
     #getHeaderLengthInfo = () => '(' + this.#toHex(this.#getHeaderLength()) + ')'
 
     toString = () => {
-
-        debugger
-
-        console.log(this.#buffer)
 
         let str = ''
 

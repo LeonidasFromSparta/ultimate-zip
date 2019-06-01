@@ -1,11 +1,19 @@
 
 import UZip from './u-zip'
 
-const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/deflate-normal-only-files.zip', {cacheHeaders: true})
+const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/deflate-normal-only-files-3.zip', {cacheHeaders: true})
+
 zip.getInfo().then((data) => {
 
     console.log(data)
+
+    zip.testArchive().then((data) => {
+
+    })
 })
+
+
+
 
 /*
 zip.extractAll().then(() => {

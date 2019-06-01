@@ -6,7 +6,7 @@ import LocalHeader from './local-header'
 import ExtLocalHeader from './ext-local-header'
 import File from './file'
 import Entry from './Entry'
-import FileContent from './FileContent'
+import FileContent from './file-content'
 
 export default class UZip {
 
@@ -22,13 +22,14 @@ export default class UZip {
 
         this.#options = options
         this.zip32Header = new Zip32Header(lastBytesBuf.slice(eocdr32Offset))
+        this.zip32Header.checkSignature()
     }
 
-    testArchive = () => {
+    testArchive = async () => {
 
         return new Promise((resolve, reject) => {
 
-            const readStream = this.file.createReadStream(0, this.zip32Header.offsetOfCDWithStartingDiskNum)
+            const readStream = this.file.createReadStream(0, this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk())
 
             let entry = new Entry()
 
@@ -36,10 +37,11 @@ export default class UZip {
 
                 for (const byte of chunk) {
 
-                    entry.feedByte(byte)
+                    entry.addByte(byte)
 
-                    if (entry.isFeedingDone()) {
+                    if (entry.isDone()) {
 
+                        console.log(entry.extLocalHeader.getFileName())
                         entry.test()
                         entry = new Entry()
                     }
@@ -213,7 +215,6 @@ export default class UZip {
 
                         if (extLocalHeader.isDone()) {
 
-                            extLocalHeader.finalize()
                             readStream.destroy()
                             return
                         }

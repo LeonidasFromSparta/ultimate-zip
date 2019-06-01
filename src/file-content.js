@@ -1,5 +1,5 @@
 import {inflateRawSync} from 'zlib'
-import crc32 from './crc32'
+import CRC32 from './crc32'
 
 export default class FileContent {
 
@@ -9,13 +9,12 @@ export default class FileContent {
         this.bufferOffset = 0
     }
 
-    feedByte(byte) {
+    addByte = (byte) => {
 
-        this.buffer.writeUInt8(byte, this.bufferOffset)
-        this.bufferOffset++
+        this.buffer.writeUInt8(byte, this.bufferOffset++)
     }
 
-    isContentComplete() {
+    isDone = () => {
 
         if (this.bufferOffset === this.buffer.length)
             return true
@@ -33,8 +32,11 @@ export default class FileContent {
         console.log(keke.toString())
     }
 
-    calculateCrc32() {
+    test = (crc32) => {
 
-        return crc32(this.buffer)
+        this.buffer = inflateRawSync(this.buffer)
+
+        if (crc32 === CRC32(this.buffer))
+            console.log('kekekekeke')
     }
 }

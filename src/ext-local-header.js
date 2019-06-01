@@ -17,22 +17,23 @@ export default class ExtCentralHeader {
 
     isDone = () => {
 
-        if (this.#offset >= LocalHeader.HEADER_FIXED_LENGTH)
-            if (this.#offset === this.getHeaderLength())
-                return true
+        if (this.#offset === 0 && this.#buffer === null)
+            return true
+
+        if (this.#offset >= LocalHeader.HEADER_FIXED_LENGTH && this.#offset === this.getHeaderLength()) {
+
+            const newBuffer = Buffer.allocUnsafe(this.getHeaderLength())
+            this.#buffer.copy(newBuffer)
+
+            this.#localHeader = new LocalHeader(newBuffer)
+
+            this.#offset = 0
+            this.#buffer = null
+
+            return true
+        }
 
         return false
-    }
-
-    finalize = () => {
-
-        const newBuffer = Buffer.allocUnsafe(this.getHeaderLength())
-        this.#buffer.copy(newBuffer)
-
-        this.#localHeader = new LocalHeader(newBuffer)
-
-        this.#offset = 0
-        this.#buffer = null
     }
 
     checkSignature = () => this.#localHeader.checkSignature()
