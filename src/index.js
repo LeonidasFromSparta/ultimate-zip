@@ -1,7 +1,7 @@
 
 import UZip from './u-zip'
 
-const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/deflate-normal-only-files-3.zip', {cacheHeaders: true})
+const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/7z-3f-store-ws-32.zip', {cacheHeaders: true})
 
 zip.getInfo().then((data) => {
 
