@@ -7,6 +7,8 @@ import ExtLocalHeader from './ext-local-header'
 import File from './file'
 import Entry from './Entry'
 import FileContent from './file-content'
+import {createInflateRaw} from 'zlib'
+import fs from 'fs'
 
 export default class UZip {
 
@@ -52,30 +54,37 @@ export default class UZip {
         })
     }
 
-    extractAll(path) {
+    extractAll = async (path) => {
 
-        return new Promise((resolve, reject) => {
+        const headers = await this.readCentralHeaders()
 
-            const readStream = this.file.createReadStream(0, this.zip32Header.offsetOfCDWithStartingDiskNum)
+        for (const header of  headers) {
 
-            let entry = new Entry()
+            const promise = new Promise((resolve, reject) => {
 
-            readStream.on('data', (chunk) => {
+                const startPos = header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + header.getFileNameLength()
+                const endPos = header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + header.getFileNameLength() + header.getCompressedSize()
+                const filename = path + '/' + header.getFileName()
 
-                for (const byte of chunk) {
+                console.log(header.toString())
 
-                    entry.feedByte(byte)
+                if (header.getCompressedSize() === 0) {
 
-                    if (entry.isFeedingDone()) {
-
-                        entry.extract()
-                        entry = new Entry()
-                    }
+                    fs.mkdirSync(filename, {recursive: true})
+                    resolve()
+                    return
                 }
+
+                const readStream = this.file.createReadStream(startPos, endPos)
+                const writeStream = fs.createWriteStream(filename, {flags: 'w'})
+
+                readStream.pipe(createInflateRaw()).pipe(writeStream)
+
+                writeStream.on('finish', () => resolve())
             })
 
-            readStream.on('end', () => resolve())
-        })
+            await promise
+        }
     }
 
     async extractFile(fileName) {

@@ -57,7 +57,7 @@ export default class ExtCentralHeader {
 
     getUncompressedSize = () => this.#centralHeader.getUncompressedSize()
 
-    getFilenameLength = () => this.#centralHeader.getFileNameLength()
+    getFileNameLength = () => this.#centralHeader.getFileNameLength()
 
     getExtraFieldLength = () => this.#centralHeader.getExtraFieldLength()
 
@@ -71,7 +71,7 @@ export default class ExtCentralHeader {
 
     getOffsetOfLocalFileHeader = () => this.#centralHeader.getOffsetOfLocalFileHeader()
 
-    getFileName = () => this.#centralHeader.getFilename()
+    getFileName = () => this.#centralHeader.getFileName()
 
     getExtraField = () => this.#centralHeader.getExtraField()
 
