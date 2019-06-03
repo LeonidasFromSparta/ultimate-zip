@@ -4,7 +4,7 @@ import UZip from './u-zip'
 const start = process.hrtime.bigint()
 console.log('start unzip: ' + start)
 
-const zip = new UZip('C:/Users/leonidw/Desktop/ultimate-zip.js/samples/benchmark-17k-files.zip', {cacheHeaders: true})
+const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/7z-normal-17k-files.zip', {cacheHeaders: true})
 
 /*
 zip.getInfo().then((data) => {
@@ -17,11 +17,11 @@ zip.getInfo().then((data) => {
 })
 */
 
-zip.extractAll('C:/Users/leonidw/Desktop/ultimate-zip.js/mytest').then((data) => {
+zip.extractAll('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then((data) => {
 
 
     const end = process.hrtime.bigint()
-    console.log('end unzip: ' + end)
+    console.log('end unzip: ' + new Number((end - start)) / 1e+9)
 })
 
 /*

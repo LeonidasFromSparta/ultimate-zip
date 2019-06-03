@@ -355,6 +355,10 @@ export default class CentralHeader {
 
     getHeaderLength = () => CentralHeader.HEADER_FIXED_LENGTH + this.getFileNameLength() + this.getExtraFieldLength() + this.getFileCommentLength()
 
+    isDirectory = () => this.getCompressedSize() === 0
+
+    isCompressed = () => this.getCompressedSize() !== this.getUncompressedSize()
+
     #getHeaderLengthInfo = () => '(' + this.#toHex(this.getHeaderLength()) + ')'
 
     #toHex = (value) => `0x${value.toString(16).toUpperCase()}`
@@ -390,4 +394,6 @@ export default class CentralHeader {
 
         return str
     }
+
+
 }

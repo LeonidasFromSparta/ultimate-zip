@@ -9,6 +9,7 @@ import Entry from './Entry'
 import FileContent from './file-content'
 import {createInflateRaw} from 'zlib'
 import fs from 'fs'
+import path from 'path'
 
 export default class UZip {
 
@@ -57,33 +58,66 @@ export default class UZip {
     extractAll = async (path) => {
 
         const headers = await this.readCentralHeaders()
+        this.file.openFile()
+
+        const arr = []
 
         for (const header of  headers) {
 
-            const promise = new Promise((resolve, reject) => {
+            console.log(header.toString())
+            arr.push(this.extractPromise(path, header))
+        }
 
-                const startPos = header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + header.getFileNameLength()
-                const endPos = header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + header.getFileNameLength() + header.getCompressedSize()
-                const filename = path + '/' + header.getFileName()
+        Promise.all(arr)
 
-                console.log(header.toString())
+        this.file.closeFile()
+    }
 
-                if (header.getCompressedSize() === 0) {
+    extractPromise = (where, header) => {
 
-                    fs.mkdirSync(filename, {recursive: true})
+        const filename = where + '/' + header.getFileName()
+
+        if (header.isDirectory()) {
+
+            return new Promise((resolve, reject) => {
+
+                fs.mkdir(filename, {recursive: true}, () => {
+
                     resolve()
-                    return
-                }
+                })
+            })
+        }
 
-                const readStream = this.file.createReadStream(startPos, endPos)
+        const startPos = header.getOffsetOfLocalFileHeader()
+        const endPos = header.getOffsetOfLocalFileHeader() + header.getCompressedSize() + LocalHeader.HEADER_MAX_LENGTH
+
+        if (header.isCompressed()) {
+
+            return new Promise((resolve, reject) => {
+
+                const readStream = this.file.createFdReadStream(startPos, endPos)
                 const writeStream = fs.createWriteStream(filename, {flags: 'w'})
 
                 readStream.pipe(createInflateRaw()).pipe(writeStream)
 
                 writeStream.on('finish', () => resolve())
             })
+        }
 
-            await promise
+        if (!header.isCompressed()) {
+
+            return new Promise((resolve, reject) => {
+
+                if (!header.isCompressed()) {
+
+                    const readStream = this.file.createFdReadStream(startPos, endPos)
+                    const writeStream = fs.createWriteStream(filename, {flags: 'w'})
+
+                    readStream.pipe(writeStream)
+
+                    writeStream.on('finish', () => resolve())
+                }
+            })
         }
     }
 

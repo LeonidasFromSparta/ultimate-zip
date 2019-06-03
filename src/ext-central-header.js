@@ -79,5 +79,9 @@ export default class ExtCentralHeader {
 
     getHeaderLength = () => this.#centralHeader.getHeaderLength()
 
+    isDirectory = () => this.#centralHeader.isDirectory()
+
+    isCompressed = () => this.#centralHeader.isCompressed()
+
     toString = () => this.#centralHeader.toString()
 }
