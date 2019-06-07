@@ -1,4 +1,4 @@
-import {should} from 'chai'
+import {Should} from 'chai'
 import {Readable} from 'stream'
 import CRC32Stream from '../src/crc32-stream'
 

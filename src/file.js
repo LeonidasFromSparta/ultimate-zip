@@ -27,6 +27,15 @@ export default class File {
         return buffer
     }
 
+    readBytesSync(pos, length) {
+
+        const buffer = Buffer.allocUnsafe(length)
+
+        fs.readSync(Number(this.fd), buffer, 0, length, pos)
+
+        return buffer
+    }
+
     /**
      * Method creates a file read stream from - to specified positions.
      * @param {int} startPos The start position in the file.

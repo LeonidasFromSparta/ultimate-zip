@@ -1,11 +1,13 @@
 import {EOL} from 'os'
 import Zip32Header from './zip-32-header'
-import ExtCentralHeader from './ext-central-header'
+// import ExtCentralHeader from './ext-central-header'
 import LocalHeader from './local-header'
 import ExtLocalHeader from './ext-local-header'
 import File from './file'
 import Entry2 from './Entry2'
 import path from 'path'
+import CentralHeaderDeserializer from './central-header-serializer'
+// import CentralHeader2 from './central-header2'
 
 export default class UZip {
 
@@ -26,7 +28,7 @@ export default class UZip {
 
     testArchive = async () => {
 
-        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
+        const entries = this.readCentralHeaders().map((obj) => new Entry2(obj, this.file))
 
         this.file.openFile()
 
@@ -41,7 +43,10 @@ export default class UZip {
 
     extractArchive = async (path) => {
 
-        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
+        debugger
+
+        const entries = this.readCentralHeaders().map((obj) => new Entry2(obj, this.file))
+        // const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
 
         this.file.openFile()
 
@@ -53,7 +58,7 @@ export default class UZip {
 
     extractByRegex = async (regex, path) => {
 
-        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename().test(regex))
+        const entries = this.readCentralHeaders().map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename().test(regex))
 
         this.file.openFile()
 
@@ -65,7 +70,7 @@ export default class UZip {
 
     extractFile = async (filename, path) => {
 
-        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename() === filename)
+        const entries = this.readCentralHeaders().map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename() === filename)
 
         this.file.openFile()
 
@@ -80,10 +85,43 @@ export default class UZip {
         return (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
     }
 
-    readCentralHeaders = async () => {
+    readCentralHeaders = () => {
 
         if (this.#centralHeaders !== null)
             return this.#centralHeaders
+
+        const centralDirectories = this.zip32Header.getNumberOfCentralDirectories()
+
+        let startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
+
+        const headers = []
+
+        this.file.openFile()
+
+        for (let i=0; i < centralDirectories; i++) {
+
+            const buffer = this.file.readBytesSync(startPos, CentralHeaderDeserializer.HEADER_MAX_LENGTH)
+            const centralHeader2 = CentralHeaderDeserializer.deserealize(buffer)
+
+            headers.push(centralHeader2)
+            startPos += centralHeader2.getHeaderLength()
+        }
+
+        this.file.closeFile()
+
+        if (this.#options.cacheHeaders !== undefined)
+            this.#centralHeaders = headers
+
+        return headers
+    }
+
+/*
+   readCentralHeaders = async () => {
+
+        if (this.#centralHeaders !== null)
+            return this.#centralHeaders
+
+            debugger
 
         const startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
         const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories()
@@ -121,7 +159,7 @@ export default class UZip {
 
         return centralHeaders
     }
-
+*/
     async readLocalFileHeaders() {
 
         const extLocalHeaders = []
