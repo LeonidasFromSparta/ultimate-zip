@@ -6,6 +6,7 @@ import LocalHeader from './local-header'
 import ExtLocalHeader from './ext-local-header'
 import File from './file'
 import Entry from './Entry'
+import Entry2 from './Entry2'
 import FileContent from './file-content'
 import {createInflateRaw} from 'zlib'
 import fs from 'fs'
@@ -30,169 +31,61 @@ export default class UZip {
 
     testArchive = async () => {
 
-        return new Promise((resolve, reject) => {
+        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
 
-            const readStream = this.file.createReadStream(0, this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk())
-
-            let entry = new Entry()
-
-            readStream.on('data', (chunk) => {
-
-                for (const byte of chunk) {
-
-                    entry.addByte(byte)
-
-                    if (entry.isDone()) {
-
-                        console.log(entry.extLocalHeader.getFileName())
-                        entry.test()
-                        entry = new Entry()
-                    }
-                }
-            })
-
-            readStream.on('end', () => resolve())
-        })
-    }
-
-    extractAll = async (path) => {
-
-        const headers = await this.readCentralHeaders()
         this.file.openFile()
 
-        const arr = []
+        for (const entry of entries) {
 
-        for (const header of  headers) {
-
-            console.log(header.toString())
-            arr.push(this.extractPromise(path, header))
+            if (!entry.isDirectory())
+                await entry.test(path)
         }
-
-        Promise.all(arr)
 
         this.file.closeFile()
     }
 
-    extractPromise = (where, header) => {
+    extractArchive = async (path) => {
 
-        const filename = where + '/' + header.getFileName()
+        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
 
-        if (header.isDirectory()) {
+        this.file.openFile()
 
-            return new Promise((resolve, reject) => {
+        for (let i=0; i < entries.length; i++)
+            await entries[i].extract(path)
 
-                fs.mkdir(filename, {recursive: true}, () => {
-
-                    resolve()
-                })
-            })
-        }
-
-        const startPos = header.getOffsetOfLocalFileHeader()
-        const endPos = header.getOffsetOfLocalFileHeader() + header.getCompressedSize() + LocalHeader.HEADER_MAX_LENGTH
-
-        if (header.isCompressed()) {
-
-            return new Promise((resolve, reject) => {
-
-                const readStream = this.file.createFdReadStream(startPos, endPos)
-                const writeStream = fs.createWriteStream(filename, {flags: 'w'})
-
-                readStream.pipe(createInflateRaw()).pipe(writeStream)
-
-                writeStream.on('finish', () => resolve())
-            })
-        }
-
-        if (!header.isCompressed()) {
-
-            return new Promise((resolve, reject) => {
-
-                if (!header.isCompressed()) {
-
-                    const readStream = this.file.createFdReadStream(startPos, endPos)
-                    const writeStream = fs.createWriteStream(filename, {flags: 'w'})
-
-                    readStream.pipe(writeStream)
-
-                    writeStream.on('finish', () => resolve())
-                }
-            })
-        }
+        this.file.closeFile()
     }
 
-    async extractFile(fileName) {
+    extractByRegex = async (regex, path) => {
 
-        const centralHeader = (await this.readCentralHeaders()).filter((centralHeader) => centralHeader.getFileName() === fileName)[0]
+        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename().test(regex))
 
-        if (centralHeader.length === 0)
-            console.log('error')
+        this.file.openFile()
 
-        const startPos = centralHeader.getOffsetOfLocalFileHeader()
-        const endPos = centralHeader.getOffsetOfLocalFileHeader() + centralHeader.getCompressedSize() + LocalHeader.HEADER_MAX_LENGTH
+        for (let i=0; i < entries.length; i++)
+            await entries[i].extract(path)
 
-        const promise = new Promise((resolve, reject) => {
-
-            const readStream = this.file.createReadStream(startPos, endPos)
-
-            let entry = new Entry()
-
-            readStream.on('data', (chunk) => {
-
-                for (const byte of chunk) {
-
-                    entry.feedByte(byte)
-
-                    if (entry.isFeedingDone()) {
-
-                        entry.extract()
-                        entry = new Entry()
-                    }
-                }
-            })
-
-            readStream.on('end', () => resolve())
-        })
+        this.file.closeFile()
     }
 
-    async extractByRegex(path, regex) {
+    extractFile = async (filename, path) => {
 
-        let filteredCentralFileHeaders
+        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename() === filename
 
-        if (this.centralFileHeaders === undefined)
-            filteredCentralFileHeaders = this.readCentralHeaders().filter((cfh) => regex.test(cfh.getFilename()))
-        else
-            filteredCentralFileHeaders = this.centralFileHeaders.filter((cfh) => regex.test(cfh.getFilename()))
+        this.file.openFile()
 
-        for (const centralHeader of filteredCentralFileHeaders) {
+        for (let i=0; i < entries.length; i++)
+            await entries[i].extract(path)
 
-            await new Promise((resolve, reject) => {
-
-                const readStream = this.file.createReadStream(centralHeader.getOffsetOfLocalFileHeader(), LocalHeader.HEADER_MAX_LENGTH + centralHeader.getCompressedSize())
-
-                const entry = new Entry()
-
-                readStream.on('data', (chunk) => {
-
-                    for (const byte of chunk) {
-
-                        entry.feedByte(byte)
-
-                        if (entry.isFeedingDone()) {
-
-                            entry.extract()
-                            readStream.destroy()
-                            return
-                        }
-                    }
-                })
-
-                readStream.on('end', () => resolve())
-            })
-        }
+        this.file.closeFile()
     }
 
-    async readCentralHeaders() {
+    getEntries = async () => {
+
+        return (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)
+    }
+
+    readCentralHeaders = async () => {
 
         if (this.#centralHeaders !== null)
             return this.#centralHeaders

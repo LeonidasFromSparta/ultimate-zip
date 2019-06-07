@@ -17,11 +17,11 @@ zip.getInfo().then((data) => {
 })
 */
 
-zip.extractAll('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then((data) => {
+zip.extractArchive('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then((data) => {
 
 
     const end = process.hrtime.bigint()
-    console.log('end unzip: ' + new Number((end - start)) / 1e+9)
+    console.log('unzip time: ' + new Number((end - start)) / 1e+9)
 })
 
 /*

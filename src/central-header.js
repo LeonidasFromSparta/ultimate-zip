@@ -395,5 +395,8 @@ export default class CentralHeader {
         return str
     }
 
+    extractTo = async () => {
 
+        this.File.write()
+    }
 }
