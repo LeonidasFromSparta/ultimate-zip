@@ -1,5 +1,5 @@
 import {Should} from 'chai'
-import Crc32 from '../src/crc32'
+import CRC32 from './../src/crc32'
 
 const should = Should()
 
@@ -16,8 +16,9 @@ describe('Testing crc32', () => {
         txt += 'Platonem inimicus omittantur usu id, eu sea quas abhorreant voluptatibus.\r\n'
         txt += 'Est te nusquam percipitur, sed nonumes principes ea.\r\n'
 
-        const buffer = Buffer.from(txt)
+        const crc32 = new CRC32()
+        crc32.update(Buffer.from(txt))
 
-        Crc32(buffer).should.equal(0x94699776)
+        crc32.getValue().should.equal(0x94699776)
     })
 })

@@ -64,7 +64,7 @@ export default class EFH {
      * @param {buffer} buffer The buffer in which all the data supposed to be in.
      * @param {int} headerId The header id.
      */
-    readDataBlock(buffer, headerId) {
+    readDataBlock(buffer) {
 
         /*
         switch (headerId) {

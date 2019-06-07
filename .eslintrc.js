@@ -1,12 +1,12 @@
 module.exports = {
-    parserOptions: {
-        ecmaVersion: 9,
-        sourceType: 'module',
-    },
+
+    parser: 'babel-eslint',
     env: {
-        node: true
+        node: true,
+        es6: true,
+        jest: true
     },
-    plugins: ['babel']
+    plugins: ['babel'],
     extends: ['eslint:recommended'],
     rules: {
         'semi': [2, 'never'],

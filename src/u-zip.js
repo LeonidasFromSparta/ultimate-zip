@@ -1,15 +1,10 @@
 import {EOL} from 'os'
 import Zip32Header from './zip-32-header'
-import CentralHeader from './central-header'
 import ExtCentralHeader from './ext-central-header'
 import LocalHeader from './local-header'
 import ExtLocalHeader from './ext-local-header'
 import File from './file'
-import Entry from './Entry'
 import Entry2 from './Entry2'
-import FileContent from './file-content'
-import {createInflateRaw} from 'zlib'
-import fs from 'fs'
 import path from 'path'
 
 export default class UZip {
@@ -70,7 +65,7 @@ export default class UZip {
 
     extractFile = async (filename, path) => {
 
-        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename() === filename
+        const entries = (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)).filter((obj) => obj.getFilename() === filename)
 
         this.file.openFile()
 
@@ -82,7 +77,7 @@ export default class UZip {
 
     getEntries = async () => {
 
-        return (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file)
+        return (await this.readCentralHeaders()).map((obj) => new Entry2(obj, this.file))
     }
 
     readCentralHeaders = async () => {
@@ -93,7 +88,7 @@ export default class UZip {
         const startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
         const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories()
 
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve) => {
 
             const readStream = this.file.createReadStream(startPos, endPos)
 
@@ -134,7 +129,7 @@ export default class UZip {
 
         for (const centralHeader of centralHeaders) {
 
-            const promise = new Promise((resolve, reject) => {
+            const promise = new Promise((resolve) => {
 
                 const startPos = centralHeader.getOffsetOfLocalFileHeader()
                 const endPos = centralHeader.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_MAX_LENGTH

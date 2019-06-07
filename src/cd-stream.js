@@ -11,10 +11,9 @@ export default class CDStream extends Writable {
     variableLengthBuf = null
     variableLengthBufIndex = 0
 
-    constructor(totalCDEntries) {
+    constructor() {
 
         super()
-        totalCDEntries = totalCDEntries
     }
 
     _write(chunk, encoding, callback) {

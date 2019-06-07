@@ -1,5 +1,4 @@
 import fs from 'fs'
-import { resolve } from 'dns';
 
 export default class File {
 
@@ -44,11 +43,6 @@ export default class File {
         return fs.createReadStream(null, {fd: this.fd, autoClose: false, start: startPos, end: endPos})
     }
 
-    createReadStream(startPos, endPos) {
-
-        return fs.createReadStream(this.path, {start: startPos, end: endPos})
-    }
-
     /**
      * Method opens file descriptor.
      */
@@ -65,29 +59,9 @@ export default class File {
         fs.closeSync(this.fd)
     }
 
-    getFileSize() {
-
-        const fd = fs.openSync (path, 'r')
-        const fileSize = fs.fstatSync(fd).size
-        fs.closeSync(fd)
-
-        return fileSize
-    }
-
-    makeDirRecursively = (dir) => {
-
-        return new Promise((resolve, reject) => {
-
-            fs.mkdir(dir, {recursive: true}, () => {
-
-                resolve()
-            })
-        })
-    }
-
     makeDir = (dir) => {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             fs.mkdir(dir, () => {
 

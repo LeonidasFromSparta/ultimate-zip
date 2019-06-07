@@ -74,15 +74,13 @@ export default class CentralHeader {
     // TO-DO think how to get rid of reading buffer in this func
     #getVersionMadeByInfo = () => {
 
-        const value = this.#buffer.readUInt16LE(4)
-
         const versionValue = this.#buffer.readUInt16LE(4)
         const version = (this.#buffer.readUInt16LE(4) / 10).toFixed(1)
 
         const platformValue = this.#buffer.readUInt8(5)
         const platform = PLATFORM_MAPPING[platformValue] ? PLATFORM_MAPPING[platformValue] : 'Unknown compatible platform'
 
-        return '(' + this.#toHex(value) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
+        return '(' + this.#toHex(versionValue) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
     }
 
     /**

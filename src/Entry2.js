@@ -1,9 +1,5 @@
-import crc32 from './crc32'
 import LocalHeader from './local-header'
-import ExtLocalHeader from './ext-local-header'
-import FileContent from './file-content'
 import {createInflateRaw} from 'zlib'
-import path1 from 'path'
 import CRC32Stream from './crc32-stream'
 
 export default class Entry {
@@ -26,7 +22,7 @@ export default class Entry {
 
         if (this.header.isCompressed()) {
 
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
                 const crc32Stream = new CRC32Stream()
@@ -39,8 +35,6 @@ export default class Entry {
                     if (crc32Stream.crc.getValue() !== this.header.getCRC32()) {
 
                         console.log(this.header.toString())
-                        const keke = this.header.getCRC32()
-                        debugger
                     }
                 })
 
@@ -50,7 +44,7 @@ export default class Entry {
 
         if (!this.header.isCompressed()) {
 
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
                 const crc32Stream = new CRC32Stream()
@@ -68,8 +62,6 @@ export default class Entry {
                     if (crc32Stream.crc.getValue() !== this.header.getCRC32()) {
 
                         console.log(this.header.toString())
-                        const keke = this.header.getCRC32()
-                        debugger
                     }
                 })
             })
@@ -78,14 +70,12 @@ export default class Entry {
 
     test = () => {
 
-        console.log(this.header.getFileName())
-
         const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
         const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
 
         if (!this.header.isCompressed()) {
 
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
                 const crcStream = new CRC32Stream()
@@ -104,14 +94,14 @@ export default class Entry {
 
         if (this.header.isCompressed()) {
 
-            return new Promise(async (resolve, reject) => {
+            return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
                 const crcStream = new CRC32Stream()
 
                 readStream.pipe(createInflateRaw()).pipe(crcStream)
 
-                crcStream.on('end', (data) => {
+                crcStream.on('end', () => {
 
                     if (crcStream.calculate() !== this.header.getCRC32())
                         console.log('kekeke')

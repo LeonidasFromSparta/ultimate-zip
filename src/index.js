@@ -1,4 +1,3 @@
-
 import UZip from './u-zip'
 
 const start = process.hrtime.bigint()
@@ -17,7 +16,7 @@ zip.getInfo().then((data) => {
 })
 */
 
-zip.extractArchive('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then((data) => {
+zip.extractArchive('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then(() => {
 
 
     const end = process.hrtime.bigint()

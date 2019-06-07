@@ -1,5 +1,3 @@
-import crc32 from './crc32'
-import LocalHeader from './local-header'
 import ExtLocalHeader from './ext-local-header'
 import FileContent from './file-content'
 
