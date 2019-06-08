@@ -1,7 +1,7 @@
 import LocalHeader from './local-header'
 import {createInflateRaw} from 'zlib'
 import CRC32Stream from './crc32-stream'
-import CentralHeaderInfo from './central-header-info';
+import CentralHeaderInfo from './central-header-info'
 
 export default class Entry {
 
@@ -119,6 +119,6 @@ export default class Entry {
 
     getInfo = () => {
 
-
+        return new CentralHeaderInfo(this.header).toString()
     }
 }
