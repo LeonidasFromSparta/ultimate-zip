@@ -1,4 +1,4 @@
-export const VERSION_MAPPING = {
+export const VERSION = {
 
     10: 'Default value',
     11: 'File is a volume label',
@@ -16,7 +16,7 @@ export const VERSION_MAPPING = {
     63: 'File is compressed using LZMA, PPMd+, Blowfish, Twofish'
 }
 
-export const COMPRESSION_METHOD_MAPPING = {
+export const COMPRESSION_METHOD = {
 
     0: 'The file is stored (no compression)',
     1: 'The file is Shrunk',
@@ -44,7 +44,7 @@ export const COMPRESSION_METHOD_MAPPING = {
    99: 'AE-x encryption marker (see APPENDIX E)'
 }
 
-export const PLATFORM_MAPPING = {
+export const PLATFORM = {
 
     0:  'MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)',
     1:  'Amiga',
@@ -68,6 +68,61 @@ export const PLATFORM_MAPPING = {
     19: 'OS X (Darwin)'
 }
 
+export const MSDOS = 0
+
+export const GENERAL_BIT_FLAG = {
+
+    1:     'Bit 0 - File is encrypted',
+    8:     'Bit 3 - Bit Fields CRC-32, compressed size, uncompressed size are set to zero in the local header.',
+    16:    'Bit 4 - Reserved for use with deflate method, for enhanced deflating',
+    32:    'Bit 5 - File is compressed patched data',
+    64:    'Bit 6 - Strong encryption',
+    128:   'Bit 7 - Currently unused',
+    256:   'Bit 8 - Currently unused',
+    512:   'Bit 9 - Currently unused',
+    1024:  'Bit 10 - Currently unused',
+    2048:  'Bit 11 - Currently unused',
+    4096:  'Bit 12 - Reserved by PKWARE for enhanced compression.',
+    8192:  'Bit 13 - Selected data values in the Local Header are masked to hide their actual values',
+    16384: 'Bit 14 - Reserved by PKWARE',
+    32768: 'Bit 15 - Reserved by PKWARE'
+}
+
+export const IMPLODING_BIT_FLAG = {
+
+    0: 'Imploded (0x00): 4K sliding dictionary, 2 Shannon-Fano trees',
+    2: 'Imploded (0x02): 4K sliding dictionary, 3 Shannon-Fano trees',
+    4: 'Imploded (0x04): 8K sliding dictionary, 2 Shannon-Fano trees',
+    6: 'Imploded (0x06): 8K sliding dictionary, 3 Shannon-Fano trees'
+}
+
+export const DEFLATE_BIT_FLAG = {
+
+    0: 'Deflate + (0x00): Normal (-en) compression',
+    2: 'Deflate + (0x02): Maximum (-exx/-ex) compression',
+    4: 'Deflate + (0x04): Fast (-ef) compression',
+    6: 'Deflate + (0x06): Super Fast (-es) compression'
+}
+
+export const IMPLODED = 6
+export const DEFLATE = 8
+export const DEFLATE64 = 9
+
+export const INTERNAL_ATTRIBUTES = {
+
+    0: '(0x0000): The file apparently contains binary data',
+    1: '(0x0001): File is an ASCII or text file',
+    2: '(0x0002): A 4 byte variable record length control field precedes each logical record (mainframe data transfer support)',
+    4: '(0x0004): Reserved for use by PKWARE',
+}
+
+export const MSDOS_FILE_ATTRIBUTES = {
+
+    1:  '(0x0001) Read only file',
+    2:  '(0x0002) Hidden file',
+    4:  '(0x0004) System file',
+    32: '(0x0020) Archive file'
+}
 /*
 export const ZIP_FORMAT_VERSIONS = {
 

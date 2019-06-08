@@ -1,5 +1,5 @@
 import {EOL} from 'os'
-import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING} from './mappings'
+import {VERSION, COMPRESSION_METHOD} from './mappings'
 
 export default class LocalHeader {
 
@@ -29,34 +29,6 @@ export default class LocalHeader {
         17: 'Tandem',
         18: 'OS/400',
         19: 'OS X (Darwin)'
-    }
-
-    static GENERAL_PURPOSE_BIT_FLAG_MAPPING = {
-
-        1:     'Bit 0',
-        2:     'Bit 1',
-        4:     'Bit 2',
-        8:     'Bit 3',
-        16:    'Bit 4',
-        32:    'Bit 5',
-        64:    'Bit 6',
-        128:   'Bit 7',
-        256:   'Bit 8',
-        512:   'Bit 9',
-        1024:  'Bit 10',
-        2048:  'Bit 11',
-        4096:  'Bit 12',
-        8192:  'Bit 13',
-        16384: 'Bit 14',
-        32768: 'Bit 15'
-    }
-
-    static INTERNAL_ATTRIBUTES_MAPPING = {
-
-        16384: '(Bit 1) Reserved for use by PKWARE',
-        8192:  '(Bit 2) Reserved for use by PKWARE',
-        2:     '(Bit 14) A 4 byte variable record length control field precedes each logical record (mainframe data transfer support) LOL!',
-        1:     '(Bit 15) File is an ASCII or text file'
     }
 
     #buffer
@@ -100,7 +72,7 @@ export default class LocalHeader {
         const value = this.getVersionNeededToExtract()
 
         const version = (value / 10).toFixed(1)
-        const versionInfo = VERSION_MAPPING[value] ? VERSION_MAPPING[value] : 'Unknown ZIP spec version'
+        const versionInfo = VERSION[value] ? VERSION[value] : 'Unknown ZIP spec version'
 
         return '(' + this.#toHex(value) + ')' + ' - Version ' + version + ' ' + versionInfo
     }
@@ -139,7 +111,7 @@ export default class LocalHeader {
 
         const value = this.getCompressionMethod()
 
-        const info = COMPRESSION_METHOD_MAPPING[value] ? COMPRESSION_METHOD_MAPPING[value] : 'Unknown compression method'
+        const info = COMPRESSION_METHOD[value] ? COMPRESSION_METHOD[value] : 'Unknown compression method'
         return '(' + this.#toHex(value) + ')' + ' - ' + info
     }
 

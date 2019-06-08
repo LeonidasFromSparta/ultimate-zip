@@ -1,40 +1,12 @@
 import {EOL} from 'os'
 import CentralHeaderSerializer from './central-header-serializer'
-import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING, PLATFORM_MAPPING} from './mappings'
+import * as constants from './mappings'
 
 export default class CentralHeaderInfo {
 
     static HEADER_FIXED_LENGTH = 46
     static HEADER_MAX_LENGTH = CentralHeaderInfo.HEADER_FIXED_LENGTH + 65536 + 65536 + 65536
     static SIGNATURE = 0x02014b50
-
-    static GENERAL_PURPOSE_BIT_FLAG_MAPPING = {
-
-        1:     'Bit 0',
-        2:     'Bit 1',
-        4:     'Bit 2',
-        8:     'Bit 3',
-        16:    'Bit 4',
-        32:    'Bit 5',
-        64:    'Bit 6',
-        128:   'Bit 7',
-        256:   'Bit 8',
-        512:   'Bit 9',
-        1024:  'Bit 10',
-        2048:  'Bit 11',
-        4096:  'Bit 12',
-        8192:  'Bit 13',
-        16384: 'Bit 14',
-        32768: 'Bit 15'
-    }
-
-    static INTERNAL_ATTRIBUTES_MAPPING = {
-
-        16384: '(Bit 1) Reserved for use by PKWARE',
-        8192:  '(Bit 2) Reserved for use by PKWARE',
-        2:     '(Bit 14) A 4 byte variable record length control field precedes each logical record (mainframe data transfer support) LOL!',
-        1:     '(Bit 15) File is an ASCII or text file'
-    }
 
     constructor(header) {
 
@@ -43,248 +15,245 @@ export default class CentralHeaderInfo {
 
     getSignatureInfo = () => {
 
-        return '(' + this.#toHex(CentralHeaderSerializer.SIGNATURE) + ')'
+        return '(' + this.toHex(CentralHeaderSerializer.SIGNATURE) + ')'
     }
 
     getVersionMadeByInfo = () => {
 
-        const value = (this.header.getVersionMadeBy() / 10).toFixed(1)
-        return value + ' (' + this.#toHex(value) + ')'
+        const value = this.header.getVersionMadeBy()
+        return value + ' (' + this.toHex(value) + ') .ZIP Version ' + (value / 10).toFixed(1)
     }
 
-    /*
-    getVersionMadeByInfo1 = () => {
+    getPlatformCompatibilityInfo = () => {
 
-        const versionValue = this.#buffer.readUInt16LE(4)
-        const version = (this.#buffer.readUInt16LE(4) / 10).toFixed(1)
+        const value = this.header.getPlatformCompatibility()
+        const platform = constants.PLATFORM[value] ? constants.PLATFORM[value] : 'Unknown compatible platform'
 
-        const platformValue = this.#buffer.readUInt8(5)
-        const platform = PLATFORM_MAPPING[platformValue] ? PLATFORM_MAPPING[platformValue] : 'Unknown compatible platform'
-
-        return '(' + this.#toHex(versionValue) + ')' + ' - (HI) Platform ' + platform + ' (LO) Version ' + version
+        return value + ' (' + this.toHex(value) + ')' + ' Platform ' + platform
     }
 
-    getVersionNeededToExtract = () => this.#buffer.readUInt16LE(6)
+    getVersionNeededToExtractInfo = () => {
 
-    #getVersionNeededToExtractInfo = () => {
-
-        const value = this.getVersionNeededToExtract()
-
-        const version = (value / 10).toFixed(1)
-        const versionInfo = VERSION_MAPPING[value] ? VERSION_MAPPING[value] : 'Unknown version'
-
-        return '(' + this.#toHex(value) + ')' + ' - Version ' + version + ' ' + versionInfo
+        const value = this.header.getVersionNeededToExtract()
+        return value + ' (' + this.toHex(value) + ') .ZIP Version ' + (value / 10).toFixed(1)
     }
 
-    getGeneralPurposeBitFlag = () => this.#buffer.readUInt16LE(8)
+    getGeneralPurposeBitFlagInfo = () => {
 
-    #getGeneralPurposeBitFlagInfo = () => {
+        const value = this.header.getGeneralPurposeBitFlag()
+        const bitFlagInfo = []
 
-        this.value = this.getGeneralPurposeBitFlag()
-        this.generalPurposeBitFlagInfo = []
+        if ((value & 1) === 1)
+            bitFlagInfo.push(constants.GENERAL_BIT_FLAG[1])
 
-        for (let i = 0; i < 16; i++) {
+        const method = this.header.getCompressionMethod()
 
-            const bit = this.value & Math.pow(2, i)
+        if (method === constants.DEFLATE || method === constants.DEFLATE64)
+            bitFlagInfo.push(constants.DEFLATE_BIT_FLAG[(value & 0x06)])
 
-            if (CentralHeaderInfo.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit] !== undefined)
-                this.generalPurposeBitFlagInfo.push(CentralHeaderInfo.GENERAL_PURPOSE_BIT_FLAG_MAPPING[bit])
+        if (method === constants.IMPLODED)
+            bitFlagInfo.push(constants.IMPLODED_BIT_FLAG[(value & 0x06)])
+
+        for (let i = 3; i < 16; i++)
+            if ((value & Math.pow(2, i)) === Math.pow(2, i))
+                bitFlagInfo.push(constants.GENERAL_BIT_FLAG[value & Math.pow(2, i)])
+
+        let bitInfo = ''
+
+        for (let i=0; i < bitFlagInfo.length; i++)
+            bitInfo += ' '.repeat(35) + ' - ' + bitFlagInfo[i]
+
+       return value + ' (' + this.toHex(value) + ')' + EOL + bitInfo
+    }
+
+    getCompressionMethodInfo = () => {
+
+        const value = this.header.getCompressionMethod()
+        const method = constants.COMPRESSION_METHOD[value] ? constants.COMPRESSION_METHOD[value] : 'Unknown compression method'
+
+        return value + ' (' + this.toHex(value) + ') ' + method
+    }
+
+    getLastModFileTimeInfo = () => {
+
+        const value = this.header.getLastModFileTime()
+
+        const seconds = (value & 0x1F).toString().padStart(2, '0')
+        const minutes = ((value & 0x7E0) >>> 5).toString().padStart(2, '0')
+        const hours = ((value & 0xF800) >>> 11).toString().padStart(2, '0')
+
+        return value + ' (' + this.toHex(value) + ') ' + hours + ':' + minutes + ':' + seconds
+    }
+
+    getLastModFileDateInfo = () => {
+
+        const value = this.header.getLastModFileDate()
+
+        const day = (value & 0x1F).toString().padStart(2, '0')
+        const month = ((value & 0x1E0) >>> 5).toString().padStart(2, '0')
+        const year = (((value & 0xFE00) >>> 9) + 1980).toString().padStart(4, '0')
+
+        return value + ' (' + this.toHex(value) + ') ' + day + '/' + month + '/' + year
+    }
+
+    getCRC32Info = () => {
+
+        const value = this.header.getCRC32()
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getCompressedSizeInfo = () => {
+
+        const value = this.header.getCompressedSize()
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getUncompressedSizeInfo = () => {
+
+        const value = this.header.getUncompressedSize()
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getFileNameLengthInfo = () => {
+
+        const value =  this.header.getFileName().length
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getExtraFieldLengthInfo = () => {
+
+        const value = this.header.getExtraField().length
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getFileCommentLengthInfo = () => {
+
+        const value = this.header.getFileComment().length
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getDiskNumberStartInfo = () => {
+
+        const value = this.header.getDiskNumberStart()
+        return value + ' (' + this.toHex(value) + ')'
+    }
+
+    getInternalFileAttributesInfo = () => {
+
+        const value = this.header.getInternalFileAttributes()
+        const bitFlagInfo = []
+
+        if ((value & 1) === 0)
+            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[0])
+
+        if ((value & 1) === 1)
+            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[1])
+
+        if ((value & 2) === 2)
+            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[2])
+
+        if ((value & 4) === 4)
+            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[4])
+
+        let bitInfo = ''
+
+        for (let i=0; i < bitFlagInfo.length; i++)
+            bitInfo += ' '.repeat(35) + ' - ' + bitFlagInfo[i]
+
+       return value + ' (' + this.toHex(value) + ')' + EOL + bitInfo
+    }
+
+    getExternalFileAttributesInfo = () => {
+
+        const value = this.header.getExternalFileAttributes()
+
+        if (this.header.getPlatformCompatibility() === constants.MSDOS) {
+
+            const bitFlagInfo = []
+
+            if ((value & 1) === 1)
+                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[1])
+
+            if ((value & 2) === 2)
+                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[2])
+
+            if ((value & 4) === 4)
+                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[4])
+
+            if ((value & 32) === 32)
+                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[32])
+
+            let bitInfo = ''
+
+            for (let i=0; i < bitFlagInfo.length; i++)
+                bitInfo += ' '.repeat(35) + ' - ' + bitFlagInfo[i]
+
+           return value + ' (' + this.toHex(value) + ')' + EOL + bitInfo
         }
     }
 
+    getOffsetOfLocalFileHeaderInfo = () => {
 
-    getCompressionMethod = () => this.#buffer.readUInt16LE(10)
-
-    #getCompressionMethodInfo = () => {
-
-        const value = this.getCompressionMethod()
-
-        const info = COMPRESSION_METHOD_MAPPING[value] ? COMPRESSION_METHOD_MAPPING[value] : 'Unknown compression method'
-        return '(' + this.#toHex(value) + ')' + ' - ' + info
+        const value = this.header.getOffsetOfLocalFileHeader()
+        return value + ' (' + this.toHex(value) + ')'
     }
 
-    getLastModFileTime = () => this.#buffer.readUInt16LE(12)
+    getFileNameInfo = () => {
 
-    #getLastModFileTimeInfo = () => {
-
-        const value = this.getLastModFileTime()
-
-        const seconds = value & 0x1F
-        const minutes = (value & 0x7E0) >>> 5
-        const hours = (value & 0xF800) >>> 11
-
-        return '(' + this.#toHex(value) + ')' + ' - ' + hours + ':' + minutes + ':' + seconds
+        return this.header.getFileName()
     }
 
-    getLastModFileDate = () => this.#buffer.readUInt16LE(14)
+    getExtraFieldInfo = () => {
 
-    #getLastModFileDateInfo = () => {
-
-        const value = this.getLastModFileDate()
-
-        const day = value & 0x1F
-        const month = (value & 0x1E0) >>> 5
-        const year = ((value & 0xFE00) >>> 9) + 1980
-
-        return '(' + this.#toHex(value) + ')' + ' - ' + day + '/' + month + '/' + year
+        return this.header.getExtraField().toString('hex')
     }
 
+    getFileCommentInfo = () => {
 
-    getCRC32 = () => this.#buffer.readUInt32LE(16)
-
-    #getCRC32Info = () => {
-
-        const value = this.getCRC32()
-        return '(' + this.#toHex(value) + ')'
+        return this.header.getFileComment()
     }
 
+    getHeaderLengthInfo = () => {
 
-    getCompressedSize = () => this.#buffer.readUInt32LE(20)
-
-    #getCompressedSizeInfo = () => {
-
-        const value = this.getCompressedSize()
-        return '(' + this.#toHex(value) + ')'
+        const value = this.header.getHeaderLength()
+        return value + ' (' + this.toHex(value) + ')'
     }
 
-    getUncompressedSize = () => this.#buffer.readUInt32LE(24)
+    toHex = (value) => {
 
-    #getUncompressedSizeInfo = () => {
-
-        const value = this.getUncompressedSize()
-        return '(' + this.#toHex(value) + ')'
+        return '0x' + value.toString(16).toUpperCase()
     }
 
-    getFileNameLength = () => this.#buffer.readUInt16LE(28)
-
-    #getFileNameLengthInfo = () => {
-
-        const value =  this.getFileNameLength()
-        return '(' + this.#toHex(value) + ')'
-    }
-
-    getExtraFieldLength = () => this.#buffer.readUInt16LE(30)
-
-    #getExtraFieldLengthInfo = () => {
-
-        const value = this.getExtraFieldLength()
-        return '(' + this.#toHex(value) + ')'
-    }
-
-    getFileCommentLength = () => this.#buffer.readUInt16LE(32)
-
-    #getFileCommentLengthInfo = () => {
-
-        const value = this.getFileCommentLength()
-        return '(' + this.#toHex(value) + ')'
-    }
-
-    getDiskNumberStart = () => this.#buffer.readUInt16LE(34)
-
-    #getDiskNumberStartInfo = () => {
-
-        const value = this.getDiskNumberStart()
-        return '(' + this.#toHex(value) + ')'
-    }
-
-    getInternalFileAttributes = () => this.#buffer.readUInt16LE(36)
-
-    #getInternalFileAttributesInfo = () => {
-
-        const value = this.getInternalFileAttributes()
-
-        const internalFileAttributesInfo = []
-
-        for (let i = 0; i < 16; i++) {
-
-            const bit = value & Math.pow(2, i)
-
-            if (CentralHeaderInfo.INTERNAL_ATTRIBUTES_MAPPING[bit] !== undefined)
-                internalFileAttributesInfo.push(CentralHeaderInfo.INTERNAL_ATTRIBUTES_MAPPING[bit])
-        }
-    }
-
-    getExternalFileAttributes = () => this.#buffer.readUInt32LE(38)
-
-    #getExternalFileAttributesInfo = () => {
-
-        const value = this.getExternalFileAttributes()
-        return '(' + this.#toHex(value) + ')'
-    }
-
-
-    getOffsetOfLocalFileHeader = () => this.#buffer.readUInt32LE(42)
-
-    #getOffsetOfLocalFileHeaderInfo = () => {
-
-        const value = this.getOffsetOfLocalFileHeader()
-        return '(' + this.#toHex(value) + ')'
-    }
-
-
-    getFileName = () => this.#buffer.toString('utf8', 46, 46 + this.getFileNameLength())
-
-    getExtraField = () => this.#buffer.toString('hex', 46 + this.getFileNameLength(), 46 + this.getFileNameLength() + this.getExtraFieldLength())
-
-
-    getFileComment = () => this.#buffer.toString('utf8', 46 + this.getFileNameLength() + this.getExtraFieldLength(), 46 + this.getFileNameLength() + this.getExtraFieldLength() + this.getFileCommentLength())
-
-    getHeaderLength = () => CentralHeaderInfo.HEADER_FIXED_LENGTH + this.getFileNameLength() + this.getExtraFieldLength() + this.getFileCommentLength()
-
-    isDirectory = () => this.getCompressedSize() === 0
-
-    isCompressed = () => this.getCompressedSize() !== this.getUncompressedSize()
-
-    #getHeaderLengthInfo = () => '(' + this.#toHex(this.getHeaderLength()) + ')'
-*/
-
-    #toHex = (value) => `0x${value.toString(16).toUpperCase()}`
-
-    /*
     toString = () => {
 
         let str = ''
 
         str += '[ CENTRAL FILE HEADER ]' + EOL
 
-        str += 'Signature                         : ' + this.#getSignatureInfo()                                                                           + EOL
-        str += 'Version made by                   : ' + this.getVersionMadeBy()                      + ' ' + this.#getVersionMadeByInfo()                  + EOL
-        str += 'Version needed to extract         : ' + this.getVersionNeededToExtract()             + ' ' + this.#getVersionNeededToExtractInfo()         + EOL
-        str += 'General purpose bit flag          : ' + this.getGeneralPurposeBitFlag()              + ' ' +                                                 EOL
-        str += 'Compression method                : ' + this.getCompressionMethod()                  + ' ' + this.#getCompressionMethodInfo()              + EOL
-        str += 'Last mod file time                : ' + this.getLastModFileTime()                    + ' ' + this.#getLastModFileTimeInfo()                + EOL
-        str += 'Last mod file date                : ' + this.getLastModFileDate()                    + ' ' + this.#getLastModFileDateInfo()                + EOL
-        str += 'CRC-32                            : ' + this.getCRC32()                              + ' ' + this.#getCRC32Info()                          + EOL
-        str += 'Compressed size                   : ' + this.getCompressedSize()                     + ' ' + this.#getCompressedSizeInfo()                 + EOL
-        str += 'Uncompressed size                 : ' + this.getUncompressedSize()                   + ' ' + this.#getUncompressedSizeInfo()               + EOL
-        str += 'File name length                  : ' + this.getFileNameLength()                     + ' ' + this.#getFileNameLengthInfo()                 + EOL
-        str += 'Extra field length                : ' + this.getExtraFieldLength()                   + ' ' + this.#getExtraFieldLengthInfo()               + EOL
-        str += 'File comment length               : ' + this.getFileCommentLength()                  + ' ' + this.#getFileCommentLengthInfo()              + EOL
-        str += 'Disk number start                 : ' + this.getDiskNumberStart()                    + ' ' + this.#getDiskNumberStartInfo()                + EOL
-        str += 'Internal file attributes          : ' + this.getInternalFileAttributes()             + ' ' +                                                 EOL
-        str += 'External file attributes          : ' + this.getExternalFileAttributes()             + ' ' + this.#getExternalFileAttributesInfo()         + EOL
-        str += 'Relative offset of local header   : ' + this.getOffsetOfLocalFileHeader()            + ' ' + this.#getOffsetOfLocalFileHeaderInfo()        + EOL
-        str += 'File name                         : ' + this.getFileName()                                                                                 + EOL
-        str += 'Extra field                       : ' + this.getExtraField()                                                                               + EOL
-        str += 'File comment                      : ' + this.getFileComment()                                                                              + EOL
+        str += 'Signature                         : ' + this.getSignatureInfo()                              + EOL
+        str += 'Version made by                   : ' + this.getVersionMadeByInfo()                          + EOL
+        str += 'Platform compatiblity             : ' + this.getPlatformCompatibilityInfo()                  + EOL
+        str += 'Version needed to extract         : ' + this.getVersionNeededToExtractInfo()                 + EOL
+        str += 'General purpose bit flag          : ' + this.getGeneralPurposeBitFlagInfo()                  + EOL
+        str += 'Compression method                : ' + this.getCompressionMethodInfo()                      + EOL
+        str += 'Last mod file time                : ' + this.getLastModFileTimeInfo()                        + EOL
+        str += 'Last mod file date                : ' + this.getLastModFileDateInfo()                        + EOL
+        str += 'CRC-32                            : ' + this.getCRC32Info()                                  + EOL
+        str += 'Compressed size                   : ' + this.getCompressedSizeInfo()                         + EOL
+        str += 'Uncompressed size                 : ' + this.getUncompressedSizeInfo()                       + EOL
+        str += 'File name length                  : ' + this.getFileNameLengthInfo()                         + EOL
+        str += 'Extra field length                : ' + this.getExtraFieldLengthInfo()                       + EOL
+        str += 'File comment length               : ' + this.getFileCommentLengthInfo()                      + EOL
+        str += 'Disk number start                 : ' + this.getDiskNumberStartInfo()                        + EOL
+        str += 'Internal file attributes          : ' + this.getInternalFileAttributesInfo()                 + EOL
+        str += 'External file attributes          : ' + this.getExternalFileAttributesInfo()                 + EOL
+        str += 'Relative offset of local header   : ' + this.getOffsetOfLocalFileHeaderInfo()                + EOL
+        str += 'File name                         : ' + this.getFileNameInfo()                               + EOL
+        str += 'Extra field                       : ' + this.getExtraFieldInfo()                             + EOL
+        str += 'File comment                      : ' + this.getFileCommentInfo()                            + EOL
 
-        str += '[ CENTRAL FILE HEADER | LENGTH ' + this.getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL
+        str += '[ CENTRAL FILE HEADER | LENGTH ' + this.getHeaderLengthInfo() + ' ]'                         + EOL
 
         return str
     }
-    */
-
-   toString = () => {
-
-    let str = ''
-
-    str += '[ CENTRAL FILE HEADER ]' + EOL
-
-    str += 'Signature                         : ' + this.#getSignatureInfo()                                                                           + EOL
-    str += 'Version made by                   : ' + this.getVersionMadeBy()                      + ' ' + this.#getVersionMadeByInfo()                  + EOL
-
-    str += '[ CENTRAL FILE HEADER | LENGTH ' + this.getHeaderLength() + ' ' + this.#getHeaderLengthInfo() + ' ]' + EOL
-
-    return str
-}
 }

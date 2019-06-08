@@ -155,12 +155,13 @@ export default class UZip {
     }
 */
 
-    async getInfo() {
+    getInfo = () => {
 
-        const centralHeaders = this.readEntries()
+        const entries = this.readEntries()
         // const localFileHeaders = await this.readLocalFileHeaders()
 
         // return this.zip32Header.toString() + EOL + centralHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
-        return centralHeaders.join(EOL) + EOL
+        const d = entries.reduce((accu, obj) => accu + obj.getInfo() + EOL, '')
+        return d
     }
 }
