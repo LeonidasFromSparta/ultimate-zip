@@ -1,44 +1,124 @@
-import ExtLocalHeader from './ext-local-header'
-import FileContent from './file-content'
+import LocalHeader from './local-header'
+import {createInflateRaw} from 'zlib'
+import CRC32Stream from './crc32-stream'
+import CentralHeaderInfo from './central-header-info';
 
 export default class Entry {
 
-    constructor() {
+    constructor(header, file) {
 
-        this.extLocalHeader = new ExtLocalHeader()
-        this.fileContent = null
+        this.header = header
+        this.file = file
     }
 
-    addByte = (byte) => {
+    extract = async (path) => {
 
-        if (!this.extLocalHeader.isDone()) {
+        const filename = path + '/' + this.header.getFileName()
 
-            this.extLocalHeader.addByte(byte)
-            return
+        if (this.header.isDirectory())
+            return this.file.makeDir(filename)
+
+        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileName().length
+        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileName().length - 1
+
+        if (this.header.isCompressed()) {
+
+            return new Promise(async (resolve) => {
+
+                const readStream = this.file.createFdReadStream(startPos, endPos)
+                const crc32Stream = new CRC32Stream()
+                const writeStream = this.file.createWriteStream(filename)
+
+                readStream.pipe(createInflateRaw()).pipe(crc32Stream).pipe(writeStream)
+
+                crc32Stream.on('end', () => {
+
+                    if (crc32Stream.crc.getValue() !== this.header.getCRC32()) {
+
+                        console.log(this.header.toString())
+                    }
+                })
+
+                writeStream.on('finish', () => resolve())
+            })
         }
 
-        if (this.extLocalHeader.isDone() && this.fileContent === null)
-            this.fileContent = new FileContent(this.extLocalHeader.getCompressedSize())
+        if (!this.header.isCompressed()) {
 
-        if (!this.fileContent.isDone())
-            this.fileContent.addByte(byte)
-    }
+            return new Promise(async (resolve) => {
 
-    isDone = () => {
+                const readStream = this.file.createFdReadStream(startPos, endPos)
+                const crc32Stream = new CRC32Stream()
+                const writeStream = this.file.createWriteStream(filename)
 
-        if (this.extLocalHeader.isDone() && this.fileContent !== null && this.fileContent.isDone())
-            return true
+                readStream.pipe(crc32Stream).pipe(writeStream)
 
-        return false
-    }
+                writeStream.on('finish', () => {
 
-    extract() {
+                    resolve()
+                })
 
-        this.fileContent.extract()
+                crc32Stream.on('end', () => {
+
+                    if (crc32Stream.crc.getValue() !== this.header.getCRC32()) {
+
+                        console.log(this.header.toString())
+                    }
+                })
+            })
+        }
     }
 
     test = () => {
 
-        this.fileContent.test(this.extLocalHeader.getCRC32())
+        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
+        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
+
+        if (!this.header.isCompressed()) {
+
+            return new Promise(async (resolve) => {
+
+                const readStream = this.file.createFdReadStream(startPos, endPos)
+                const crcStream = new CRC32Stream()
+
+                readStream.pipe(crcStream)
+
+                crcStream.on('end', () => {
+
+                    if (crcStream.calculate() !== this.header.getCRC32())
+                        console.log('kekeke')
+
+                    resolve()
+                })
+            })
+        }
+
+        if (this.header.isCompressed()) {
+
+            return new Promise(async (resolve) => {
+
+                const readStream = this.file.createFdReadStream(startPos, endPos)
+                const crcStream = new CRC32Stream()
+
+                readStream.pipe(createInflateRaw()).pipe(crcStream)
+
+                crcStream.on('end', () => {
+
+                    if (crcStream.calculate() !== this.header.getCRC32())
+                        console.log('kekeke')
+
+                    resolve()
+                })
+            })
+        }
+    }
+
+    isDirectory = () => this.header.isDirectory()
+
+    getFilename = () => this.header.getFileName()
+
+    getInfo = () => {
+
+
     }
 }

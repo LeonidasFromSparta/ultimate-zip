@@ -5,23 +5,18 @@ console.log('start unzip: ' + start)
 
 const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/7z-normal-17k-files.zip', {cacheHeaders: true})
 
+
+console.log(zip.getInfo())
+
+
 /*
-zip.getInfo().then((data) => {
-
-    console.log(data)
-
-    zip.testArchive().then((data) => {
-
-    })
-})
-*/
-
 zip.extractArchive('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then(() => {
 
 
     const end = process.hrtime.bigint()
     console.log('unzip time: ' + new Number((end - start)) / 1e+9)
 })
+*/
 
 /*
 zip.extractAll().then(() => {
