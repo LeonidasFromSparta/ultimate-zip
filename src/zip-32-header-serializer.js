@@ -1,5 +1,4 @@
 import Zip32Header from './zip-32-header'
-import Zip32HeaderInfo from './zip-32-header-info'
 
 export default class Zip32HeaderSerializer {
 
@@ -22,18 +21,11 @@ export default class Zip32HeaderSerializer {
         const zip32Header = new Zip32Header()
 
         zip32Header.setNumberOfThisDisk(buffer.readUInt16LE(offset + 4))
-
         zip32Header.setNumberOfDiskWhereCentralDirectoriesStart(buffer.readUInt16LE(offset + 6))
-
         zip32Header.setNumberOfCentralDirectoriesOnThisDisk(buffer.readUInt16LE(offset + 8))
-
         zip32Header.setNumberOfCentralDirectories(buffer.readUInt16LE(offset + 10))
-
         zip32Header.setSizeOfCentralDirectories(buffer.readUInt32LE(offset + 12))
-
         zip32Header.setCentralDirectoriesOffsetWithStartingDisk(buffer.readUInt32LE(offset + 16))
-
-        // console.log(new Zip32HeaderInfo(zip32Header).toString())
 
         const zipCommentLength = buffer.readUInt16LE(offset + 20)
 

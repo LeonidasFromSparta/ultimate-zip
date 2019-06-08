@@ -2,9 +2,9 @@ import CentralHeaderSerializer from './central-header-serializer'
 
 export default class CentralHeader {
 
-    static HEADER_FIXED_LENGTH = 29
+    static HEADER_FIXED_LENGTH = 34
 
-    buffer = Buffer.allocUnsafe(CentralHeader.HEADER_FIXED_LENGTH)
+    buffer = Buffer.alloc(CentralHeader.HEADER_FIXED_LENGTH)
     fileName = ''
     extraField = null
 
@@ -38,17 +38,17 @@ export default class CentralHeader {
     getUncompressedSize = () => this.buffer.readUInt32LE(18)
     setUncompressedSize = (value) => this.buffer.writeUInt32LE(value, 18)
 
-    getDiskNumberStart = () => this.buffer.readUInt8(22)
-    setDiskNumberStart = (value) => this.buffer.writeUInt8(value, 22)
+    getDiskNumberStart = () => this.buffer.readUInt16LE(22)
+    setDiskNumberStart = (value) => this.buffer.writeUInt16LE(value, 22)
 
-    getInternalFileAttributes = () => this.buffer.readUInt8(23)
-    setInternalFileAttributes = (value) => this.buffer.writeUInt8(value, 23)
+    getInternalFileAttributes = () => this.buffer.readUInt16LE(24)
+    setInternalFileAttributes = (value) => this.buffer.writeUInt16LE(value, 24)
 
-    getExternalFileAttributes = () => this.buffer.readUInt8(24)
-    setExternalFileAttributes = (value) => this.buffer.writeUInt8(value, 24)
+    getExternalFileAttributes = () => this.buffer.readUInt32LE(26)
+    setExternalFileAttributes = (value) => this.buffer.writeUInt32LE(value, 26)
 
-    getOffsetOfLocalFileHeader = () => this.buffer.readUInt32LE(25)
-    setOffsetOfLocalFileHeader = (value) => this.buffer.writeUInt32LE(value, 25)
+    getOffsetOfLocalFileHeader = () => this.buffer.readUInt32LE(30)
+    setOffsetOfLocalFileHeader = (value) => this.buffer.writeUInt32LE(value, 30)
 
     getFileName = () => this.fileName
     setFileName = (value) => this.fileName = value

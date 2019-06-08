@@ -18,10 +18,6 @@ export default class UZip {
         const zip32Bytes = this.file.readZip32HeaderBytesSync(Zip32HeaderSerializer.HEADER_MAX_LENGTH)
         this.zip32Header = Zip32HeaderSerializer.deserealize(zip32Bytes)
 
-        console.log(new Zip32HeaderInfo(this.zip32Header).toString())
-
-        debugger
-
         this.options = options
     }
 
@@ -86,7 +82,7 @@ export default class UZip {
         if (this.entries !== null)
             return this.entries
 
-        const centralDirectories = this.zip32Header.getNumberOfCentralDirectories()
+        // const centralDirectories = this.zip32Header.getNumberOfCentralDirectories()
 
         let startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
 
@@ -94,7 +90,8 @@ export default class UZip {
 
         this.file.openFile()
 
-        for (let i=0; i < centralDirectories; i++) {
+        // for (let i=0; i < centralDirectories; i++) {
+        for (let i=0; i < 10; i++) {
 
             const buffer = this.file.readBytesSync(startPos, CentralHeaderSeserializer.HEADER_MAX_LENGTH)
             const centralHeader = CentralHeaderSeserializer.deserealize(buffer)

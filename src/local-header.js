@@ -1,5 +1,5 @@
 import {EOL} from 'os'
-import {VERSION, COMPRESSION_METHOD} from './mappings'
+import {VERSION, COMPRESSION_METHOD} from './contants'
 
 export default class LocalHeader {
 

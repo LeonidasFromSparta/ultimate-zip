@@ -1,6 +1,6 @@
 import {EOL} from 'os'
 import CentralHeaderSerializer from './central-header-serializer'
-import * as constants from './mappings'
+import * as constants from './contants'
 
 export default class CentralHeaderInfo {
 
@@ -163,29 +163,42 @@ export default class CentralHeaderInfo {
 
         const value = this.header.getExternalFileAttributes()
 
-        if (this.header.getPlatformCompatibility() === constants.MSDOS) {
+        let info = ''
 
-            const bitFlagInfo = []
+        // 0x01 - readonly
+        info += ((value & 0x01) === 0x01) ? 'R' : ''
+        // 0x02 - hidden
+        info += ((value & 0x02) === 0x02) ? 'H' : ''
+        // 0x04 - system
+        info += ((value & 0x04) === 0x04) ? 'S' : ''
+        // 0x10 - directory
+        info += ((value & 0x10) === 0x10) ? 'D' : ''
+        // 0x20 - archive
+        info += ((value & 0x20) === 0x20) ? 'A' : ''
 
-            if ((value & 1) === 1)
-                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[1])
+        if (this.header.getPlatformCompatibility() === constants.UNIX) {
 
-            if ((value & 2) === 2)
-                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[2])
-
-            if ((value & 4) === 4)
-                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[4])
-
-            if ((value & 32) === 32)
-                bitFlagInfo.push(constants.MSDOS_FILE_ATTRIBUTES[32])
-
-            let bitInfo = ''
-
-            for (let i=0; i < bitFlagInfo.length; i++)
-                bitInfo += ' '.repeat(35) + ' - ' + bitFlagInfo[i]
-
-           return value + ' (' + this.toHex(value) + ')' + EOL + bitInfo
+            // 0x1000000 - Rwxrwxrwx
+            info += ((value & 0x1000000) === 0x1000000) ? 'r' : '-'
+            // 0x0800000 - rWxrwxrwx
+            info += ((value & 0x0800000) === 0x0800000) ? 'w' : '-'
+            // 0x0400000 - rwXrwxrwx
+            info += ((value & 0x0400000) === 0x0400000) ? 'x' : '-'
+            // 0x0200000 - rwxRwxrwx
+            info += ((value & 0x0200000) === 0x0200000) ? 'r' : '-'
+            // 0x0100000 - rwxrWxrwx
+            info += ((value & 0x0100000) === 0x0100000) ? 'w' : '-'
+            // 0x0080000 - rwxrwXrwx
+            info += ((value & 0x0080000) === 0x0080000) ? 'x' : '-'
+            // 0x0040000 - rwxrwxRwx
+            info += ((value & 0x0040000) === 0x0040000) ? 'r' : '-'
+            // 0x0020000 - rwxrwxrWx
+            info += ((value & 0x0020000) === 0x0020000) ? 'w' : '-'
+            // 0x0010000 - rwxrwxrwX
+            info += ((value & 0x0010000) === 0x0010000) ? 'x' : '-'
         }
+
+        return '(' + this.toHex(value) + ') ' + info
     }
 
     getOffsetOfLocalFileHeaderInfo = () => {

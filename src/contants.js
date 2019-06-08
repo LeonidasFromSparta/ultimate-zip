@@ -69,6 +69,7 @@ export const PLATFORM = {
 }
 
 export const MSDOS = 0
+export const UNIX = 3
 
 export const GENERAL_BIT_FLAG = {
 
@@ -116,13 +117,6 @@ export const INTERNAL_ATTRIBUTES = {
     4: '(0x0004): Reserved for use by PKWARE',
 }
 
-export const MSDOS_FILE_ATTRIBUTES = {
-
-    1:  '(0x0001) Read only file',
-    2:  '(0x0002) Hidden file',
-    4:  '(0x0004) System file',
-    32: '(0x0020) Archive file'
-}
 /*
 export const ZIP_FORMAT_VERSIONS = {
 
