@@ -18,6 +18,10 @@ export default class UZip {
         const zip32Bytes = this.file.readZip32HeaderBytesSync(Zip32HeaderSerializer.HEADER_MAX_LENGTH)
         this.zip32Header = Zip32HeaderSerializer.deserealize(zip32Bytes)
 
+        console.log(new Zip32HeaderInfo(this.zip32Header).toString())
+
+        debugger
+
         this.options = options
     }
 

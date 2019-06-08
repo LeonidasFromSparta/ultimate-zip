@@ -1,5 +1,5 @@
 import {EOL} from 'os'
-import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING, PLATFORM_MAPPING} from './mappings'
+import {VERSION_MAPPING, COMPRESSION_METHOD_MAPPING, PLATFORM_MAPPING} from '../mappings'
 
 export default class CentralHeader {
 

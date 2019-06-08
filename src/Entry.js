@@ -1,6 +1,7 @@
 import LocalHeader from './local-header'
 import {createInflateRaw} from 'zlib'
-import CRC32Stream from './crc32-stream'
+import CRC32PassThroughStream from './crc32-passthrough-stream'
+import CRC32WriteableStream from './crc32-writeable-stream'
 import CentralHeaderInfo from './central-header-info'
 
 export default class Entry {
@@ -26,14 +27,14 @@ export default class Entry {
             return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32Stream = new CRC32Stream()
+                const crc32PassThroughStream = new CRC32PassThroughStream()
                 const writeStream = this.file.createWriteStream(filename)
 
-                readStream.pipe(createInflateRaw()).pipe(crc32Stream).pipe(writeStream)
+                readStream.pipe(createInflateRaw()).pipe(crc32PassThroughStream).pipe(writeStream)
 
-                crc32Stream.on('end', () => {
+                crc32PassThroughStream.on('end', () => {
 
-                    if (crc32Stream.crc.getValue() !== this.header.getCRC32()) {
+                    if (crc32PassThroughStream.getValue() !== this.header.getCRC32()) {
 
                         console.log(this.header.toString())
                     }
@@ -48,19 +49,19 @@ export default class Entry {
             return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32Stream = new CRC32Stream()
+                const crc32PassThroughStream = new CRC32PassThroughStream()
                 const writeStream = this.file.createWriteStream(filename)
 
-                readStream.pipe(crc32Stream).pipe(writeStream)
+                readStream.pipe(crc32PassThroughStream).pipe(writeStream)
 
                 writeStream.on('finish', () => {
 
                     resolve()
                 })
 
-                crc32Stream.on('end', () => {
+                crc32PassThroughStream.on('end', () => {
 
-                    if (crc32Stream.crc.getValue() !== this.header.getCRC32()) {
+                    if (crc32PassThroughStream.getValue() !== this.header.getCRC32()) {
 
                         console.log(this.header.toString())
                     }
@@ -79,13 +80,13 @@ export default class Entry {
             return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crcStream = new CRC32Stream()
+                const crc32WriteableStream = new CRC32WriteableStream()
 
-                readStream.pipe(crcStream)
+                readStream.pipe(crc32WriteableStream)
 
-                crcStream.on('end', () => {
+                crc32WriteableStream.on('finish', () => {
 
-                    if (crcStream.calculate() !== this.header.getCRC32())
+                    if (crc32WriteableStream.getValue() !== this.header.getCRC32())
                         console.log('kekeke')
 
                     resolve()
@@ -98,13 +99,13 @@ export default class Entry {
             return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crcStream = new CRC32Stream()
+                const crc32WriteableStream = new CRC32WriteableStream()
 
-                readStream.pipe(createInflateRaw()).pipe(crcStream)
+                readStream.pipe(createInflateRaw()).pipe(crc32WriteableStream)
 
-                crcStream.on('end', () => {
+                crc32WriteableStream.on('finsih', () => {
 
-                    if (crcStream.calculate() !== this.header.getCRC32())
+                    if (crc32WriteableStream.getValue() !== this.header.getCRC32())
                         console.log('kekeke')
 
                     resolve()
