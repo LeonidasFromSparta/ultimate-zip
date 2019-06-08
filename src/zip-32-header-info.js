@@ -10,7 +10,7 @@ export default class Zip32HeaderInfo {
 
     getSignatureInfo = () => {
 
-        return '(' + this.toHex(Zip32HeaderSerializer.SIGNATURE) + ')'
+        return this.toHex(Zip32HeaderSerializer.SIGNATURE)
     }
 
     getNumberOfThisDiskInfo = () => {

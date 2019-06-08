@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import Zip32Header from './../src/zip-32-header'
 import Zip32HeaderSerializer from './../src/zip-32-header-serializer'
 
-describe('Testing zip 32 header created on windows', () => {
+describe('Testing zip 32 header', () => {
 
     it('should assert NumberOfThisDisk getter/setter', () => {
 

@@ -2,11 +2,11 @@ import CentralHeaderSerializer from './central-header-serializer'
 
 export default class CentralHeader {
 
-    static HEADER_FIXED_LENGTH = 34
+    static HEADER_FIXED_LENGTH = 36
 
     buffer = Buffer.alloc(CentralHeader.HEADER_FIXED_LENGTH)
     fileName = ''
-    extraField = null
+    extraField = Buffer.alloc(0)
 
     getVersionMadeBy = () => this.buffer.readUInt8(0)
     setVersionMadeBy = (value) => this.buffer.writeUInt8(value, 0)
@@ -17,38 +17,41 @@ export default class CentralHeader {
     getVersionNeededToExtract = () => this.buffer.readUInt8(2)
     setVersionNeededToExtract = (value) => this.buffer.writeUInt8(value, 2)
 
-    getGeneralPurposeBitFlag = () => this.buffer.readUInt16LE(3)
-    setGeneralPurposeBitFlag = (value) => this.buffer.writeUInt16LE(value, 3)
+    getPlatformNeededToExtract = () => this.buffer.readUInt8(3)
+    setPlatformNeededToExtract = (value) => this.buffer.writeUInt8(value, 3)
 
-    getCompressionMethod = () => this.buffer.readUInt8(5)
-    setCompressionMethod = (value) => this.buffer.writeUInt8(value, 5)
+    getGeneralPurposeBitFlag = () => this.buffer.readUInt16LE(4)
+    setGeneralPurposeBitFlag = (value) => this.buffer.writeUInt16LE(value, 4)
 
-    getLastModFileTime = () => this.buffer.readUInt16LE(6)
-    setLastModFileTime = (value) => this.buffer.writeUInt16LE(value, 6)
+    getCompressionMethod = () => this.buffer.readUInt8(6)
+    setCompressionMethod = (value) => this.buffer.writeUInt8(value, 6)
 
-    getLastModFileDate = () => this.buffer.readUInt16LE(8)
-    setLastModFileDate = (value) => this.buffer.writeUInt16LE(value, 8)
+    getLastModFileTime = () => this.buffer.readUInt16LE(8)
+    setLastModFileTime = (value) => this.buffer.writeUInt16LE(value, 8)
 
-    getCRC32 = () => this.buffer.readUInt32LE(10)
-    setCRC32 = (value) => this.buffer.writeUInt32LE(value, 10)
+    getLastModFileDate = () => this.buffer.readUInt16LE(10)
+    setLastModFileDate = (value) => this.buffer.writeUInt16LE(value, 10)
 
-    getCompressedSize = () => this.buffer.readUInt32LE(14)
-    setCompressedSize = (value) => this.buffer.writeUInt32LE(value, 14)
+    getCRC32 = () => this.buffer.readUInt32LE(12)
+    setCRC32 = (value) => this.buffer.writeUInt32LE(value, 12)
 
-    getUncompressedSize = () => this.buffer.readUInt32LE(18)
-    setUncompressedSize = (value) => this.buffer.writeUInt32LE(value, 18)
+    getCompressedSize = () => this.buffer.readUInt32LE(16)
+    setCompressedSize = (value) => this.buffer.writeUInt32LE(value, 16)
 
-    getDiskNumberStart = () => this.buffer.readUInt16LE(22)
-    setDiskNumberStart = (value) => this.buffer.writeUInt16LE(value, 22)
+    getUncompressedSize = () => this.buffer.readUInt32LE(20)
+    setUncompressedSize = (value) => this.buffer.writeUInt32LE(value, 20)
 
-    getInternalFileAttributes = () => this.buffer.readUInt16LE(24)
-    setInternalFileAttributes = (value) => this.buffer.writeUInt16LE(value, 24)
+    getDiskNumberStart = () => this.buffer.readUInt16LE(24)
+    setDiskNumberStart = (value) => this.buffer.writeUInt16LE(value, 24)
 
-    getExternalFileAttributes = () => this.buffer.readUInt32LE(26)
-    setExternalFileAttributes = (value) => this.buffer.writeUInt32LE(value, 26)
+    getInternalFileAttributes = () => this.buffer.readUInt16LE(26)
+    setInternalFileAttributes = (value) => this.buffer.writeUInt16LE(value, 26)
 
-    getOffsetOfLocalFileHeader = () => this.buffer.readUInt32LE(30)
-    setOffsetOfLocalFileHeader = (value) => this.buffer.writeUInt32LE(value, 30)
+    getExternalFileAttributes = () => this.buffer.readUInt32LE(28)
+    setExternalFileAttributes = (value) => this.buffer.writeUInt32LE(value, 28)
+
+    getOffsetOfLocalFileHeader = () => this.buffer.readUInt32LE(32)
+    setOffsetOfLocalFileHeader = (value) => this.buffer.writeUInt32LE(value, 32)
 
     getFileName = () => this.fileName
     setFileName = (value) => this.fileName = value

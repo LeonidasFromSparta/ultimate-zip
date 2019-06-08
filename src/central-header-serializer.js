@@ -18,6 +18,7 @@ export default class CentralHeaderSeserializer {
         centralHeader.setVersionMadeBy(buffer.readUInt8(4))
         centralHeader.setPlatformCompatibility(buffer.readUInt8(5))
         centralHeader.setVersionNeededToExtract(buffer.readUInt8(6))
+        centralHeader.setPlatformNeededToExtract(buffer.readUInt8(7))
         centralHeader.setGeneralPurposeBitFlag(buffer.readUInt8(8))
         centralHeader.setCompressionMethod(buffer.readUInt16LE(10))
         centralHeader.setLastModFileTime(buffer.readUInt16LE(12))
