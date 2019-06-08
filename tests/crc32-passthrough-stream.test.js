@@ -1,12 +1,12 @@
 import {Should} from 'chai'
 import {Readable} from 'stream'
-import CRC32Stream from '../src/crc32-stream'
+import CRC32PassThroughStream from '../src/crc32-passthrough-stream'
 
 const should = Should()
 
-describe('Testing crc32 transform stream', () => {
+describe('Testing crc32 passthrough stream', () => {
 
-    it('should assert crc32 transform stream', () => {
+    it('should assert crc32 passthrough stream', () => {
 
         let txt = ''
 
@@ -23,10 +23,10 @@ describe('Testing crc32 transform stream', () => {
             readable.push(Buffer.from(txt))
             readable.push(null)
 
-            const crc32Stream = new CRC32Stream()
-            readable.pipe(crc32Stream)
+            const crc32PassThroughStream = new CRC32PassThroughStream()
+            readable.pipe(crc32PassThroughStream)
 
-            crc32Stream.on('end', () => resolve(crc32Stream.getValue()))
+            crc32PassThroughStream.on('end', () => resolve(crc32PassThroughStream.getValue()))
         })
 
         promise.then((crc32) => crc32.should.equal(0x94699776))

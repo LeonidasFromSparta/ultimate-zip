@@ -15,12 +15,8 @@ export default class UZip {
 
         this.file = new File(path)
 
-        debugger
-
         const zip32Bytes = this.file.readZip32HeaderBytesSync(Zip32HeaderSerializer.HEADER_MAX_LENGTH)
         this.zip32Header = Zip32HeaderSerializer.deserealize(zip32Bytes)
-
-        console.log(new Zip32HeaderInfo(this.zip32Header).toString())
 
         this.options = options
     }
@@ -164,7 +160,7 @@ export default class UZip {
         // const localFileHeaders = await this.readLocalFileHeaders()
 
         // return this.zip32Header.toString() + EOL + centralHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
-        const d = entries.reduce((accu, obj) => accu + obj.getInfo() + EOL, '')
+        const d = new Zip32HeaderInfo(this.zip32Header).toString() + EOL + entries.reduce((accu, obj) => accu + obj.getInfo() + EOL, '')
         return d
     }
 }
