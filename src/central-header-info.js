@@ -11,7 +11,7 @@ export default class CentralHeaderInfo {
 
     getSignatureInfo = () => {
 
-        return '(' + this.toHex(CentralHeaderSerializer.SIGNATURE) + ')'
+        return this.toHex(CentralHeaderSerializer.SIGNATURE)
     }
 
     getVersionMadeByInfo = () => {
@@ -95,37 +95,37 @@ export default class CentralHeaderInfo {
     getCRC32Info = () => {
 
         const value = this.header.getCRC32()
-        return value + ' (' + this.toHex(value) + ')'
+        return this.toHex(value)
     }
 
     getCompressedSizeInfo = () => {
 
         const value = this.header.getCompressedSize()
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' bytes'
     }
 
     getUncompressedSizeInfo = () => {
 
         const value = this.header.getUncompressedSize()
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' bytes'
     }
 
     getFileNameLengthInfo = () => {
 
         const value =  this.header.getFileName().length
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' characters'
     }
 
     getExtraFieldLengthInfo = () => {
 
         const value = this.header.getExtraField().length
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' bytes'
     }
 
     getFileCommentLengthInfo = () => {
 
         const value = this.header.getFileComment().length
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' characters'
     }
 
     getDiskNumberStartInfo = () => {
@@ -137,26 +137,7 @@ export default class CentralHeaderInfo {
     getInternalFileAttributesInfo = () => {
 
         const value = this.header.getInternalFileAttributes()
-        const bitFlagInfo = []
-
-        if ((value & 1) === 0)
-            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[0])
-
-        if ((value & 1) === 1)
-            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[1])
-
-        if ((value & 2) === 2)
-            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[2])
-
-        if ((value & 4) === 4)
-            bitFlagInfo.push(constants.INTERNAL_ATTRIBUTES[4])
-
-        let bitInfo = ''
-
-        for (let i=0; i < bitFlagInfo.length; i++)
-            bitInfo += ' '.repeat(35) + ' - ' + bitFlagInfo[i]
-
-       return value + ' (' + this.toHex(value) + ')' + EOL + bitInfo
+        return this.toHex(value)
     }
 
     getExternalFileAttributesInfo = () => {
@@ -204,7 +185,7 @@ export default class CentralHeaderInfo {
     getOffsetOfLocalFileHeaderInfo = () => {
 
         const value = this.header.getOffsetOfLocalFileHeader()
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' bytes'
     }
 
     getFileNameInfo = () => {
@@ -225,7 +206,7 @@ export default class CentralHeaderInfo {
     getHeaderLengthInfo = () => {
 
         const value = this.header.getHeaderLength()
-        return value + ' (' + this.toHex(value) + ')'
+        return value + ' bytes'
     }
 
     toHex = (value) => {
@@ -261,7 +242,7 @@ export default class CentralHeaderInfo {
         str += 'Extra field                       : ' + this.getExtraFieldInfo()                             + EOL
         str += 'File comment                      : ' + this.getFileCommentInfo()                            + EOL
 
-        str += '[ CENTRAL FILE HEADER | LENGTH ' + this.getHeaderLengthInfo() + ' ]'                         + EOL
+        str += '[ CENTRAL FILE HEADER | Length ' + this.getHeaderLengthInfo() + ' ]'                         + EOL
 
         return str
     }

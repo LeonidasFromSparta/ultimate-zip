@@ -1,7 +1,7 @@
 {
-    "name": "magnus-server",
+    "name": "ultimate-zip",
     "version": "1.0.0",
-    "description": "",
+    "description": "Unzip and zip with ease!",
     "scripts": {
         "lint": "eslint src",
         "compile": "babel src -d build",
