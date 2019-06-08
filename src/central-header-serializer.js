@@ -1,17 +1,17 @@
 import CentralHeader from './central-header'
 
-export default class CentralHeaderDeserializer {
+export default class CentralHeaderSeserializer {
 
     static SIGNATURE = 0x02014b50
     static HEADER_FIXED_LENGTH = 46
-    static HEADER_MAX_LENGTH = CentralHeaderDeserializer.HEADER_FIXED_LENGTH + 65536 + 65536 + 65536
+    static HEADER_MAX_LENGTH = CentralHeaderSeserializer.HEADER_FIXED_LENGTH + 65536 + 65536 + 65536
 
     static deserealize = (buffer) => {
 
         const signature = buffer.readUInt32LE(0)
 
-        if (CentralHeaderDeserializer.SIGNATURE !== signature)
-            throw `Central file header signature could not be verified: expected ${CentralHeaderDeserializer.SIGNATURE}, actual ${signature}`
+        if (CentralHeaderSeserializer.SIGNATURE !== signature)
+            throw `Central file header signature could not be verified: expected ${CentralHeaderSeserializer.SIGNATURE}, actual ${signature}`
 
         const centralHeader = new CentralHeader()
 
@@ -39,8 +39,6 @@ export default class CentralHeaderDeserializer {
 
         if (fileCommentLength > 0)
             centralHeader.setFileComment(buffer.toString('utf8', 46 + fileNameLength + extraFieldLength, 46 + fileNameLength + extraFieldLength + fileCommentLength))
-
-        centralHeader.setHeaderLength(CentralHeaderDeserializer.HEADER_FIXED_LENGTH + fileNameLength + extraFieldLength + fileCommentLength)
 
         return centralHeader
     }

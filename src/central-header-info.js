@@ -4,10 +4,6 @@ import * as constants from './mappings'
 
 export default class CentralHeaderInfo {
 
-    static HEADER_FIXED_LENGTH = 46
-    static HEADER_MAX_LENGTH = CentralHeaderInfo.HEADER_FIXED_LENGTH + 65536 + 65536 + 65536
-    static SIGNATURE = 0x02014b50
-
     constructor(header) {
 
         this.header = header
@@ -228,7 +224,7 @@ export default class CentralHeaderInfo {
 
         let str = ''
 
-        str += '[ CENTRAL FILE HEADER ]' + EOL
+        str += '[ CENTRAL FILE HEADER ]'                                                                     + EOL
 
         str += 'Signature                         : ' + this.getSignatureInfo()                              + EOL
         str += 'Version made by                   : ' + this.getVersionMadeByInfo()                          + EOL

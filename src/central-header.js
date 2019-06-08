@@ -1,3 +1,5 @@
+import CentralHeaderSerializer from './central-header-serializer'
+
 export default class CentralHeader {
 
     static HEADER_FIXED_LENGTH = 29
@@ -57,8 +59,7 @@ export default class CentralHeader {
     getFileComment = () => this.fileComment !== undefined ? this.fileComment : ''
     setFileComment = (value) => this.fileComment = value
 
-    getHeaderLength = () => this.size
-    setHeaderLength = (value) => this.size = value
+    getHeaderLength = () => CentralHeaderSerializer.HEADER_FIXED_LENGTH + this.getFileName().length + this.getExtraField().length + this.getFileComment().length
 
     isDirectory = () => this.getCompressedSize() === 0
 

@@ -27,6 +27,21 @@ export default class File {
         return buffer
     }
 
+    readZip32HeaderBytesSync = (length) => {
+
+        const fd = fs.openSync(this.path, 'r')
+        const stats = fs.fstatSync(fd)
+
+        const numBytesToRead = stats.size < length ? stats.size : length
+        const buffer = Buffer.allocUnsafe(numBytesToRead)
+        const position = numBytesToRead < length ? 0 : stats.size - length
+
+        fs.readSync(Number(fd), buffer, 0, numBytesToRead, position)
+        fs.closeSync(fd)
+
+        return buffer
+    }
+
     readBytesSync(pos, length) {
 
         const buffer = Buffer.allocUnsafe(length)

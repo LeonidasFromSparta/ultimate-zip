@@ -1,9 +1,10 @@
 import {EOL} from 'os'
 import path from 'path'
-import Zip32Header from './zip-32-header'
 import File from './file'
 import Entry from './entry'
-import CentralHeaderDeserializer from './central-header-serializer'
+import CentralHeaderSeserializer from './central-header-serializer'
+import Zip32HeaderSerializer from './zip-32-header-serializer'
+import Zip32HeaderInfo from './zip-32-header-info'
 
 export default class UZip {
 
@@ -14,12 +15,14 @@ export default class UZip {
 
         this.file = new File(path)
 
-        const lastBytesBuf = this.file.readLastBytes(Zip32Header.HEADER_FIXED_LENGTH + Zip32Header.MAX_ZIP_COMMENT_LENGTH)
-        const eocdr32Offset = Zip32Header.locateHeaderStartPos(lastBytesBuf)
+        debugger
+
+        const zip32Bytes = this.file.readZip32HeaderBytesSync(Zip32HeaderSerializer.HEADER_MAX_LENGTH)
+        this.zip32Header = Zip32HeaderSerializer.deserealize(zip32Bytes)
+
+        console.log(new Zip32HeaderInfo(this.zip32Header).toString())
 
         this.options = options
-        this.zip32Header = new Zip32Header(lastBytesBuf.slice(eocdr32Offset))
-        this.zip32Header.checkSignature()
     }
 
     testArchive = async () => {
@@ -93,8 +96,8 @@ export default class UZip {
 
         for (let i=0; i < centralDirectories; i++) {
 
-            const buffer = this.file.readBytesSync(startPos, CentralHeaderDeserializer.HEADER_MAX_LENGTH)
-            const centralHeader = CentralHeaderDeserializer.deserealize(buffer)
+            const buffer = this.file.readBytesSync(startPos, CentralHeaderSeserializer.HEADER_MAX_LENGTH)
+            const centralHeader = CentralHeaderSeserializer.deserealize(buffer)
 
             entries.push(new Entry(centralHeader, this.file))
             startPos += centralHeader.getHeaderLength()
