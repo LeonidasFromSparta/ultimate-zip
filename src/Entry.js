@@ -129,7 +129,7 @@ export default class Entry {
         const readStream = this.file.createReadStream(start, end, highWaterMark)
         const writeStream = new LocalHeaderWriteable()
 
-        const promise = new Promise(async (resolve) => {
+        const promise = new Promise((resolve) => {
 
             readStream.pipe(writeStream)
             writeStream.on('finish', () => resolve(writeStream.getHeader()))

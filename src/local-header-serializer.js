@@ -47,26 +47,26 @@ export default class LocalHeaderSerializer {
         if (LocalHeaderSerializer.SIGNATURE !== signature)
             throw `Local Header signature could not be verified: expected ${LocalHeaderSerializer.SIGNATURE}, actual ${signature}`
 
-        const localHeader = new LocalHeader()
+        const header = new LocalHeader()
 
-        localHeader.setVersionNeededToExtract(this.fixedBuffer.readUInt8(4))
-        localHeader.setPlatformNeededToExtract(this.fixedBuffer.readUInt8(5))
-        localHeader.setGeneralPurposeBitFlag(this.fixedBuffer.readUInt16LE(6))
-        localHeader.setCompressionMethod(this.fixedBuffer.readUInt16LE(8))
-        localHeader.setLastModFileTime(this.fixedBuffer.readUInt16LE(10))
-        localHeader.setLastModFileDate(this.fixedBuffer.readUInt16LE(12))
-        localHeader.setCRC32(this.fixedBuffer.readUInt32LE(14))
-        localHeader.setCompressedSize(this.fixedBuffer.readUInt32LE(18))
-        localHeader.setUncompressedSize(this.fixedBuffer.readUInt32LE(22))
+        header.setVersionNeededToExtract(this.fixedBuffer.readUInt8(4))
+        header.setPlatformNeededToExtract(this.fixedBuffer.readUInt8(5))
+        header.setGeneralPurposeBitFlag(this.fixedBuffer.readUInt16LE(6))
+        header.setCompressionMethod(this.fixedBuffer.readUInt16LE(8))
+        header.setLastModFileTime(this.fixedBuffer.readUInt16LE(10))
+        header.setLastModFileDate(this.fixedBuffer.readUInt16LE(12))
+        header.setCRC32(this.fixedBuffer.readUInt32LE(14))
+        header.setCompressedSize(this.fixedBuffer.readUInt32LE(18))
+        header.setUncompressedSize(this.fixedBuffer.readUInt32LE(22))
 
         const fileNameLength = this.fixedBuffer.readUInt16LE(26)
-        localHeader.setFileName(this.extraBuffer.toString('utf8', 0, fileNameLength))
+        header.setFileName(this.extraBuffer.toString('utf8', 0, fileNameLength))
 
         const extraFieldLength = this.fixedBuffer.readUInt16LE(28)
 
         if (extraFieldLength > 0)
-            localHeader.setExtraField(this.extraBuffer.slice(fileNameLength, fileNameLength + extraFieldLength))
+            header.setExtraField(this.extraBuffer.slice(fileNameLength, fileNameLength + extraFieldLength))
 
-        return localHeader
+        return header
     }
 }

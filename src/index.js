@@ -8,10 +8,18 @@ const zip = new UZip('./samples/7z-windows-normal.zip', {cacheHeaders: true})
 
 // console.log(zip.getInfo())
 
+zip._readEntries().then(async (data) => {
+
+    console.log(data)
+    debugger
+})
+
+/*
 zip.getEntries().then(async (data) => {
 
     await data[0].getLocalHeader()
 })
+*/
 
 /*
 zip.extractArchive('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then(() => {

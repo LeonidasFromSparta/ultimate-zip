@@ -3,13 +3,13 @@ import LocalHeaderSerializer from './local-header-serializer'
 
 export default class LocalHeaderWriteable extends Writable {
 
-    localHeaderDeserializer = new LocalHeaderSerializer()
+    deserializer = new LocalHeaderSerializer()
 
     _write = (chunk, encoding, callback) => {
 
-        this.localHeaderDeserializer.update(chunk)
+        this.deserializer.update(chunk)
 
-        if (this.localHeaderDeserializer.isDone())
+        if (this.deserializer.isDone())
             this.end()
 
         callback()
@@ -17,6 +17,6 @@ export default class LocalHeaderWriteable extends Writable {
 
     getHeader = () => {
 
-        return this.localHeaderDeserializer.deserialize()
+        return this.deserializer.deserialize()
     }
 }

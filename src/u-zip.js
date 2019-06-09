@@ -1,10 +1,10 @@
 import {EOL} from 'os'
 import path from 'path'
 import File from './file'
-import Entry from './entry'
-import CentralHeaderSeserializer from './central-header-serializer'
+// import Entry from './entry'
 import Zip32HeaderSerializer from './zip-32-header-serializer'
 import Zip32HeaderInfo from './zip-32-header-info'
+import CentralHeaderDuplex from './central-header-duplex'
 
 export default class UZip {
 
@@ -23,7 +23,7 @@ export default class UZip {
 
     testArchive = async () => {
 
-        const entries = this.readEntries()
+        const entries = this._readEntries()
 
         this.file.openFile()
 
@@ -38,7 +38,7 @@ export default class UZip {
 
     extractArchive = async (path) => {
 
-        const entries = this.readEntries()
+        const entries = this._readEntries()
 
         this.file.openFile()
 
@@ -50,7 +50,7 @@ export default class UZip {
 
     extractByRegex = async (regex, path) => {
 
-        const entries = this.readEntries().filter((obj) => obj.getFilename().test(regex))
+        const entries = this._readEntries().filter((obj) => obj.getFilename().test(regex))
 
         this.file.openFile()
 
@@ -62,7 +62,7 @@ export default class UZip {
 
     extractFile = async (filename, path) => {
 
-        const entries = this.readEntries().filter((obj) => obj.getFilename() === filename)
+        const entries = this._readEntries().filter((obj) => obj.getFilename() === filename)
 
         this.file.openFile()
 
@@ -74,9 +74,10 @@ export default class UZip {
 
     getEntries = async () => {
 
-        return this.readEntries()
+        return this._readEntries()
     }
 
+    /*
     readEntries = () => {
 
         if (this.entries !== null)
@@ -107,10 +108,43 @@ export default class UZip {
 
         return entries
     }
+    */
+
+    _readEntries = async () => {
+
+        if (this.entries !== null)
+            return this.entries
+
+        const start = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
+        // const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + LocalHeaderSerializer.HEADER_MAX_LENGTH - 1 // -1 because inclusive
+        const highWaterMark = 1024
+
+        const readStream = this.file.createReadStream(start, undefined, highWaterMark)
+        const writeStream = new CentralHeaderDuplex()
+
+        debugger
+
+        const promise = new Promise((resolve) => {
+
+            readStream.pipe(writeStream)
+
+            writeStream.on('data', (data) => {
+
+                console.log(data)
+                debugger
+            })
+
+            writeStream.on('finish', () => resolve())
+        })
+
+        const data = await promise
+
+        return data
+    }
 
     getInfo = () => {
 
-        const entries = this.readEntries()
+        const entries = this._readEntries()
         // const localFileHeaders = await this.readLocalFileHeaders()
 
         // return this.zip32Header.toString() + EOL + centralHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)

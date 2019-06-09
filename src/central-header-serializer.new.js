@@ -2,17 +2,16 @@ import CentralHeader from './central-header'
 
 export default class CentralHeaderSeserializer {
 
-    static SIGNATURE = 0x02014b50
-    static HEADER_FIXED_LENGTH = 46
-    static HEADER_MAX_LENGTH = CentralHeaderSeserializer.HEADER_FIXED_LENGTH + 65536 + 65536 + 65536
+    signature = 0x02014b50
 
-    constructor() {
+    originalLength = 46
+    fixedBuffer = Buffer.allocUnsafe(this.originalLength)
+    fixedOffset = 0
 
-        this.fixedBuffer = Buffer.alloc(CentralHeaderSeserializer.HEADER_FIXED_LENGTH)
-        this.fixedOffset = 0
-        this.extraBuffer = null
-        this.extraOffset = 0
-    }
+    extraBuffer = Buffer.allocUnsafe(65536 + 65536 + 65536)
+    extraOffset = 0
+
+    actualExtraLength = -1
 
     update = (bytes) => {
 
@@ -24,28 +23,37 @@ export default class CentralHeaderSeserializer {
                 continue
             }
 
-            if (this.extraBuffer === null)
-                this.extraBuffer = Buffer.alloc(this.fixedBuffer.readUInt16LE(28) + this.fixedBuffer.readUInt16LE(30) + this.fixedBuffer.readUInt16LE(32))
+            if (this.actualExtraLength === -1)
+                this.actualExtraLength = this.fixedBuffer.readUInt16LE(28) + this.fixedBuffer.readUInt16LE(30) + this.fixedBuffer.readUInt16LE(32)
 
-            if (this.extraOffset < this.extraBuffer.length)
+            if (this.extraOffset < this.actualExtraLength)
                 this.extraBuffer.writeUInt8(bytes[i], this.extraOffset++)
 
-            if (this.extraOffset === this.extraBuffer.length)
-                return
+            if (this.extraOffset === this.actualExtraLength)
+                return i
         }
+
+        return bytes.length
+    }
+
+    reset = () => {
+
+        this.fixedOffset = 0
+        this.extraOffset = 0
+        this.actualExtraLength = -1
     }
 
     isDone = () => {
 
-        return this.extraBuffer !== null && this.extraOffset === this.extraBuffer.length
+        return this.extraOffset === this.actualExtraLength
     }
 
     deserealize = () => {
 
         const signature = this.fixedBuffer.readUInt32LE(0)
 
-        if (CentralHeaderSeserializer.SIGNATURE !== signature)
-            throw `Central file header signature could not be verified: expected ${CentralHeaderSeserializer.SIGNATURE}, actual ${signature}`
+        if (this.signature !== signature)
+            throw `Central file header signature could not be verified: expected ${this.signature}, actual ${signature}`
 
         const header = new CentralHeader()
 
