@@ -1,8 +1,11 @@
-import LocalHeader from './local-header'
+import LocalHeader from './tmp/dumpy'
 import {createInflateRaw} from 'zlib'
 import CRC32PassThroughStream from './crc32-passthrough-stream'
 import CRC32WriteableStream from './crc32-writeable-stream'
 import CentralHeaderInfo from './central-header-info'
+import LocalHeaderSerializer from './local-header-serializer'
+import LocalHeaderWriteable from './local-header-writeable'
+import LocalHeaderInfo from './local-header-info'
 
 export default class Entry {
 
@@ -117,6 +120,33 @@ export default class Entry {
     isDirectory = () => this.header.isDirectory()
 
     getFilename = () => this.header.getFileName()
+
+    getLocalHeader = async () => {
+
+        const startPos = this.header.getOffsetOfLocalFileHeader()
+        const endPos = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_MAX_LENGTH - 1 // -1 because inclusive
+
+        await this.file.openFileProm()
+
+        const promise = new Promise(async (resolve) => {
+
+            const readStream = this.file.createFdReadStream(startPos, endPos)
+            const localHeaderWriteable = new LocalHeaderWriteable(this.header.getFileName().length)
+
+            readStream.pipe(localHeaderWriteable)
+            localHeaderWriteable.on('finish', () => resolve(localHeaderWriteable.deserialize()))
+        })
+
+        debugger
+
+        const data = await promise
+
+        await this.file.closeFileProm()
+
+        console.log(new LocalHeaderInfo(data).toString())
+
+        return data
+    }
 
     getInfo = () => {
 

@@ -1,22 +1,16 @@
 import {EOL} from 'os'
 import * as constants from './contants'
 
-export default class CentralHeaderInfo {
+export default class LocalHeaderInfo {
 
     constructor(header) {
 
         this.header = header
     }
 
-    getVersionMadeByInfo = () => {
+    getPlatformNeededToExtractInfo = () => {
 
-        const value = this.header.getVersionMadeBy()
-        return value + ' (' + this.toHex(value) + ') .ZIP Version ' + (value / 10).toFixed(1)
-    }
-
-    getPlatformCompatibilityInfo = () => {
-
-        const value = this.header.getPlatformCompatibility()
+        const value = this.header.getPlatformNeededToExtract()
         const platform = constants.PLATFORM[value] ? constants.PLATFORM[value] : 'Unknown compatible platform'
 
         return value + ' (' + this.toHex(value) + ')' + ' Platform ' + platform
@@ -116,72 +110,6 @@ export default class CentralHeaderInfo {
         return value + ' bytes'
     }
 
-    getFileCommentLengthInfo = () => {
-
-        const value = this.header.getFileComment().length
-        return value + ' characters'
-    }
-
-    getDiskNumberStartInfo = () => {
-
-        const value = this.header.getDiskNumberStart()
-        return value + ' (' + this.toHex(value) + ')'
-    }
-
-    getInternalFileAttributesInfo = () => {
-
-        const value = this.header.getInternalFileAttributes()
-        return this.toHex(value)
-    }
-
-    getExternalFileAttributesInfo = () => {
-
-        const value = this.header.getExternalFileAttributes()
-
-        let info = ''
-
-        // 0x01 - readonly
-        info += ((value & 0x01) === 0x01) ? 'R' : ''
-        // 0x02 - hidden
-        info += ((value & 0x02) === 0x02) ? 'H' : ''
-        // 0x04 - system
-        info += ((value & 0x04) === 0x04) ? 'S' : ''
-        // 0x10 - directory
-        info += ((value & 0x10) === 0x10) ? 'D' : ''
-        // 0x20 - archive
-        info += ((value & 0x20) === 0x20) ? 'A' : ''
-
-        if (this.header.getPlatformCompatibility() === constants.UNIX) {
-
-            // 0x1000000 - Rwxrwxrwx
-            info += ((value & 0x1000000) === 0x1000000) ? 'r' : '-'
-            // 0x0800000 - rWxrwxrwx
-            info += ((value & 0x0800000) === 0x0800000) ? 'w' : '-'
-            // 0x0400000 - rwXrwxrwx
-            info += ((value & 0x0400000) === 0x0400000) ? 'x' : '-'
-            // 0x0200000 - rwxRwxrwx
-            info += ((value & 0x0200000) === 0x0200000) ? 'r' : '-'
-            // 0x0100000 - rwxrWxrwx
-            info += ((value & 0x0100000) === 0x0100000) ? 'w' : '-'
-            // 0x0080000 - rwxrwXrwx
-            info += ((value & 0x0080000) === 0x0080000) ? 'x' : '-'
-            // 0x0040000 - rwxrwxRwx
-            info += ((value & 0x0040000) === 0x0040000) ? 'r' : '-'
-            // 0x0020000 - rwxrwxrWx
-            info += ((value & 0x0020000) === 0x0020000) ? 'w' : '-'
-            // 0x0010000 - rwxrwxrwX
-            info += ((value & 0x0010000) === 0x0010000) ? 'x' : '-'
-        }
-
-        return '(' + this.toHex(value) + ') ' + info
-    }
-
-    getOffsetOfLocalFileHeaderInfo = () => {
-
-        const value = this.header.getOffsetOfLocalFileHeader()
-        return value + ' bytes'
-    }
-
     getFileNameInfo = () => {
 
         return this.header.getFileName()
@@ -190,11 +118,6 @@ export default class CentralHeaderInfo {
     getExtraFieldInfo = () => {
 
         return this.header.getExtraField().toString('hex')
-    }
-
-    getFileCommentInfo = () => {
-
-        return this.header.getFileComment()
     }
 
     getHeaderLengthInfo = () => {
@@ -212,11 +135,10 @@ export default class CentralHeaderInfo {
 
         let str = ''
 
-        str += '[ CENTRAL FILE HEADER ]'                                                                     + EOL
+        str += '[ LOCAL FILE HEADER ]'                                                                       + EOL
 
-        str += 'Version made by                   : ' + this.getVersionMadeByInfo()                          + EOL
-        str += 'Platform compatiblity             : ' + this.getPlatformCompatibilityInfo()                  + EOL
         str += 'Version needed to extract         : ' + this.getVersionNeededToExtractInfo()                 + EOL
+        str += 'Platform needed to extract        : ' + this.getPlatformNeededToExtractInfo()                + EOL
         str += 'General purpose bit flag          : ' + this.getGeneralPurposeBitFlagInfo()                  + EOL
         str += 'Compression method                : ' + this.getCompressionMethodInfo()                      + EOL
         str += 'Last mod file time                : ' + this.getLastModFileTimeInfo()                        + EOL
@@ -226,16 +148,10 @@ export default class CentralHeaderInfo {
         str += 'Uncompressed size                 : ' + this.getUncompressedSizeInfo()                       + EOL
         str += 'File name length                  : ' + this.getFileNameLengthInfo()                         + EOL
         str += 'Extra field length                : ' + this.getExtraFieldLengthInfo()                       + EOL
-        str += 'File comment length               : ' + this.getFileCommentLengthInfo()                      + EOL
-        str += 'Disk number start                 : ' + this.getDiskNumberStartInfo()                        + EOL
-        str += 'Internal file attributes          : ' + this.getInternalFileAttributesInfo()                 + EOL
-        str += 'External file attributes          : ' + this.getExternalFileAttributesInfo()                 + EOL
-        str += 'Relative offset of local header   : ' + this.getOffsetOfLocalFileHeaderInfo()                + EOL
         str += 'File name                         : ' + this.getFileNameInfo()                               + EOL
         str += 'Extra field                       : ' + this.getExtraFieldInfo()                             + EOL
-        str += 'File comment                      : ' + this.getFileCommentInfo()                            + EOL
 
-        str += '[ CENTRAL FILE HEADER | Length ' + this.getHeaderLengthInfo() + ' ]'                         + EOL
+        str += '[ LOCAL FILE HEADER | Length ' + this.getHeaderLengthInfo() + ' ]'                           + EOL
 
         return str
     }

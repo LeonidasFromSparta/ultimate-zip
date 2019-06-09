@@ -108,53 +108,6 @@ export default class UZip {
         return entries
     }
 
-    /*
-    async readLocalFileHeaders() {
-
-        const extLocalHeaders = []
-        const centralHeaders = await this.readEntries()
-
-        for (const centralHeader of centralHeaders) {
-
-            const promise = new Promise((resolve) => {
-
-                const startPos = centralHeader.getOffsetOfLocalFileHeader()
-                const endPos = centralHeader.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_MAX_LENGTH
-
-                const extLocalHeader = new ExtLocalHeader()
-
-                const readStream = this.file.createReadStream(startPos, endPos)
-
-                readStream.on('data', (chunk) => {
-
-                    for (const byte of chunk) {
-
-                        extLocalHeader.addByte(byte)
-
-                        if (extLocalHeader.isDone()) {
-
-                            readStream.destroy()
-                            return
-                        }
-                    }
-                })
-
-                readStream.on('end', () => {
-
-                    // ERROR
-                })
-
-                readStream.on('close', () => resolve(extLocalHeader))
-            })
-
-            const result = await promise
-            extLocalHeaders.push(result)
-        }
-
-        return extLocalHeaders
-    }
-*/
-
     getInfo = () => {
 
         const entries = this.readEntries()

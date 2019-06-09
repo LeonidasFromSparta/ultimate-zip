@@ -75,12 +75,38 @@ export default class File {
         this.fd = fs.openSync(this.path, 'r')
     }
 
+    openFileProm = async () => {
+
+        const promise = new Promise((resolve) => {
+
+            fs.open(this.path, (err, fd) => {
+
+                resolve(fd)
+            })
+        })
+
+        this.fd = await promise
+    }
+
     /**
      * Method closes file descriptor.
      */
     closeFile() {
 
         fs.closeSync(this.fd)
+    }
+
+    closeFileProm = async () => {
+
+        const promise = new Promise((resolve) => {
+
+            fs.close(this.fd, () => {
+
+                resolve()
+            })
+        })
+
+        await promise
     }
 
     makeDir = (dir) => {
