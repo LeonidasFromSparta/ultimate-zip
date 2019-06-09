@@ -1,4 +1,3 @@
-import LocalHeader from './tmp/dumpy'
 import {createInflateRaw} from 'zlib'
 import CRC32PassThroughStream from './crc32-passthrough-stream'
 import CRC32WriteableStream from './crc32-writeable-stream'
@@ -22,8 +21,8 @@ export default class Entry {
         if (this.header.isDirectory())
             return this.file.makeDir(filename)
 
-        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileName().length
-        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileName().length - 1
+        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileName().length
+        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileName().length - 1
 
         if (this.header.isCompressed()) {
 
@@ -75,8 +74,8 @@ export default class Entry {
 
     test = () => {
 
-        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeader.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
+        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
+        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
 
         if (!this.header.isCompressed()) {
 
@@ -121,35 +120,31 @@ export default class Entry {
 
     getFilename = () => this.header.getFileName()
 
-    getLocalHeader = async () => {
+    getLocalHeader = () => {
 
-        const startPos = this.header.getOffsetOfLocalFileHeader()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_MAX_LENGTH - 1 // -1 because inclusive
+        const start = this.header.getOffsetOfLocalFileHeader()
+        const end = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_MAX_LENGTH - 1 // -1 because inclusive
+        const highWaterMark = 1024
 
-        await this.file.openFileProm()
+        const readStream = this.file.createReadStream(start, end, highWaterMark)
+        const writeStream = new LocalHeaderWriteable()
 
         const promise = new Promise(async (resolve) => {
 
-            const readStream = this.file.createFdReadStream(startPos, endPos)
-            const localHeaderWriteable = new LocalHeaderWriteable(this.header.getFileName().length)
-
-            readStream.pipe(localHeaderWriteable)
-            localHeaderWriteable.on('finish', () => resolve(localHeaderWriteable.deserialize()))
+            readStream.pipe(writeStream)
+            writeStream.on('finish', () => resolve(writeStream.getHeader()))
         })
 
-        debugger
-
-        const data = await promise
-
-        await this.file.closeFileProm()
-
-        console.log(new LocalHeaderInfo(data).toString())
-
-        return data
+        return promise
     }
 
-    getInfo = () => {
+    getCentralHeaderInfo = () => {
 
         return new CentralHeaderInfo(this.header).toString()
+    }
+
+    getLocalHeaderInfo = async () => {
+
+        return new LocalHeaderInfo(await this.getLocalHeader()).toString()
     }
 }

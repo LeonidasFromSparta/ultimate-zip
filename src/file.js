@@ -53,13 +53,13 @@ export default class File {
 
     /**
      * Method creates a file read stream from - to specified positions.
-     * @param {int} startPos The start position in the file.
-     * @param {int} endPos The end position in the file.
+     * @param {int} start The start position in the file.
+     * @param {int} end The end position in the file.
      * @returns {fs.ReadStream} The readable stream from - to specified positions.
      */
-    createReadStream(startPos, endPos) {
+    createReadStream(start, end, highWaterMark) {
 
-        return fs.createReadStream(this.path, {start: startPos, end: endPos})
+        return fs.createReadStream(this.path, {start, end, highWaterMark})
     }
 
     createFdReadStream(startPos, endPos) {
