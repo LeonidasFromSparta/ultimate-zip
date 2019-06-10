@@ -85,12 +85,12 @@ export default class UZip {
 
         const promise = new Promise((resolve) => {
 
-            const headers = []
+            const entries = []
 
             readStream.pipe(writeStream)
 
-            writeStream.on('data', (data) => headers.push(new Entry(data, this.file)))
-            writeStream.on('finish', () => resolve(headers))
+            writeStream.on('data', (data) => entries.push(new Entry(data, this.file)))
+            writeStream.on('finish', () => resolve(entries))
         })
 
         this.entries = await promise

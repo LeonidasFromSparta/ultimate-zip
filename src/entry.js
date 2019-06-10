@@ -3,8 +3,9 @@ import CRC32PassThroughStream from './crc32-passthrough-stream'
 import CRC32WriteableStream from './crc32-writeable-stream'
 import CentralHeaderInfo from './central-header-info'
 import LocalHeaderSerializer from './local-header-serializer'
-import LocalHeaderWriteable from './local-header-writeable'
+import LocalHeaderTransformer from './local-header-transformer'
 import LocalHeaderInfo from './local-header-info'
+import {LOCAL_HEADER_LENGTH} from '../src/constants'
 
 export default class Entry {
 
@@ -120,22 +121,27 @@ export default class Entry {
 
     getFilename = () => this.header.getFileName()
 
-    getLocalHeader = () => {
+    getLocalHeader = async () => {
 
         const start = this.header.getOffsetOfLocalFileHeader()
-        const end = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_MAX_LENGTH - 1 // -1 because inclusive
+        const end = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + 65536 + 65536 - 1 // -1 because inclusive
         const highWaterMark = 1024
 
-        const readStream = this.file.createReadStream(start, end, highWaterMark)
-        const writeStream = new LocalHeaderWriteable()
+        const readStream = this.file.createReadStreamWithHighWaterMark(start, end, highWaterMark)
+        const writeStream = new LocalHeaderTransformer()
 
         const promise = new Promise((resolve) => {
 
+            let header
+
             readStream.pipe(writeStream)
-            writeStream.on('finish', () => resolve(writeStream.getHeader()))
+
+            writeStream.on('data', (data) => header = data)
+            writeStream.on('finish', () => resolve(header))
         })
 
-        return promise
+        this.localHeader = await promise
+        return this.localHeader
     }
 
     getCentralHeaderInfo = () => {
