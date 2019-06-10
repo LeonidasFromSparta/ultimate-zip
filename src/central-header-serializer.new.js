@@ -6,12 +6,23 @@ export default class CentralHeaderSeserializer {
 
     originalLength = 46
     fixedBuffer = Buffer.allocUnsafe(this.originalLength)
-    fixedOffset = 0
-
     extraBuffer = Buffer.allocUnsafe(65536 + 65536 + 65536)
-    extraOffset = 0
 
-    actualExtraLength = -1
+    constructor() {
+
+        this.reset()
+    }
+
+    reset = () => {
+
+        this.fixedOffset = 0
+        this.extraOffset = 0
+        this.actualExtraLength = -1
+
+        this.fileNameLength = 0
+        this.extraFieldLength = 0
+        this.fileCommentLength = 0
+    }
 
     update = (bytes) => {
 
@@ -23,8 +34,15 @@ export default class CentralHeaderSeserializer {
                 continue
             }
 
-            if (this.actualExtraLength === -1)
-                this.actualExtraLength = this.fixedBuffer.readUInt16LE(28) + this.fixedBuffer.readUInt16LE(30) + this.fixedBuffer.readUInt16LE(32)
+            if (this.actualExtraLength === -1) {
+
+                this.fileNameLength = this.fixedBuffer.readUInt16LE(28)
+                this.extraFieldLength = this.fixedBuffer.readUInt16LE(30)
+                this.fileCommentLength = this.fixedBuffer.readUInt16LE(32)
+
+                this.actualExtraLength = this.fileNameLength +  this.extraFieldLength +  this.fileCommentLength
+
+            }
 
             if (this.extraOffset < this.actualExtraLength)
                 this.extraBuffer.writeUInt8(bytes[i], this.extraOffset++)
@@ -34,13 +52,6 @@ export default class CentralHeaderSeserializer {
         }
 
         return bytes.length
-    }
-
-    reset = () => {
-
-        this.fixedOffset = 0
-        this.extraOffset = 0
-        this.actualExtraLength = -1
     }
 
     isDone = () => {
@@ -73,16 +84,24 @@ export default class CentralHeaderSeserializer {
         header.setExternalFileAttributes(this.fixedBuffer.readUInt32LE(38))
         header.setOffsetOfLocalFileHeader(this.fixedBuffer.readUInt32LE(42))
 
-        const fileNameLength = this.fixedBuffer.readUInt16LE(28)
+        header.setFileName(this.extraBuffer.toString('utf8', 0, this.fileNameLength))
+
         const extraFieldLength = this.fixedBuffer.readUInt16LE(30)
 
-        header.setFileName(this.extraBuffer.toString('utf8', 0, fileNameLength))
-        header.setExtraField(this.extraBuffer.slice(fileNameLength, fileNameLength + extraFieldLength))
+        if (this.extraFieldLength > 0) {
 
-        const fileCommentLength = this.fixedBuffer.readUInt16LE(32)
+            const extaFieldBuffer = Buffer.allocUnsafe(extraFieldLength)
+            this.extraBuffer.copy(extaFieldBuffer, 0, this.fileNameLength, this.fileNameLength + this.extraFieldLength)
+            header.setExtraField(extaFieldBuffer)
+        }
 
-        if (fileCommentLength > 0)
-            header.setFileComment(this.extraBuffer.toString('utf8', fileNameLength + extraFieldLength, fileNameLength + extraFieldLength + fileCommentLength))
+        if (this.fileCommentLength > 0) {
+
+            const start = this.fileNameLength + this.extraFieldLength
+            const end = this.fileNameLength + this.extraFieldLength + this.fileCommentLength
+
+            header.setFileComment(this.extraBuffer.toString('utf8', start, end))
+        }
 
         return header
     }

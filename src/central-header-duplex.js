@@ -3,11 +3,10 @@ import CentralHeaderSerializer from './central-header-serializer.new'
 
 export default class CentralHeaderDuplex extends Transform {
 
-    deserializer = new CentralHeaderSerializer()
-
     constructor() {
 
         super({objectMode: true})
+        this.deserializer = new CentralHeaderSerializer()
     }
 
     _write = (chunk, encoding, callback) => {
