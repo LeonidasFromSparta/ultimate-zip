@@ -4,7 +4,7 @@ import File from './file'
 // import Entry from './entry'
 import Zip32HeaderSerializer from './zip-32-header-serializer'
 import Zip32HeaderInfo from './zip-32-header-info'
-import CentralHeaderDuplex from './central-header-transform'
+import CentralHeaderTransformer from './central-header-transform'
 
 export default class UZip {
 
@@ -120,7 +120,7 @@ export default class UZip {
         const highWaterMark = 1024
 
         const readStream = this.file.createReadStream(start, undefined, highWaterMark)
-        const writeStream = new CentralHeaderDuplex()
+        const writeStream = new CentralHeaderTransformer()
 
         debugger
 
