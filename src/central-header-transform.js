@@ -1,5 +1,5 @@
 import {Transform} from 'stream'
-import CentralHeaderSerializer from './central-header-serializer.new'
+import CentralHeaderSerializer from './central-header-serializer'
 
 export default class CentralHeaderDuplex extends Transform {
 
