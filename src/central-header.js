@@ -4,9 +4,12 @@ export default class CentralHeader {
 
     static HEADER_FIXED_LENGTH = 36
 
-    buffer = Buffer.alloc(CentralHeader.HEADER_FIXED_LENGTH)
-    fileName = ''
-    extraField = Buffer.alloc(0)
+    constructor(buffer) {
+
+        this.buffer = buffer
+        this.fileName = ''
+        this.extraField = Buffer.alloc(0)
+    }
 
     getVersionMadeBy = () => this.buffer.readUInt8(0)
     setVersionMadeBy = (value) => this.buffer.writeUInt8(value, 0)
