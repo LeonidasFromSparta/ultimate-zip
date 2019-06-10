@@ -24,6 +24,8 @@ export default class CentralHeaderTransformer extends Transform {
             }
         }
 
+        console.log('chekist')
+
         callback()
     }
 }

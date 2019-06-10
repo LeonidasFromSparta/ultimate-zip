@@ -4,7 +4,7 @@ import File from './file'
 import Entry from './entry'
 import Zip32HeaderSerializer from './zip-32-header-serializer'
 import Zip32HeaderInfo from './zip-32-header-info'
-import CentralHeaderTransformer from './central-header-transform'
+import CentralHeaderTransformer from './central-header-transformer'
 
 export default class UZip {
 

@@ -1,7 +1,7 @@
-import {Trasform} from 'stream'
+import {Transform} from 'stream'
 import LocalHeaderSerializer from './local-header-serializer'
 
-export default class LocalHeaderWriteable extends Trasform {
+export default class LocalHeaderWriteable extends Transform {
 
     constructor() {
 

@@ -1,6 +1,6 @@
 import {createInflateRaw} from 'zlib'
 import CRC32PassThroughStream from './crc32-passthrough-stream'
-import CRC32WriteableStream from './crc32-writeable-stream'
+import CRC32Transformer from './crc32-transformer'
 import CentralHeaderInfo from './central-header-info'
 import LocalHeaderSerializer from './local-header-serializer'
 import LocalHeaderTransformer from './local-header-transformer'
@@ -75,34 +75,34 @@ export default class Entry {
 
     test = () => {
 
-        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileNameLength()
+        const startPos = this.header.getOffsetOfLocalFileHeader()
+        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
 
         if (!this.header.isCompressed()) {
 
-            return new Promise(async (resolve) => {
+            const readStream = this.file.createReadStream(startPos, endPos)
+            const localHeaderTransformer = new LocalHeaderTransformer()
+            const crc32WriteableStream = new CRC32Transformer()
 
-                const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32WriteableStream = new CRC32WriteableStream()
+            return new Promise((resolve) => {
 
-                readStream.pipe(crc32WriteableStream)
+                readStream.pipe(localHeaderTransformer)
 
-                crc32WriteableStream.on('finish', () => {
+                localHeaderTransformer.on('finish', () => {
 
-                    if (crc32WriteableStream.getValue() !== this.header.getCRC32())
-                        console.log('kekeke')
-
+                    debugger
                     resolve()
                 })
             })
         }
 
+        /*
         if (this.header.isCompressed()) {
 
             return new Promise(async (resolve) => {
 
                 const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32WriteableStream = new CRC32WriteableStream()
+                const crc32WriteableStream = new CRC32Transformer()
 
                 readStream.pipe(createInflateRaw()).pipe(crc32WriteableStream)
 
@@ -115,6 +115,7 @@ export default class Entry {
                 })
             })
         }
+        */
     }
 
     isDirectory = () => this.header.isDirectory()

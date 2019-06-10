@@ -1,6 +1,6 @@
 import {Should} from 'chai'
 import {Readable} from 'stream'
-import CRC32WriteableStream from '../src/crc32-writeable-stream'
+import CRC32Transformer from '../src/crc32-writeable-stream'
 
 const should = Should()
 
@@ -23,7 +23,7 @@ describe('Testing crc32 writeable stream', () => {
             readable.push(Buffer.from(txt))
             readable.push(null)
 
-            const crc32WriteableStream = new CRC32WriteableStream()
+            const crc32WriteableStream = new CRC32Transformer()
             readable.pipe(crc32WriteableStream)
 
             crc32WriteableStream.on('finish', () => resolve(crc32WriteableStream.getValue()))

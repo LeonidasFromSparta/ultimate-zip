@@ -1,5 +1,6 @@
 import CentralHeader from './central-header'
 import {CENTRAL_HEADER_LENGTH} from './constants'
+import {OBJECT_CENTRAL_HEADER_LENGTH} from './constants'
 
 export default class CentralHeaderSeserializer {
 
@@ -69,14 +70,18 @@ export default class CentralHeaderSeserializer {
         return this.extraOffset === this.extraBufferActualLength
     }
 
+    x = 0
+
     deserealize = () => {
+
+        console.log(++this.x)
 
         const signature = this.fixedBuffer.readUInt32LE(0)
 
         if (this.signature !== signature)
             throw `Central file header signature could not be verified: expected ${this.signature}, actual ${signature}`
 
-        const buffer = Buffer.allocUnsafe(CentralHeader.HEADER_FIXED_LENGTH)
+        const buffer = Buffer.allocUnsafe(OBJECT_CENTRAL_HEADER_LENGTH)
         this.fixedBuffer.copy(buffer, 0, 4, 28)
         this.fixedBuffer.copy(buffer, 24, 34, 46)
 
