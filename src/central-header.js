@@ -2,8 +2,6 @@ import {CENTRAL_HEADER_LENGTH} from './constants'
 
 export default class CentralHeader {
 
-    static HEADER_FIXED_LENGTH = 36
-
     constructor(buffer) {
 
         this.buffer = buffer

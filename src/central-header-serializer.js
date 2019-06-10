@@ -84,11 +84,9 @@ export default class CentralHeaderSeserializer {
 
         header.setFileName(this.extraBuffer.toString('utf8', 0, this.fileNameLength))
 
-        const extraFieldLength = this.fixedBuffer.readUInt16LE(30)
-
         if (this.extraFieldLength > 0) {
 
-            const extaFieldBuffer = Buffer.allocUnsafe(extraFieldLength)
+            const extaFieldBuffer = Buffer.allocUnsafe(this.extraFieldLength)
             this.extraBuffer.copy(extaFieldBuffer, 0, this.fileNameLength, this.fileNameLength + this.extraFieldLength)
             header.setExtraField(extaFieldBuffer)
         }

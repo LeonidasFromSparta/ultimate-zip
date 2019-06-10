@@ -1,71 +1,93 @@
 import LocalHeader from './local-header'
+import {LOCAL_HEADER_LENGTH} from './constants'
+import {OBJECT_LOCAL_HEADER_LENGTH} from './constants'
 
-export default class LocalHeaderSerializer {
+export default class LocalHeaderSeserializer {
 
-    static SIGNATURE = 0x04034b50
-    static HEADER_FIXED_LENGTH = 30
-    static HEADER_MAX_LENGTH = LocalHeaderSerializer.HEADER_FIXED_LENGTH + 65536 + 65536
+    signature = 0x04034b50
+
+    fixedBuffer = Buffer.allocUnsafe(LOCAL_HEADER_LENGTH)
+    extraBuffer = Buffer.allocUnsafe(65536 + 65536)
 
     constructor() {
 
-        this.fixedBuffer = Buffer.alloc(LocalHeaderSerializer.HEADER_FIXED_LENGTH)
+        this.reset()
+    }
+
+    reset = () => {
+
         this.fixedOffset = 0
-        this.extraBuffer = null
         this.extraOffset = 0
+        this.extraBufferActualLength = 0
+
+        this.fileNameLength = 0
+        this.extraFieldLength = 0
     }
 
     update = (bytes) => {
 
-        for (let i = 0; i < bytes.length; i++) {
+        // how much i need to read more
+        const fixedBufferRemainingBytes = this.fixedBuffer.length - this.fixedOffset
 
-            if (this.fixedOffset < this.fixedBuffer.length) {
+        if (fixedBufferRemainingBytes !== 0) {
 
-                this.fixedBuffer.writeUInt8(bytes[i], this.fixedOffset++)
-                continue
-            }
+            const bytesToRead = bytes.length > fixedBufferRemainingBytes ? fixedBufferRemainingBytes : bytes.length
 
-            if (this.extraBuffer === null)
-                this.extraBuffer = Buffer.alloc(this.fixedBuffer.readUInt16LE(26) + this.fixedBuffer.readUInt16LE(28))
-
-            if (this.extraOffset < this.extraBuffer.length)
-                this.extraBuffer.writeUInt8(bytes[i], this.extraOffset++)
-
-            if (this.extraOffset === this.extraBuffer.length)
-                return
+            bytes.copy(this.fixedBuffer, this.fixedOffset, 0, bytesToRead)
+            this.fixedOffset += bytesToRead
         }
+
+        // if bytes are less than header fixed length OR bytes are equal to header fixed length
+        if (bytes.length < fixedBufferRemainingBytes || bytes.length === fixedBufferRemainingBytes)
+            return bytes.length
+
+        if (this.extraBufferActualLength === 0) {
+
+            this.fileNameLength = this.fixedBuffer.readUInt16LE(26)
+            this.extraFieldLength = this.fixedBuffer.readUInt16LE(28)
+
+            this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength
+        }
+
+        const extraBufferRemainingBytes = this.extraBufferActualLength - this.extraOffset
+
+        if (extraBufferRemainingBytes !== 0) {
+
+            const bytesReadFixedBuffer = bytes.length > fixedBufferRemainingBytes ? fixedBufferRemainingBytes : bytes.length
+            const bytesToRead = (bytes.length - bytesReadFixedBuffer) > extraBufferRemainingBytes ? extraBufferRemainingBytes : bytes.length - bytesReadFixedBuffer
+
+            bytes.copy(this.extraBuffer, this.extraOffset, bytesReadFixedBuffer, bytesReadFixedBuffer + bytesToRead)
+            this.extraOffset += bytesToRead
+        }
+
+        return fixedBufferRemainingBytes + extraBufferRemainingBytes
     }
 
     isDone = () => {
 
-        return this.extraBuffer !== null && this.extraOffset === this.extraBuffer.length
+        return this.extraOffset === this.extraBufferActualLength
     }
 
-    deserialize = () => {
+    deserealize = () => {
 
         const signature = this.fixedBuffer.readUInt32LE(0)
 
-        if (LocalHeaderSerializer.SIGNATURE !== signature)
-            throw `Local Header signature could not be verified: expected ${LocalHeaderSerializer.SIGNATURE}, actual ${signature}`
+        if (this.signature !== signature)
+            throw `Local file header signature could not be verified: expected ${this.signature}, actual ${signature}`
 
-        const header = new LocalHeader()
+        const buffer = Buffer.allocUnsafe(OBJECT_LOCAL_HEADER_LENGTH)
+        this.fixedBuffer.copy(buffer, 0, 4, 26)
 
-        header.setVersionNeededToExtract(this.fixedBuffer.readUInt8(4))
-        header.setPlatformNeededToExtract(this.fixedBuffer.readUInt8(5))
-        header.setGeneralPurposeBitFlag(this.fixedBuffer.readUInt16LE(6))
-        header.setCompressionMethod(this.fixedBuffer.readUInt16LE(8))
-        header.setLastModFileTime(this.fixedBuffer.readUInt16LE(10))
-        header.setLastModFileDate(this.fixedBuffer.readUInt16LE(12))
-        header.setCRC32(this.fixedBuffer.readUInt32LE(14))
-        header.setCompressedSize(this.fixedBuffer.readUInt32LE(18))
-        header.setUncompressedSize(this.fixedBuffer.readUInt32LE(22))
+        const header = new LocalHeader(buffer)
 
-        const fileNameLength = this.fixedBuffer.readUInt16LE(26)
-        header.setFileName(this.extraBuffer.toString('utf8', 0, fileNameLength))
+        header.setFileName(this.extraBuffer.toString('utf8', 0, this.fileNameLength))
 
-        const extraFieldLength = this.fixedBuffer.readUInt16LE(28)
+        if (this.extraFieldLength > 0) {
 
-        if (extraFieldLength > 0)
-            header.setExtraField(this.extraBuffer.slice(fileNameLength, fileNameLength + extraFieldLength))
+            const extaFieldBuffer = Buffer.allocUnsafe(this.extraFieldLength)
+            this.extraBuffer.copy(extaFieldBuffer, 0, this.fileNameLength, this.fileNameLength + this.extraFieldLength)
+            header.setExtraField(extaFieldBuffer)
+        }
 
         return header
     }

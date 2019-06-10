@@ -139,3 +139,6 @@ export const ZIP_FORMAT_VERSIONS = {
 
 export const CENTRAL_HEADER_LENGTH = 46
 export const OBJECT_CENTRAL_HEADER_LENGTH = 36
+
+export const LOCAL_HEADER_LENGTH = 30
+export const OBJECT_LOCAL_HEADER_LENGTH = 22

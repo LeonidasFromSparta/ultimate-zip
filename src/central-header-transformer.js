@@ -11,8 +11,6 @@ export default class CentralHeaderTransformer extends Transform {
 
     _write = (chunk, encoding, callback) => {
 
-        debugger
-
         let bytesRead = 0
 
         while (bytesRead < chunk.length) {
@@ -20,8 +18,6 @@ export default class CentralHeaderTransformer extends Transform {
             bytesRead += this.deserializer.update(chunk.slice(bytesRead))
 
             if (this.deserializer.isDone()) {
-
-                debugger
 
                 this.push(this.deserializer.deserealize())
                 this.deserializer.reset()
