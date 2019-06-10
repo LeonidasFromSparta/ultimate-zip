@@ -123,6 +123,15 @@ export default class Entry {
 
     getLocalHeader = async () => {
 
+        if (this.localHeader)
+            return this.localHeader
+
+        this.localHeader = await this._readLocalHeader()
+        return this.localHeader
+    }
+
+    _readLocalHeader = async () => {
+
         const start = this.header.getOffsetOfLocalFileHeader()
         const end = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + 65536 + 65536 - 1 // -1 because inclusive
         const highWaterMark = 1024
@@ -140,8 +149,7 @@ export default class Entry {
             writeStream.on('finish', () => resolve(header))
         })
 
-        this.localHeader = await promise
-        return this.localHeader
+        return promise
     }
 
     getCentralHeaderInfo = () => {
@@ -151,6 +159,6 @@ export default class Entry {
 
     getLocalHeaderInfo = async () => {
 
-        return new LocalHeaderInfo(await this.getLocalHeader()).toString()
+        return new LocalHeaderInfo(await this._readLocalHeader()).toString()
     }
 }

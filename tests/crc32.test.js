@@ -1,24 +1,24 @@
-import {Should} from 'chai'
+import {expect} from 'chai'
 import CRC32 from './../src/crc32'
 
-const should = Should()
-
-describe('Testing crc32', () => {
+describe('Testing crc32.js', () => {
 
     it('should assert crc32', () => {
 
-        let txt = ''
-
-        txt += 'Lorem ipsum dolor sit amet, et elitr fuisset nec, eu habeo euismod mei.\r\n'
-        txt += 'Ut qui nostrum accommodare, ex nam delicata iudicabit, mea id labore alienum tractatos.\r\n'
-        txt += 'Ad mel semper civibus, duo virtute repudiare et.\r\n'
-        txt += 'Mea debet integre graecis et, aliquip nominavi atomorum mei at.\r\n'
-        txt += 'Platonem inimicus omittantur usu id, eu sea quas abhorreant voluptatibus.\r\n'
-        txt += 'Est te nusquam percipitur, sed nonumes principes ea.\r\n'
-
         const crc32 = new CRC32()
-        crc32.update(Buffer.from(txt))
 
-        crc32.getValue().should.equal(0x94699776)
+        let text = ''
+
+        text += 'Lorem ipsum dolor sit amet, et elitr fuisset nec, eu habeo euismod mei.\r\n'
+        text += 'Ut qui nostrum accommodare, ex nam delicata iudicabit, mea id labore alienum tractatos.\r\n'
+        text += 'Ad mel semper civibus, duo virtute repudiare et.\r\n'
+        text += 'Mea debet integre graecis et, aliquip nominavi atomorum mei at.\r\n'
+        text += 'Platonem inimicus omittantur usu id, eu sea quas abhorreant voluptatibus.\r\n'
+        text += 'Est te nusquam percipitur, sed nonumes principes ea.\r\n'
+
+        crc32.update(Buffer.from(text))
+        const value = crc32.getValue()
+
+        expect(value).to.be.equal(0x94699776)
     })
 })
