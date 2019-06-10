@@ -15,9 +15,18 @@ export default class CentralHeaderTransformer extends Transform {
 
         while (bytesRead < chunk.length) {
 
-            bytesRead += this.deserializer.update(chunk.slice(bytesRead))
+            const sliced = chunk.slice(bytesRead)
 
-            if (this.deserializer.isDone()) {
+            const fixedRead = this.deserializer.updateFixed(sliced)
+            bytesRead += fixedRead
+
+            if (fixedRead !== 0)
+                continue
+
+            const varRead = this.deserializer.updateVar(sliced)
+            bytesRead += varRead
+
+            if (varRead === 0) {
 
                 this.push(this.deserializer.deserealize())
                 this.deserializer.reset()

@@ -2,7 +2,7 @@ import CentralHeader from './central-header'
 import {CENTRAL_HEADER_LENGTH} from './constants'
 import {OBJECT_CENTRAL_HEADER_LENGTH} from './constants'
 
-export default class CentralHeaderSeserializer {
+export default class CentralHeaderSerializer {
 
     signature = 0x02014b50
 
@@ -25,6 +25,46 @@ export default class CentralHeaderSeserializer {
         this.fileCommentLength = 0
     }
 
+    updateFixed = (bytes) => {
+
+        const fixedBufferRemainingBytes = this.fixedBuffer.length - this.fixedOffset
+
+        if (fixedBufferRemainingBytes !== 0) {
+
+            const bytesToRead = bytes.length > fixedBufferRemainingBytes ? fixedBufferRemainingBytes : bytes.length
+
+            bytes.copy(this.fixedBuffer, this.fixedOffset, 0, bytesToRead)
+            this.fixedOffset += bytesToRead
+        }
+
+        return fixedBufferRemainingBytes
+    }
+
+    updateVar = (bytes) => {
+
+        if (this.extraBufferActualLength === 0) {
+
+            this.fileNameLength = this.fixedBuffer.readUInt16LE(28)
+            this.extraFieldLength = this.fixedBuffer.readUInt16LE(30)
+            this.fileCommentLength = this.fixedBuffer.readUInt16LE(32)
+
+            this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength + this.fileCommentLength
+        }
+
+        const extraBufferRemainingBytes = this.extraBufferActualLength - this.extraOffset
+
+        if (extraBufferRemainingBytes !== 0) {
+
+            const bytesToRead = bytes.length > extraBufferRemainingBytes ? extraBufferRemainingBytes : bytes.length
+
+            bytes.copy(this.extraBuffer, this.extraOffset, 0, bytesToRead)
+            this.extraOffset += bytesToRead
+        }
+
+        return extraBufferRemainingBytes
+    }
+
+    /*
     update = (bytes) => {
 
         // how much i need to read more
@@ -64,6 +104,7 @@ export default class CentralHeaderSeserializer {
 
         return fixedBufferRemainingBytes + extraBufferRemainingBytes
     }
+    */
 
     isDone = () => {
 
