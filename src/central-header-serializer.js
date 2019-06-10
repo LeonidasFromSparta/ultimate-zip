@@ -1,5 +1,5 @@
 import CentralHeader from './central-header'
-import {CENTRAL_HEADER_LENGTH} from './contants'
+import {CENTRAL_HEADER_LENGTH} from './constants'
 
 export default class CentralHeaderSeserializer {
 

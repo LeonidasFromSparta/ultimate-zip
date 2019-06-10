@@ -1,5 +1,5 @@
 import {EOL} from 'os'
-import * as constants from './contants'
+import * as constants from './constants'
 
 export default class LocalHeaderInfo {
 

@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import CentralHeader from './../src/central-header'
-import {OBJECT_CENTRAL_HEADER_LENGTH} from './contants'
-import {CENTRAL_HEADER_LENGTH} from './contants'
+import {OBJECT_CENTRAL_HEADER_LENGTH} from './../src/constants'
+import {CENTRAL_HEADER_LENGTH} from './../src/constants'
 
 describe('Testing central header', () => {
 
