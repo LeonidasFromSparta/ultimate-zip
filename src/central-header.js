@@ -1,4 +1,4 @@
-import CentralHeaderSerializer from './central-header-serializer'
+import {CENTRAL_HEADER_LENGTH} from './contants'
 
 export default class CentralHeader {
 
@@ -26,8 +26,8 @@ export default class CentralHeader {
     getGeneralPurposeBitFlag = () => this.buffer.readUInt16LE(4)
     setGeneralPurposeBitFlag = (value) => this.buffer.writeUInt16LE(value, 4)
 
-    getCompressionMethod = () => this.buffer.readUInt8(6)
-    setCompressionMethod = (value) => this.buffer.writeUInt8(value, 6)
+    getCompressionMethod = () => this.buffer.readUInt16LE(6)
+    setCompressionMethod = (value) => this.buffer.writeUInt16LE(value, 6)
 
     getLastModFileTime = () => this.buffer.readUInt16LE(8)
     setLastModFileTime = (value) => this.buffer.writeUInt16LE(value, 8)
@@ -65,7 +65,7 @@ export default class CentralHeader {
     getFileComment = () => this.fileComment !== undefined ? this.fileComment : ''
     setFileComment = (value) => this.fileComment = value
 
-    getHeaderLength = () => CentralHeaderSerializer.HEADER_FIXED_LENGTH + this.getFileName().length + this.getExtraField().length + this.getFileComment().length
+    getHeaderLength = () => CENTRAL_HEADER_LENGTH + this.getFileName().length + this.getExtraField().length + this.getFileComment().length
 
     isDirectory = () => this.getCompressedSize() === 0
 

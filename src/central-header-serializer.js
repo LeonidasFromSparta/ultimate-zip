@@ -1,11 +1,11 @@
 import CentralHeader from './central-header'
+import {CENTRAL_HEADER_LENGTH} from './contants'
 
 export default class CentralHeaderSeserializer {
 
     signature = 0x02014b50
 
-    originalLength = 46
-    fixedBuffer = Buffer.allocUnsafe(this.originalLength)
+    fixedBuffer = Buffer.allocUnsafe(CENTRAL_HEADER_LENGTH)
     extraBuffer = Buffer.allocUnsafe(65536 + 65536 + 65536)
 
     constructor() {
@@ -62,34 +62,6 @@ export default class CentralHeaderSeserializer {
         }
 
         return fixedBufferRemainingBytes + extraBufferRemainingBytes
-
-        /*
-        for (let i = 0; i < bytes.length; i++) {
-
-            if (this.fixedOffset < this.fixedBuffer.length) {
-
-                this.fixedBuffer.writeUInt8(bytes[i], this.fixedOffset++)
-                continue
-            }
-
-            if (this.extraBufferActualLength === 0) {
-
-                this.fileNameLength = this.fixedBuffer.readUInt16LE(28)
-                this.extraFieldLength = this.fixedBuffer.readUInt16LE(30)
-                this.fileCommentLength = this.fixedBuffer.readUInt16LE(32)
-
-                this.extraBufferActualLength = this.fileNameLength +  this.extraFieldLength +  this.fileCommentLength
-            }
-
-            if (this.extraOffset < this.extraBufferActualLength)
-                this.extraBuffer.writeUInt8(bytes[i], this.extraOffset++)
-
-            if (this.extraOffset === this.extraBufferActualLength)
-                return i
-        }
-
-        return bytes.length
-        */
     }
 
     isDone = () => {
@@ -109,24 +81,6 @@ export default class CentralHeaderSeserializer {
         this.fixedBuffer.copy(buffer, 24, 34, 46)
 
         const header = new CentralHeader(buffer)
-
-        /*
-        header.setVersionMadeBy(this.fixedBuffer.readUInt8(4))
-        header.setPlatformCompatibility(this.fixedBuffer.readUInt8(5))
-        header.setVersionNeededToExtract(this.fixedBuffer.readUInt8(6))
-        header.setPlatformNeededToExtract(this.fixedBuffer.readUInt8(7))
-        header.setGeneralPurposeBitFlag(this.fixedBuffer.readUInt16LE(8))
-        header.setCompressionMethod(this.fixedBuffer.readUInt16LE(10))
-        header.setLastModFileTime(this.fixedBuffer.readUInt16LE(12))
-        header.setLastModFileDate(this.fixedBuffer.readUInt16LE(14))
-        header.setCRC32(this.fixedBuffer.readUInt32LE(16))
-        header.setCompressedSize(this.fixedBuffer.readUInt32LE(20))
-        header.setUncompressedSize(this.fixedBuffer.readUInt32LE(24))
-        header.setDiskNumberStart(this.fixedBuffer.readUInt16LE(34))
-        header.setInternalFileAttributes(this.fixedBuffer.readUInt16LE(36))
-        header.setExternalFileAttributes(this.fixedBuffer.readUInt32LE(38))
-        header.setOffsetOfLocalFileHeader(this.fixedBuffer.readUInt32LE(42))
-        */
 
         header.setFileName(this.extraBuffer.toString('utf8', 0, this.fileNameLength))
 

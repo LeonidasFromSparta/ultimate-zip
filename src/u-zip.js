@@ -1,24 +1,19 @@
 import {EOL} from 'os'
 import path from 'path'
 import File from './file'
-// import Entry from './entry'
+import Entry from './entry'
 import Zip32HeaderSerializer from './zip-32-header-serializer'
 import Zip32HeaderInfo from './zip-32-header-info'
 import CentralHeaderTransformer from './central-header-transform'
 
 export default class UZip {
 
-    options = {}
-    entries = null
-
-    constructor(path, options) {
+    constructor(path) {
 
         this.file = new File(path)
 
         const zip32Bytes = this.file.readZip32HeaderBytesSync(Zip32HeaderSerializer.HEADER_MAX_LENGTH)
         this.zip32Header = Zip32HeaderSerializer.deserealize(zip32Bytes)
-
-        this.options = options
     }
 
     testArchive = async () => {
@@ -72,74 +67,34 @@ export default class UZip {
         this.file.closeFile()
     }
 
-    getEntries = async () => {
+    getEntries = () => {
 
         return this._readEntries()
     }
 
-    /*
-    readEntries = () => {
-
-        if (this.entries !== null)
-            return this.entries
-
-        // const centralDirectories = this.zip32Header.getNumberOfCentralDirectories()
-
-        let startPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
-
-        const entries = []
-
-        this.file.openFile()
-
-        // for (let i=0; i < centralDirectories; i++) {
-        for (let i=0; i < 10; i++) {
-
-            const buffer = this.file.readBytesSync(startPos, CentralHeaderSeserializer.HEADER_MAX_LENGTH)
-            const centralHeader = CentralHeaderSeserializer.deserealize(buffer)
-
-            entries.push(new Entry(centralHeader, this.file))
-            startPos += centralHeader.getHeaderLength()
-        }
-
-        this.file.closeFile()
-
-        if (this.options.cacheHeaders !== undefined)
-            this.entries = entries
-
-        return entries
-    }
-    */
-
     _readEntries = async () => {
 
-        if (this.entries !== null)
+        if (this.entries)
             return this.entries
 
         const start = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
-        // const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + LocalHeaderSerializer.HEADER_MAX_LENGTH - 1 // -1 because inclusive
-        const highWaterMark = 1024
+        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories() - 1 // -1 because inclusive
 
-        const readStream = this.file.createReadStream(start, undefined, highWaterMark)
+        const readStream = this.file.createReadStream(start, end)
         const writeStream = new CentralHeaderTransformer()
-
-        debugger
 
         const promise = new Promise((resolve) => {
 
+            const headers = []
+
             readStream.pipe(writeStream)
 
-            writeStream.on('data', (data) => {
-
-                console.log(data)
-                debugger
-            })
-
-            writeStream.on('finish', () => resolve())
+            writeStream.on('data', (data) => headers.push(new Entry(data, this.file)))
+            writeStream.on('finish', () => resolve(headers))
         })
 
-        const data = await promise
-
-        return data
+        this.entries = await promise
+        return this.entries
     }
 
     getInfo = () => {

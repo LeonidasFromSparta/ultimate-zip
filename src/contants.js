@@ -136,3 +136,6 @@ export const ZIP_FORMAT_VERSIONS = {
     '6.3': ['File is compressed using LZMA', 'File is compressed using PPMd+', 'File is encrypted using Blowfish', 'File is encrypted using Twofish']
 }
 */
+
+export const CENTRAL_HEADER_LENGTH = 46
+export const OBJECT_CENTRAL_HEADER_LENGTH = 36

@@ -57,9 +57,14 @@ export default class File {
      * @param {int} end The end position in the file.
      * @returns {fs.ReadStream} The readable stream from - to specified positions.
      */
-    createReadStream(start, end, highWaterMark) {
+    createReadStreamWithWaterMark(start, end, highWaterMark) {
 
         return fs.createReadStream(this.path, {start, end, highWaterMark})
+    }
+
+    createReadStream(start, end) {
+
+        return fs.createReadStream(this.path, {start, end})
     }
 
     createFdReadStream(startPos, endPos) {
