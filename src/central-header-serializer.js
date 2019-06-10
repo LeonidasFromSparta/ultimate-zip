@@ -47,7 +47,7 @@ export default class CentralHeaderSeserializer {
             this.extraFieldLength = this.fixedBuffer.readUInt16LE(30)
             this.fileCommentLength = this.fixedBuffer.readUInt16LE(32)
 
-            this.extraBufferActualLength = this.fileNameLength +  this.extraFieldLength +  this.fileCommentLength
+            this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength + this.fileCommentLength
         }
 
         const extraBufferRemainingBytes = this.extraBufferActualLength - this.extraOffset
@@ -90,6 +90,11 @@ export default class CentralHeaderSeserializer {
 
         return bytes.length
         */
+    }
+
+    isDone = () => {
+
+        return this.extraOffset === this.extraBufferActualLength
     }
 
     deserealize = () => {
