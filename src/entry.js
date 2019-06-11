@@ -5,7 +5,8 @@ import CentralHeaderInfo from './central-header-info'
 import LocalHeaderSerializer from './local-header-serializer'
 import LocalHeaderTransformer from './local-header-transformer'
 import LocalHeaderInfo from './local-header-info'
-import {LOCAL_HEADER_LENGTH} from '../src/constants'
+import {LOCAL_HEADER_LENGTH} from './constants'
+import WriterLocal from './local-header-transformer.write'
 
 export default class Entry {
 
@@ -73,27 +74,42 @@ export default class Entry {
         }
     }
 
-    test = () => {
+    test = async () => {
 
         const startPos = this.header.getOffsetOfLocalFileHeader()
         const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
 
         if (!this.header.isCompressed()) {
 
-            const readStream = this.file.createReadStream(startPos, endPos)
-            const localHeaderTransformer = new LocalHeaderTransformer()
-            const crc32WriteableStream = new CRC32Transformer()
+            debugger
 
-            return new Promise((resolve) => {
+            const readStream = this.file.createReadStream(startPos, endPos)
+            // const crc32WriteableStream = new CRC32Transformer()
+
+            const locHeaderPromise = new Promise((resolve) => {
+
+                const localHeaderTransformer = new WriterLocal()
 
                 readStream.pipe(localHeaderTransformer)
-
-                localHeaderTransformer.on('finish', () => {
-
-                    debugger
-                    resolve()
-                })
+                .on('finish', () => resolve({header: localHeaderTransformer.header, chunk: localHeaderTransformer.chunk}))
             })
+
+            debugger
+
+            const data = await locHeaderPromise
+
+            readStream.unpipe()
+            readStream.unshift(data.chunk)
+
+            const crc32Promise = new Promise((resolve) => {
+
+                const writeStream = new CRC32Transformer()
+
+                readStream.pipe(localHeaderTransformer)
+                .on('finish', () => resolve({header: localHeaderTransformer.header, chunk: localHeaderTransformer.chunk}))
+            })
+
+            debugger
         }
 
         /*
@@ -138,7 +154,7 @@ export default class Entry {
         const highWaterMark = 1024
 
         const readStream = this.file.createReadStreamWithHighWaterMark(start, end, highWaterMark)
-        const writeStream = new LocalHeaderTransformer()
+        const writeStream = new WriterLocal()
 
         const promise = new Promise((resolve) => {
 
