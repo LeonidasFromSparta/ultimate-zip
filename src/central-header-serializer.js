@@ -18,7 +18,7 @@ export default class CentralHeaderSerializer {
 
         this.fixedOffset = 0
         this.extraOffset = 0
-        this.extraBufferActualLength = 0
+        this.extraBufferActualLength = null
 
         this.fileNameLength = 0
         this.extraFieldLength = 0
@@ -27,22 +27,21 @@ export default class CentralHeaderSerializer {
 
     updateFixed = (bytes) => {
 
-        const fixedBufferRemainingBytes = this.fixedBuffer.length - this.fixedOffset
+        const remainingBytes = this.fixedBuffer.length - this.fixedOffset
 
-        if (fixedBufferRemainingBytes !== 0) {
+        if (remainingBytes === 0)
+            return {bytes: 0, done: true}
 
-            const bytesToRead = bytes.length > fixedBufferRemainingBytes ? fixedBufferRemainingBytes : bytes.length
+        const bytesToRead = bytes.length > remainingBytes ? remainingBytes : bytes.length
+        bytes.copy(this.fixedBuffer, this.fixedOffset, 0, bytesToRead)
+        this.fixedOffset += bytesToRead
 
-            bytes.copy(this.fixedBuffer, this.fixedOffset, 0, bytesToRead)
-            this.fixedOffset += bytesToRead
-        }
-
-        return fixedBufferRemainingBytes
+        return {bytes: bytesToRead, done: !(this.fixedBuffer.length - this.fixedOffset)}
     }
 
     updateVar = (bytes) => {
 
-        if (this.extraBufferActualLength === 0) {
+        if (this.extraBufferActualLength === null) {
 
             this.fileNameLength = this.fixedBuffer.readUInt16LE(28)
             this.extraFieldLength = this.fixedBuffer.readUInt16LE(30)
@@ -51,71 +50,19 @@ export default class CentralHeaderSerializer {
             this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength + this.fileCommentLength
         }
 
-        const extraBufferRemainingBytes = this.extraBufferActualLength - this.extraOffset
+        const remainingBytes = this.extraBufferActualLength - this.extraOffset
 
-        if (extraBufferRemainingBytes !== 0) {
+        if (remainingBytes === 0)
+            return {bytes: 0, done: true}
 
-            const bytesToRead = bytes.length > extraBufferRemainingBytes ? extraBufferRemainingBytes : bytes.length
+        const bytesToRead = bytes.length > remainingBytes ? remainingBytes : bytes.length
+        bytes.copy(this.extraBuffer, this.extraOffset, 0, bytesToRead)
+        this.extraOffset += bytesToRead
 
-            bytes.copy(this.extraBuffer, this.extraOffset, 0, bytesToRead)
-            this.extraOffset += bytesToRead
-        }
-
-        return extraBufferRemainingBytes
+        return {bytes: bytesToRead, done: !(this.extraBufferActualLength - this.extraOffset)}
     }
-
-    /*
-    update = (bytes) => {
-
-        // how much i need to read more
-        const fixedBufferRemainingBytes = this.fixedBuffer.length - this.fixedOffset
-
-        if (fixedBufferRemainingBytes !== 0) {
-
-            const bytesToRead = bytes.length > fixedBufferRemainingBytes ? fixedBufferRemainingBytes : bytes.length
-
-            bytes.copy(this.fixedBuffer, this.fixedOffset, 0, bytesToRead)
-            this.fixedOffset += bytesToRead
-        }
-
-        // if bytes are less than header fixed length OR bytes are equal to header fixed length
-        if (bytes.length < fixedBufferRemainingBytes || bytes.length === fixedBufferRemainingBytes)
-            return bytes.length
-
-        if (this.extraBufferActualLength === 0) {
-
-            this.fileNameLength = this.fixedBuffer.readUInt16LE(28)
-            this.extraFieldLength = this.fixedBuffer.readUInt16LE(30)
-            this.fileCommentLength = this.fixedBuffer.readUInt16LE(32)
-
-            this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength + this.fileCommentLength
-        }
-
-        const extraBufferRemainingBytes = this.extraBufferActualLength - this.extraOffset
-
-        if (extraBufferRemainingBytes !== 0) {
-
-            const bytesReadFixedBuffer = bytes.length > fixedBufferRemainingBytes ? fixedBufferRemainingBytes : bytes.length
-            const bytesToRead = (bytes.length - bytesReadFixedBuffer) > extraBufferRemainingBytes ? extraBufferRemainingBytes : bytes.length - bytesReadFixedBuffer
-
-            bytes.copy(this.extraBuffer, this.extraOffset, bytesReadFixedBuffer, bytesReadFixedBuffer + bytesToRead)
-            this.extraOffset += bytesToRead
-        }
-
-        return fixedBufferRemainingBytes + extraBufferRemainingBytes
-    }
-    */
-
-    isDone = () => {
-
-        return this.extraOffset === this.extraBufferActualLength
-    }
-
-    x = 0
 
     deserealize = () => {
-
-        console.log(++this.x)
 
         const signature = this.fixedBuffer.readUInt32LE(0)
 
