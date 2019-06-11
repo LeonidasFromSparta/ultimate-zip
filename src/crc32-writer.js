@@ -1,7 +1,7 @@
-import {Transform, Writable} from 'stream'
+import {Writable} from 'stream'
 import CRC32 from './crc32'
 
-export default class CRC32Transformer extends Writable {
+export default class CRC32Writer extends Writable {
 
     crc32 = new CRC32()
 
@@ -9,11 +9,7 @@ export default class CRC32Transformer extends Writable {
 
         this.crc32.update(chunk)
         callback()
-    }
 
-    _final = (callback) => {
-
-        this.push(this.crc32.getValue())
-        callback()
+        debugger
     }
 }

@@ -3,13 +3,13 @@ import LocalHeaderSerializer from './local-header-serializer'
 
 export default class LocalHeaderWriteable extends Transform {
 
-    constructor() {
+    deserializer = new LocalHeaderSerializer()
+    header
 
-        super({objectMode: true})
-        this.deserializer = new LocalHeaderSerializer()
-    }
+    _transform = (chunk, encoding, callback) => {
 
-    _write = (chunk, encoding, callback) => {
+        // time for deserializing
+        if (this.header !== null)
 
         let bytesRead = 0
 
@@ -26,22 +26,14 @@ export default class LocalHeaderWriteable extends Transform {
 
             if (varRead.done) {
 
+                this.header = this.deserializer.deserealize()
+                this.chunk = chunk.slice(bytesRead)
+
                 debugger
-                this.push(this.deserializer.deserealize())
-                // this.end()
-                // this.unshift(chunk.slice(bytesRead))
                 break
             }
         }
 
-        debugger
         callback()
-    }
-
-    _read (size) {
-
-
-
-        debugger
     }
 }

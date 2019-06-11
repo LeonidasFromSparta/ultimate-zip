@@ -10,9 +10,8 @@ const zip = new UZip('./samples/7z-windows-normal.zip', {cacheHeaders: true})
 
 zip._readEntries().then(async (data) => {
 
-    console.log(data[0])
-    data[0].test()
-    debugger
+    for (const e of data)
+        await e.test()
 })
 
 /*

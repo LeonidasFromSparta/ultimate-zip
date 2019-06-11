@@ -1,12 +1,13 @@
 import {createInflateRaw} from 'zlib'
 import CRC32PassThroughStream from './crc32-passthrough-stream'
-import CRC32Transformer from './crc32-transformer'
 import CentralHeaderInfo from './central-header-info'
-import LocalHeaderSerializer from './local-header-serializer'
-import LocalHeaderTransformer from './local-header-transformer'
 import LocalHeaderInfo from './local-header-info'
 import {LOCAL_HEADER_LENGTH} from './constants'
-import WriterLocal from './local-header-transformer.write'
+import LocalHeaderWriter from './local-header-writer'
+import CRC32Writer from './crc32-writer'
+import BytesCounterStream from './bytes-counter-stream'
+// import fs from 'fs'
+import Dupa from './dupa'
 
 export default class Entry {
 
@@ -77,37 +78,79 @@ export default class Entry {
     test = async () => {
 
         const startPos = this.header.getOffsetOfLocalFileHeader()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
+        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 - 1
 
-        if (!this.header.isCompressed()) {
+        if (!this.header.isDirectory() && !this.header.isCompressed()) {
+
+            /*
+            const fd = fs.openSync('./samples/7z-windows-normal.zip', 'r')
+            const stats = fs.fstatSync(fd)
+
+            const buffer = Buffer.allocUnsafe(70)
+            const position = this.header.getOffsetOfLocalFileHeader() + 83
+
+            fs.readSync(Number(fd), buffer, 0, 70, position)
+            fs.closeSync(fd)
+
+            console.log(buffer.toString())
+            */
 
             debugger
 
             const readStream = this.file.createReadStream(startPos, endPos)
-            // const crc32WriteableStream = new CRC32Transformer()
 
-            const locHeaderPromise = new Promise((resolve) => {
+            const localHeaderPromise = new Promise((resolve) => {
 
-                const localHeaderTransformer = new WriterLocal()
+                const dupa = new Dupa()
+                const writeStream = new LocalHeaderWriter()
 
-                readStream.pipe(localHeaderTransformer)
-                .on('finish', () => resolve({header: localHeaderTransformer.header, chunk: localHeaderTransformer.chunk}))
+                readStream
+                .pipe(dupa)
+                .pipe(writeStream)
+                .on('finish', () => {
+
+                    readStream.unpipe()
+
+                    debugger
+
+                    readStream.unshift(writeStream.chunk)
+
+                    console.log(new LocalHeaderInfo(writeStream.header).toString())
+
+                    resolve(writeStream.header)
+                })
             })
 
             debugger
 
-            const data = await locHeaderPromise
-
-            readStream.unpipe()
-            readStream.unshift(data.chunk)
+            await localHeaderPromise
 
             const crc32Promise = new Promise((resolve) => {
 
-                const writeStream = new CRC32Transformer()
+                const counterStream = new BytesCounterStream(this.header.getUncompressedSize())
+                const writeStream = new CRC32Writer()
 
-                readStream.pipe(localHeaderTransformer)
-                .on('finish', () => resolve({header: localHeaderTransformer.header, chunk: localHeaderTransformer.chunk}))
+                debugger
+
+                readStream
+                .pipe(counterStream)
+                .pipe(writeStream)
+                .on('finish', () => {
+
+                    debugger
+
+                    readStream.unpipe()
+
+                    if (writeStream.crc32.getValue() !== this.header.getCRC32())
+                        console.log('keke promplem')
+
+                    resolve()
+                })
+
+                // readStream.resume()
             })
+
+            await crc32Promise
 
             debugger
         }
@@ -154,7 +197,7 @@ export default class Entry {
         const highWaterMark = 1024
 
         const readStream = this.file.createReadStreamWithHighWaterMark(start, end, highWaterMark)
-        const writeStream = new WriterLocal()
+        const writeStream = new LocalHeaderWriter()
 
         const promise = new Promise((resolve) => {
 

@@ -18,7 +18,7 @@ export default class LocalHeaderSeserializer {
 
         this.fixedOffset = 0
         this.extraOffset = 0
-        this.extraBufferActualLength = 0
+        this.extraBufferActualLength = null
 
         this.fileNameLength = 0
         this.extraFieldLength = 0
