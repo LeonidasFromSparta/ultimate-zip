@@ -8,11 +8,13 @@ const zip = new UZip('./samples/7z-windows-normal.zip', {cacheHeaders: true})
 
 // console.log(zip.getInfo())
 
+/*
 zip._readEntries().then(async (data) => {
 
     for (const e of data)
-        await e.test()
+        await e.extract('.')
 })
+*/
 
 /*
 zip.getEntries().then(async (data) => {
@@ -21,14 +23,11 @@ zip.getEntries().then(async (data) => {
 })
 */
 
-/*
-zip.extractArchive('C:/Users/leonw/Desktop/ultimate-zip.js/extr').then(() => {
-
+zip.extractArchive('./extr').then(() => {
 
     const end = process.hrtime.bigint()
     console.log('unzip time: ' + new Number((end - start)) / 1e+9)
 })
-*/
 
 /*
 zip.extractByRegex('asd', /Eam ex.txt/).then(() => {

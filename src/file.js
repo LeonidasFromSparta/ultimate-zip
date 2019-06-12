@@ -116,17 +116,11 @@ export default class File {
 
     makeDir = (dir) => {
 
-        return new Promise((resolve) => {
-
-            fs.mkdir(dir, () => {
-
-                resolve()
-            })
-        })
+        return new Promise((resolve) => fs.mkdir(dir, resolve))
     }
 
-    createWriteStream = (filename) => {
+    createWriteStream = (fileName) => {
 
-        return fs.createWriteStream(filename, {flags: 'w'})
+        return fs.createWriteStream(fileName)
     }
 }

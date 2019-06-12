@@ -1,57 +1,47 @@
-import {Transform} from 'stream'
-import LocalHeaderSerializer from './local-header-serializer'
+import {Writable} from 'stream'
+import LocalHeaderSerializer from './local-header-decoder'
 
-export default class LocalHeaderWriteable extends Transform {
+export default class LocalHeaderWriteable extends Writable {
 
-    deserializer = new LocalHeaderSerializer()
-    header = null
+    constructor(readStream, centralHeader, decoder) {
 
-    _transform = (chunk, encoding, callback) => {
+        super({emitClose: false, autoDestroy: true})
 
-        // time for deserializing
+        this.readStream = readStream
+        this.centralHeader = centralHeader
+        this.decoder = decoder
+    }
+
+    _write = (chunk, encoding, callback) => {
+
         let bytesRead = 0
 
         while (bytesRead < chunk.length) {
 
-            // take care the header
-            if (this.header === null) {
+            const fixRead = this.decoder.updateFixed(chunk.slice(bytesRead))
+            bytesRead += fixRead.bytes
 
-                const fixRead = this.deserializer.updateFixed(chunk.slice(bytesRead))
-                bytesRead += fixRead.bytes
+            if (!fixRead.done)
+                continue
 
-                if (!fixRead.done)
-                    continue
+            const varRead = this.decoder.updateVar(chunk.slice(bytesRead))
+            bytesRead += varRead.bytes
 
-                const varRead = this.deserializer.updateVar(chunk.slice(bytesRead))
-                bytesRead += varRead.bytes
+            if (varRead.done) {
 
-                if (varRead.done) {
+                this.readStream.pause()
+                this.readStream.unshift(chunk.slice(bytesRead))
 
-                    this.header = this.deserializer.deserealize()
-                    this.deserializer.reset()
-
-                    this.max = this.header.getCompressedSize()
-                    this.count = 0
-                } else {
-
-                    continue
-                }
-            }
-
-            // start flowing the data
-            if ((this.count + chunk.length - bytesRead) < this.max) {
-
-                this.push(chunk.slice(bytesRead))
-                this.count += (chunk.length - bytesRead)
-            } else {
-
-                const bytesRemaining = this.max - this.count
-                this.push(chunk.slice(bytesRead, bytesRead + bytesRemaining))
-                this.push(null)
-                bytesRead += (this.max - this.count)
-                this.header = null
+                this.header = this.decoder.decode()
+                this.end()
+                break
             }
         }
+
+        callback()
+    }
+
+    _final = (callback) => {
 
         callback()
     }

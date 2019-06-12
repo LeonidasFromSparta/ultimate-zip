@@ -2,7 +2,7 @@ import LocalHeader from './local-header'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import {OBJECT_LOCAL_HEADER_LENGTH} from './constants'
 
-export default class LocalHeaderSeserializer {
+export default class LocalHeaderDecoder {
 
     signature = 0x04034b50
 
@@ -45,7 +45,7 @@ export default class LocalHeaderSeserializer {
             this.fileNameLength = this.fixedBuffer.readUInt16LE(26)
             this.extraFieldLength = this.fixedBuffer.readUInt16LE(28)
 
-            this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength + this.fileCommentLength
+            this.extraBufferActualLength = this.fileNameLength + this.extraFieldLength
         }
 
         const remainingBytes = this.extraBufferActualLength - this.extraOffset
@@ -60,7 +60,7 @@ export default class LocalHeaderSeserializer {
         return {bytes: bytesToRead, done: !(this.extraBufferActualLength - this.extraOffset)}
     }
 
-    deserealize = () => {
+    decode = () => {
 
         const signature = this.fixedBuffer.readUInt32LE(0)
 

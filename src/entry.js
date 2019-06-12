@@ -1,13 +1,13 @@
 import {createInflateRaw} from 'zlib'
-import CRC32PassThroughStream from './crc32-passthrough-stream'
 import CentralHeaderInfo from './central-header-info'
 import LocalHeaderInfo from './local-header-info'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import LocalHeaderWriter from './local-header-writer'
 import CRC32Writer from './crc32-writer'
-import BytesCounterStream from './bytes-counter-stream'
-// import fs from 'fs'
-import Dupa from './dupa'
+import CRC32Xform from './crc32-xform'
+import DataControlXform from './data-control-xform'
+import {once} from 'events'
+import LocalHeaderDecoder from './local-header-decoder'
 
 export default class Entry {
 
@@ -17,164 +17,80 @@ export default class Entry {
         this.file = file
     }
 
-    extract = async (path) => {
-
-        const filename = path + '/' + this.header.getFileName()
-
-        if (this.header.isDirectory())
-            return this.file.makeDir(filename)
-
-        const startPos = this.header.getOffsetOfLocalFileHeader() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileName().length
-        const endPos = this.header.getOffsetOfLocalFileHeader() + this.header.getCompressedSize() + LocalHeaderSerializer.HEADER_FIXED_LENGTH + this.header.getFileName().length - 1
-
-        if (this.header.isCompressed()) {
-
-            return new Promise(async (resolve) => {
-
-                const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32PassThroughStream = new CRC32PassThroughStream()
-                const writeStream = this.file.createWriteStream(filename)
-
-                readStream.pipe(createInflateRaw()).pipe(crc32PassThroughStream).pipe(writeStream)
-
-                crc32PassThroughStream.on('end', () => {
-
-                    if (crc32PassThroughStream.getValue() !== this.header.getCRC32()) {
-
-                        console.log(this.header.toString())
-                    }
-                })
-
-                writeStream.on('finish', () => resolve())
-            })
-        }
-
-        if (!this.header.isCompressed()) {
-
-            return new Promise(async (resolve) => {
-
-                const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32PassThroughStream = new CRC32PassThroughStream()
-                const writeStream = this.file.createWriteStream(filename)
-
-                readStream.pipe(crc32PassThroughStream).pipe(writeStream)
-
-                writeStream.on('finish', () => {
-
-                    resolve()
-                })
-
-                crc32PassThroughStream.on('end', () => {
-
-                    if (crc32PassThroughStream.getValue() !== this.header.getCRC32()) {
-
-                        console.log(this.header.toString())
-                    }
-                })
-            })
-        }
-    }
-
-    test = async () => {
+    extract = (outputPath) => {
 
         const startPos = this.header.getOffsetOfLocalFileHeader()
         const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 - 1
 
-        if (!this.header.isDirectory() && !this.header.isCompressed()) {
+        const readStream = this.file.createReadStream(startPos, endPos)
+        const localHeaderDecoder = new LocalHeaderDecoder()
 
-            /*
-            const fd = fs.openSync('./samples/7z-windows-normal.zip', 'r')
-            const stats = fs.fstatSync(fd)
+        return this._extract(outputPath, readStream, localHeaderDecoder)
+    }
 
-            const buffer = Buffer.allocUnsafe(70)
-            const position = this.header.getOffsetOfLocalFileHeader() + 83
+    _extract = async (outputPath, streamReader, localHeaderDecoder) => {
 
-            fs.readSync(Number(fd), buffer, 0, 70, position)
-            fs.closeSync(fd)
+        const fileName = outputPath + this.header.getFileName()
 
-            console.log(buffer.toString())
-            */
+        const localHeaderWriter = new LocalHeaderWriter(streamReader, this.header, localHeaderDecoder)
+        await once(streamReader.pipe(localHeaderWriter), 'finish')
 
-            debugger
+        if (this.header.isDirectory()) {
 
-            const readStream = this.file.createReadStream(startPos, endPos)
-
-            const localHeaderPromise = new Promise((resolve) => {
-
-                const dupa = new Dupa()
-                const writeStream = new LocalHeaderWriter()
-
-                readStream
-                .pipe(dupa)
-                .pipe(writeStream)
-                .on('finish', () => {
-
-                    readStream.unpipe()
-
-                    debugger
-
-                    readStream.unshift(writeStream.chunk)
-
-                    console.log(new LocalHeaderInfo(writeStream.header).toString())
-
-                    resolve(writeStream.header)
-                })
-            })
-
-            debugger
-
-            await localHeaderPromise
-
-            const crc32Promise = new Promise((resolve) => {
-
-                const counterStream = new BytesCounterStream(this.header.getUncompressedSize())
-                const writeStream = new CRC32Writer()
-
-                debugger
-
-                readStream
-                .pipe(counterStream)
-                .pipe(writeStream)
-                .on('finish', () => {
-
-                    debugger
-
-                    readStream.unpipe()
-
-                    if (writeStream.crc32.getValue() !== this.header.getCRC32())
-                        console.log('keke promplem')
-
-                    resolve()
-                })
-
-                // readStream.resume()
-            })
-
-            await crc32Promise
-
-            debugger
+            await this.file.makeDir(fileName)
+            return
         }
 
-        /*
+        const dataControlXform = new DataControlXform(streamReader, this.header.getCompressedSize())
+        const crc32Xform = new CRC32Xform(this.header)
+        const fileWriter = this.file.createWriteStream(fileName)
+
+        if (!this.header.isCompressed()) {
+
+            await once(streamReader.pipe(dataControlXform).pipe(crc32Xform).pipe(fileWriter), 'finish')
+            return
+        }
+
         if (this.header.isCompressed()) {
 
-            return new Promise(async (resolve) => {
-
-                const readStream = this.file.createFdReadStream(startPos, endPos)
-                const crc32WriteableStream = new CRC32Transformer()
-
-                readStream.pipe(createInflateRaw()).pipe(crc32WriteableStream)
-
-                crc32WriteableStream.on('finsih', () => {
-
-                    if (crc32WriteableStream.getValue() !== this.header.getCRC32())
-                        console.log('kekeke')
-
-                    resolve()
-                })
-            })
+            await once(streamReader.pipe(dataControlXform).pipe(createInflateRaw()).pipe(crc32Xform).pipe(fileWriter), 'finish')
+            return
         }
-        */
+    }
+
+    test = () => {
+
+        const startPos = this.header.getOffsetOfLocalFileHeader()
+        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 - 1
+
+        const readStream = this.file.createReadStream(startPos, endPos)
+        const localHeaderDecoder = new LocalHeaderDecoder()
+
+        return this._test(readStream, localHeaderDecoder)
+    }
+
+    _test = async (readStream, localHeaderDecoder) => {
+
+        const localHeaderWriter = new LocalHeaderWriter(readStream, this.header, localHeaderDecoder)
+        await once(readStream.pipe(localHeaderWriter), 'finish')
+
+        if (this.header.isDirectory())
+            return
+
+        const dataControlXform = new DataControlXform(readStream, this.header.getCompressedSize())
+        const crc32Writer = new CRC32Writer(this.header)
+
+        if (!this.header.isCompressed()) {
+
+            await once(readStream.pipe(dataControlXform).pipe(crc32Writer), 'finish')
+            return
+        }
+
+        if (this.header.isCompressed()) {
+
+            await once(readStream.pipe(dataControlXform).pipe(createInflateRaw()).pipe(crc32Writer), 'finish')
+            return
+        }
     }
 
     isDirectory = () => this.header.isDirectory()

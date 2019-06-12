@@ -5,6 +5,7 @@ import Entry from './entry'
 import Zip32HeaderSerializer from './zip-32-header-serializer'
 import Zip32HeaderInfo from './zip-32-header-info'
 import CentralHeaderTransformer from './central-header-transformer'
+import LocalHeaderDecoder from './local-header-decoder'
 
 export default class UZip {
 
@@ -31,16 +32,22 @@ export default class UZip {
         this.file.closeFile()
     }
 
-    extractArchive = async (path) => {
+    extractArchive = async (outputPath) => {
 
-        const entries = this._readEntries()
+        outputPath = outputPath + '/'
+        const entries = await this._readEntries()
 
-        this.file.openFile()
+        const startPos = 0
+        const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() - 1
 
-        for (let i=0; i < entries.length; i++)
-            await entries[i].extract(path)
+        const readStream = this.file.createReadStream(startPos, endPos)
+        const localHeaderDecoder = new LocalHeaderDecoder()
 
-        this.file.closeFile()
+        for (let i=0; i < entries.length; i++) {
+
+            await entries[i]._extract(outputPath, readStream, localHeaderDecoder)
+            localHeaderDecoder.reset()
+        }
     }
 
     extractByRegex = async (regex, path) => {
