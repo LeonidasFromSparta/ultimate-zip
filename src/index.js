@@ -12,7 +12,7 @@ const zip = new UZip('./samples/7z-windows-normal.zip', {cacheHeaders: true})
 zip._readEntries().then(async (data) => {
 
     for (const e of data)
-        await e.extract('.')
+        await e.extract('./extr')
 })
 */
 

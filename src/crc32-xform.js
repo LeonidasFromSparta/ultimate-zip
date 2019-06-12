@@ -14,6 +14,7 @@ export default class CRC32Xform extends Transform {
     _write(chunk, encoding, callback) {
 
         this.crc32.update(chunk)
+        this.push(chunk)
         callback()
     }
 

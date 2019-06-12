@@ -1,5 +1,4 @@
 import {Writable} from 'stream'
-import LocalHeaderSerializer from './local-header-decoder'
 
 export default class LocalHeaderWriteable extends Writable {
 
@@ -14,35 +13,38 @@ export default class LocalHeaderWriteable extends Writable {
 
     _write = (chunk, encoding, callback) => {
 
-        let bytesRead = 0
+        if (this.centralHeader.getFileName() === 'node_modules/@babel/core/node_modules/@babel/traverse/lib/scope/lib/')
+            debugger
 
-        while (bytesRead < chunk.length) {
+        const fixRead = this.decoder.updateFixed(chunk)
 
-            const fixRead = this.decoder.updateFixed(chunk.slice(bytesRead))
-            bytesRead += fixRead.bytes
+        if (!fixRead.done)
+            return callback()
 
-            if (!fixRead.done)
-                continue
+        const varRead = this.decoder.updateVar(chunk.slice(fixRead.bytes))
 
-            const varRead = this.decoder.updateVar(chunk.slice(bytesRead))
-            bytesRead += varRead.bytes
+        if (!varRead.done)
+            return callback()
 
-            if (varRead.done) {
+        // callback()
 
-                this.readStream.pause()
-                this.readStream.unshift(chunk.slice(bytesRead))
 
-                this.header = this.decoder.decode()
-                this.end()
-                break
-            }
-        }
+
+        this.readStream.pause()
+        this.readStream.unshift(chunk.slice(fixRead.bytes + varRead.bytes))
+
+
+        this.end()
+        // this.destroy()
+
+        this.header = this.decoder.decode()
 
         callback()
     }
 
     _final = (callback) => {
 
+        console.log('dumbale')
         callback()
     }
 }

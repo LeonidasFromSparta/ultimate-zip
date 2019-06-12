@@ -40,14 +40,20 @@ export default class UZip {
         const startPos = 0
         const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() - 1
 
-        const readStream = this.file.createReadStream(startPos, endPos)
-        const localHeaderDecoder = new LocalHeaderDecoder()
+        const streamReader = this.file.createReadStream(startPos, endPos)
+        const decoder = new LocalHeaderDecoder()
 
         for (let i=0; i < entries.length; i++) {
 
-            await entries[i]._extract(outputPath, readStream, localHeaderDecoder)
-            localHeaderDecoder.reset()
+            await entries[i]._extract(outputPath, streamReader, decoder)
+
+            streamReader.unpipe()
+
+
+            decoder.reset()
         }
+
+        streamReader.destroy()
     }
 
     extractByRegex = async (regex, path) => {

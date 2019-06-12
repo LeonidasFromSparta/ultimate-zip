@@ -17,23 +17,31 @@ export default class Entry {
         this.file = file
     }
 
-    extract = (outputPath) => {
+    extract = async (outputPath) => {
+
+        outputPath = outputPath + '/'
 
         const startPos = this.header.getOffsetOfLocalFileHeader()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 - 1
+        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
 
-        const readStream = this.file.createReadStream(startPos, endPos)
-        const localHeaderDecoder = new LocalHeaderDecoder()
+        const streamReader = this.file.createReadStream(startPos, endPos)
+        const decoder = new LocalHeaderDecoder()
 
-        return this._extract(outputPath, readStream, localHeaderDecoder)
+        await this._extract(outputPath, streamReader, decoder)
+
+        streamReader.destroy()
     }
 
-    _extract = async (outputPath, streamReader, localHeaderDecoder) => {
+    _extract = async (outputPath, streamReader, decoder) => {
+
+        console.log(this.header.getFileName())
 
         const fileName = outputPath + this.header.getFileName()
 
-        const localHeaderWriter = new LocalHeaderWriter(streamReader, this.header, localHeaderDecoder)
-        await once(streamReader.pipe(localHeaderWriter), 'finish')
+        const streamWriter = new LocalHeaderWriter(streamReader, this.header, decoder)
+        await once(streamReader.pipe(streamWriter), 'finish')
+
+        streamReader.unpipe(streamWriter)
 
         if (this.header.isDirectory()) {
 
@@ -41,7 +49,7 @@ export default class Entry {
             return
         }
 
-        const dataControlXform = new DataControlXform(streamReader, this.header.getCompressedSize())
+        const dataControlXform = new DataControlXform(streamReader, this.header)
         const crc32Xform = new CRC32Xform(this.header)
         const fileWriter = this.file.createWriteStream(fileName)
 

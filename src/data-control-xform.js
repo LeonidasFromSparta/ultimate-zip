@@ -2,51 +2,83 @@ import {Transform} from 'stream'
 
 export default class DataControlXform extends Transform {
 
-    constructor(readStream, size) {
+    constructor(streamReader, header) {
 
         super()
 
-        this.readStream = readStream
-        this.size = size
+        this.streamReader = streamReader
+        this.size = header.getCompressedSize()
         this.counter = 0
+
+        this.header = header
+
+        // if (this.header.getFileName() === 'node_modules/@babel/core/lib/tools/build-external-helpers.js')
+        // debugger
     }
 
     _transform(chunk, encoding, callback) {
 
+        // if (this.header.getFileName() === 'node_modules/@babel/core/lib/tools/build-external-helpers.js')
+        //    debugger
+        // console.log(this.header.getFileName() + ' wow')
+
+
         const nextCounterSize = chunk.length + this.counter
 
-        if (nextCounterSize > this.size) {
+        try {
 
-            const bytesRemaining = this.size - this.counter
-            const remainingChunk = chunk.slice(0, bytesRemaining)
-            const unshiftedChunk = chunk.slice(bytesRemaining)
+            if (nextCounterSize > this.size) {
 
-            this.push(remainingChunk)
-            this.push(null)
-            this.end()
+                const bytesRemaining = this.size - this.counter
+                const remainingChunk = chunk.slice(0, bytesRemaining)
+                const unshiftedChunk = chunk.slice(bytesRemaining)
 
-            this.readStream.pause()
-            this.readStream.unshift(unshiftedChunk)
+                this.push(remainingChunk)
+                this.push(null)
+                // this.end()
 
-            callback()
-            return
+                // callback()
+
+                this.streamReader.pause()
+                this.streamReader.unshift(unshiftedChunk)
+
+                return
+            }
+        } catch (ex) {
+
+            debugger
         }
 
-        if (nextCounterSize < this.size) {
+        try {
 
-            this.counter += chunk.length
-            this.push(chunk)
+            if (nextCounterSize < this.size) {
 
-            callback()
-            return
+                this.counter += chunk.length
+                this.push(chunk)
+
+                callback()
+                return
+            }
+
+        } catch (ex) {
+
+            debugger
         }
+
+    try {
+
 
         this.push(chunk)
         this.push(null)
-        this.end()
+        // this.end()
 
-        this.readStream.pause()
+        // callback()
 
-        callback()
+        this.streamReader.pause()
+
+    } catch (ex) {
+
+        debugger
+    }
     }
 }
