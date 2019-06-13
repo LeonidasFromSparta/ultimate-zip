@@ -39,7 +39,18 @@ export default class Entry {
         const fileName = outputPath + this.header.getFileName()
 
         const streamWriter = new LocalHeaderWriter(streamReader, this.header, decoder)
-        await once(streamReader.pipe(streamWriter), 'finish')
+
+        const decodePromise = new Promise((resolve) => {
+
+            streamReader
+            .pipe(streamWriter)
+            .on('finish', () => {
+
+                resolve()
+            })
+        })
+
+        await decodePromise
 
         streamReader.unpipe(streamWriter)
 

@@ -13,7 +13,9 @@ export default class LocalHeaderWriteable extends Writable {
 
     _write = (chunk, encoding, callback) => {
 
-        if (this.centralHeader.getFileName() === 'node_modules/@babel/core/node_modules/@babel/traverse/lib/scope/lib/')
+        debugger
+
+        if (this.centralHeader.getFileName() === 'node_modules/.bin/checksum')
             debugger
 
         const fixRead = this.decoder.updateFixed(chunk)
@@ -26,6 +28,11 @@ export default class LocalHeaderWriteable extends Writable {
         if (!varRead.done)
             return callback()
 
+        if (!this._writableState.needDrain) {
+
+            this.end()
+        }
+
         // callback()
 
 
@@ -34,12 +41,12 @@ export default class LocalHeaderWriteable extends Writable {
         this.readStream.unshift(chunk.slice(fixRead.bytes + varRead.bytes))
 
 
-        this.end()
         // this.destroy()
 
         this.header = this.decoder.decode()
 
         callback()
+
     }
 
     _final = (callback) => {

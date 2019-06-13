@@ -22,6 +22,7 @@ export default class DataControlXform extends Transform {
         //    debugger
         // console.log(this.header.getFileName() + ' wow')
 
+        debugger
 
         const nextCounterSize = chunk.length + this.counter
 
