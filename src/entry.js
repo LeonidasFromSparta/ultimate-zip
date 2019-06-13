@@ -43,9 +43,10 @@ export default class Entry {
         const decodePromise = new Promise((resolve) => {
 
             streamReader
-            .pipe(streamWriter)
-            .on('finish', () => {
+            .on('readable', () => {
 
+                const keke = streamReader.read(1024)
+                debugger
                 resolve()
             })
         })
