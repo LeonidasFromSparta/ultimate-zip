@@ -20,17 +20,28 @@ export default class UZip {
 
     testArchive = async () => {
 
-        const entries = this._readEntries()
+        const entries = await this._readEntries()
+        const decoder = new LocalHeaderDecoder()
+        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
 
-        this.file.openFile()
+        await this.file.open()
+        let fileReader = this.file.createFdReadStream(0, end)
 
-        for (const entry of entries) {
+        for (let i=0; i < entries.length; i++) {
 
-            if (!entry.isDirectory())
-                await entry.test(path)
+            const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
+
+            if (fileReaderPos !== entries[i].header.getOffsetOfLocalFileHeader()) {
+
+                const start = entries[i].header.getOffsetOfLocalFileHeader()
+                fileReader = this.file.createFdReadStream(start, end)
+            }
+
+            await entries[i]._test(fileReader, decoder)
+            decoder.reset()
         }
 
-        this.file.closeFile()
+        await this.file.close()
     }
 
     extractArchive = async (outputPath) => {
@@ -38,28 +49,26 @@ export default class UZip {
         outputPath = outputPath + '/'
         const entries = await this._readEntries()
         const decoder = new LocalHeaderDecoder()
-        debugger
+        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
 
-        // await this.file.open()
-        /*
-        const startPos = entries[i].header.getOffsetOfLocalFileHeader()
-        const endPos = entries[i].header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + entries[i]
-        let streamReader = this.file.createFdReadStream(startPos, endPos)
-        */
-
-        const startPos = 0
-        const endPos = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() - 1
-        let streamReader = this.file.createReadStream(startPos, endPos)
+        await this.file.open()
+        let fileReader = this.file.createFdReadStream(0, end)
 
         for (let i=0; i < entries.length; i++) {
 
-            await entries[i]._extract(outputPath, streamReader, decoder)
+            const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
 
-            // streamReader.close()
+            if (fileReaderPos !== entries[i].header.getOffsetOfLocalFileHeader()) {
+
+                const start = entries[i].header.getOffsetOfLocalFileHeader()
+                fileReader = this.file.createFdReadStream(start, end)
+            }
+
+            await entries[i]._extract(outputPath, fileReader, decoder)
             decoder.reset()
         }
 
-        // await this.file.close()
+        await this.file.close()
     }
 
     extractByRegex = async (regex, path) => {
@@ -97,7 +106,7 @@ export default class UZip {
             return this.entries
 
         const start = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
-        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories() - 1 // -1 because inclusive
+        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories() - 1
 
         const readStream = this.file.createReadStream(start, end)
         const writeStream = new CentralHeaderTransformer()

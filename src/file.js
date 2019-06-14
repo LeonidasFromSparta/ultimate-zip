@@ -69,15 +69,12 @@ export default class File {
 
     createFdReadStream(start, end) {
 
-        return fs.createReadStream(null, {fd: this.fd, autoClose: false, start, end})
+        return fs.createReadStream(null, {fd: this.fd, start, end})
     }
 
     open = async () => {
 
-        this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => {
-
-            resolve(fd)
-        }))
+        this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => resolve(fd)))
     }
 
     close = async () => {

@@ -31,22 +31,17 @@ export default class Entry {
         streamReader.destroy()
     }
 
-    _extract = async (outputPath, streamReader, decoder) => {
-
-        // console.log(this.header.getFileName())
-
-        //if ('node_modules/.bin/atob.cmd' === this.header.getFileName())
-         //   debugger
+    _extract = async (outputPath, fileReader, decoder) => {
 
         const fileName = outputPath + this.header.getFileName()
 
         const decodePromise = new Promise((resolve) => {
 
-            streamReader.on('readable', () => {
+            fileReader.on('readable', () => {
 
                 for (;;) {
 
-                    const data = streamReader.read(1024)
+                    const data = fileReader.read(1024)
 
                     if (!data)
                         return
@@ -55,11 +50,15 @@ export default class Entry {
 
                     if (unshiftedChunk) {
 
-                        streamReader.removeAllListeners()
-                        streamReader.unshift(unshiftedChunk)
+                        fileReader.removeAllListeners()
+                        fileReader.unshift(unshiftedChunk)
 
                         decoder.decode()
                         resolve()
+
+                        // console.log(this.header.getFileName())
+                        // console.log('loc header: ' + decoder.offset)
+                        // console.log('loc size:' + this.header.getCompressedSize())
                         return
                     }
                 }
@@ -75,62 +74,92 @@ export default class Entry {
         }
 
         const fileWriter = this.file.createWriteStream(fileName)
+        const size = this.header.getCompressedSize()
         const crc32 = new CRC32()
 
-        if (this.header.isCompressed())
-            return await new Promise((resolve) => {
+        let counter = 0
 
-                const size = this.header.getCompressedSize()
+        if (this.header.isCompressed()) {
+
+            const promise = new Promise((resolve) => {
+
                 let counter = 0
 
-                const inflator = createInflateRaw()
-                inflator.pipe(fileWriter)
+                const inflater = createInflateRaw()
+                inflater.pipe(fileWriter)
 
-                streamReader.on('data', (data) => {
+                inflater.on('drain', () => fileReader.resume())
+                fileWriter.on('finish', resolve)
 
-                    if ((counter + data.length) < size) {
+                fileReader.on('data', (chunk) => {
 
-                        counter += data.length
-                        crc32.update(data)
+                    const remainingBytes = size - counter
 
-                        if (!fileWriter.write(data, 'buffer')) {
+                    if (chunk.length < remainingBytes) {
 
-                            // console.log('enough write!')
-                            streamReader.pause()
-                            return
-                        }
-                    } else {
+                        if (!inflater.write(chunk, 'buffer'))
+                            fileReader.pause()
 
-                        streamReader.pause()
+                        counter += chunk.length
+                        crc32.update(chunk)
 
-                        // console.log('bullshit')
-                        debugger
-
-
-                        fileWriter.end(data.slice(0, size - counter))
-                        streamReader.pause()
-                        streamReader.unshift(data.slice(size - counter))
-                        resolve()
+                        return
                     }
+
+                    const partialChunk = chunk.slice(0, remainingBytes)
+
+                    crc32.update(partialChunk)
+                    inflater.end(partialChunk)
+
+                    fileReader.pause()
+                    fileReader.unshift(chunk.slice(remainingBytes))
+                    resolve()
                 })
 
-                fileWriter.on('drain', () => {
-
-                    // console.log('driner')
-                    streamReader.resume()
-                })
-
-                streamReader.resume()
+                fileReader.resume()
             })
 
-            streamReader.removeAllListeners()
+            await promise
+        }
 
-            debugger
-            /*
-        if (this.header.isCompressed())
-            return await new Promise((resolve) =>
-                streamReader.pipe(dataControlXform).pipe(createInflateRaw()).pipe(crc32Xform).pipe(fileWriter).on('finish', resolve))
-                */
+        if (!this.header.isCompressed()) {
+
+            const promise = new Promise((resolve) => {
+
+                fileWriter.on('drain', () => fileReader.resume())
+                fileWriter.on('finish', resolve)
+
+                fileReader.on('data', (chunk) => {
+
+                    const remainingBytes = size - counter
+
+                    if (chunk.length < remainingBytes) {
+
+                        if (!fileWriter.write(chunk, 'buffer'))
+                            fileReader.pause()
+
+                        counter += chunk.length
+                        crc32.update(chunk)
+
+                        return
+                    }
+
+                    const partialChunk = chunk.slice(0, remainingBytes)
+
+                    crc32.update(partialChunk)
+                    fileWriter.end(partialChunk)
+
+                    fileReader.pause()
+                    fileReader.unshift(chunk.slice(remainingBytes))
+                })
+
+                fileReader.resume()
+            })
+
+            await promise
+        }
+
+       fileReader.removeAllListeners()
     }
 
     test = () => {
@@ -144,28 +173,120 @@ export default class Entry {
         return this._test(readStream, localHeaderDecoder)
     }
 
-    _test = async (readStream, localHeaderDecoder) => {
+    _test = async (fileReader, decoder) => {
 
-        const localHeaderWriter = new LocalHeaderWriter(readStream, this.header, localHeaderDecoder)
-        await once(readStream.pipe(localHeaderWriter), 'finish')
+        const decodePromise = new Promise((resolve) => {
 
-        if (this.header.isDirectory())
-            return
+            fileReader.on('readable', () => {
 
-        const dataControlXform = new DataControlXform(readStream, this.header.getCompressedSize())
-        const crc32Writer = new CRC32Writer(this.header)
+                for (;;) {
 
-        if (!this.header.isCompressed()) {
+                    const data = fileReader.read(1024)
 
-            await once(readStream.pipe(dataControlXform).pipe(crc32Writer), 'finish')
-            return
-        }
+                    if (!data)
+                        return
+
+                    const unshiftedChunk = decoder.update(data)
+
+                    if (unshiftedChunk) {
+
+                        fileReader.removeAllListeners()
+                        fileReader.unshift(unshiftedChunk)
+
+                        decoder.decode()
+
+                        /*
+
+                        test
+
+                        */
+
+                        resolve()
+                        return
+                    }
+                }
+            })
+        })
+
+        await decodePromise
+
+        const size = this.header.getCompressedSize()
+        const crc32 = new CRC32()
+
+        let counter = 0
 
         if (this.header.isCompressed()) {
 
-            await once(readStream.pipe(dataControlXform).pipe(createInflateRaw()).pipe(crc32Writer), 'finish')
-            return
+            const promise = new Promise((resolve) => {
+
+                let counter = 0
+
+                const inflater = createInflateRaw()
+                inflater.on('drain', () => fileReader.resume())
+                inflater.on('finish', resolve)
+
+                fileReader.on('data', (chunk) => {
+
+                    const remainingBytes = size - counter
+
+                    if (chunk.length < remainingBytes) {
+
+                        if (!inflater.write(chunk, 'buffer'))
+                            fileReader.pause()
+
+                        counter += chunk.length
+                        crc32.update(chunk)
+
+                        return
+                    }
+
+                    const partialChunk = chunk.slice(0, remainingBytes)
+
+                    crc32.update(partialChunk)
+                    inflater.end(partialChunk)
+
+                    fileReader.pause()
+                    fileReader.unshift(chunk.slice(remainingBytes))
+                    resolve()
+                })
+
+                fileReader.resume()
+            })
+
+            await promise
         }
+
+        if (!this.header.isCompressed()) {
+
+            const promise = new Promise((resolve) => {
+
+                fileReader.on('data', (chunk) => {
+
+                    const remainingBytes = size - counter
+
+                    if (chunk.length < remainingBytes) {
+
+                        counter += chunk.length
+                        crc32.update(chunk)
+
+                        return
+                    }
+
+                    const partialChunk = chunk.slice(0, remainingBytes)
+                    crc32.update(partialChunk)
+
+                    fileReader.pause()
+                    fileReader.unshift(chunk.slice(remainingBytes))
+                    resolve()
+                })
+
+                fileReader.resume()
+            })
+
+            await promise
+        }
+
+       fileReader.removeAllListeners()
     }
 
     isDirectory = () => this.header.isDirectory()
