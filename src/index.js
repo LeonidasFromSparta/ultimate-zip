@@ -4,7 +4,7 @@ const start = process.hrtime.bigint()
 console.log('start unzip: ' + start)
 
 // const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip.js/samples/7z-ubuntu-normal.zip', {cacheHeaders: true})
-const zip = new UZip('./samples/7z-windows-normal.zip', {cacheHeaders: true})
+const zip = new UZip('./samples/big.zip', {cacheHeaders: true})
 
 // console.log(zip.getInfo())
 
@@ -36,3 +36,9 @@ zip.extractByRegex('asd', /Eam ex.txt/).then(() => {
 */
 
 // zip.testArchiveSync()
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.log('Unhandled Rejection at:', reason.stack || reason)
+    // Recommended: send the information to sentry.io
+    // or whatever crash reporting service you use
+  })

@@ -67,51 +67,22 @@ export default class File {
         return fs.createReadStream(this.path, {start, end})
     }
 
-    createFdReadStream(startPos, endPos) {
+    createFdReadStream(start, end) {
 
-        return fs.createReadStream(null, {fd: this.fd, autoClose: false, start: startPos, end: endPos})
+        return fs.createReadStream(null, {fd: this.fd, autoClose: false, start, end})
     }
 
-    /**
-     * Method opens file descriptor.
-     */
-    openFile() {
+    open = async () => {
 
-        this.fd = fs.openSync(this.path, 'r')
+        this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => {
+
+            resolve(fd)
+        }))
     }
 
-    openFileProm = async () => {
+    close = async () => {
 
-        const promise = new Promise((resolve) => {
-
-            fs.open(this.path, (err, fd) => {
-
-                resolve(fd)
-            })
-        })
-
-        this.fd = await promise
-    }
-
-    /**
-     * Method closes file descriptor.
-     */
-    closeFile() {
-
-        fs.closeSync(this.fd)
-    }
-
-    closeFileProm = async () => {
-
-        const promise = new Promise((resolve) => {
-
-            fs.close(this.fd, () => {
-
-                resolve()
-            })
-        })
-
-        await promise
+        await new Promise((resolve) => fs.close(this.fd, () => resolve()))
     }
 
     makeDir = (dir) => {

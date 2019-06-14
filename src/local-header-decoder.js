@@ -22,9 +22,9 @@ export default class LocalHeaderDecoder {
         this.extraFieldLength = 0
     }
 
-    updateFixed = (chunk) => {
+    update = (chunk) => {
 
-        if (!this.done) {
+        if (this.offset < 30) {
 
             const remainingBytes = this.bufferLength - this.offset
             const bytesRead = chunk.copy(this.buffer, this.offset, 0, remainingBytes)
@@ -35,9 +35,8 @@ export default class LocalHeaderDecoder {
 
             chunk = chunk.slice(bytesRead)
 
-            this.done = true
-            this.fileNameLength = this.fixedBuffer.readUInt16LE(26)
-            this.extraFieldLength = this.fixedBuffer.readUInt16LE(28)
+            this.fileNameLength = this.buffer.readUInt16LE(26)
+            this.extraFieldLength = this.buffer.readUInt16LE(28)
             this.bufferLength += this.fileNameLength + this.extraFieldLength
         }
 
@@ -46,32 +45,29 @@ export default class LocalHeaderDecoder {
         this.offset += bytesRead
 
         if (this.offset !== this.bufferLength)
-            return {done: false}
-
-        if (this.offset === this.bufferLength)
             return null
 
-        return chunk.slice()
+        return chunk.slice(bytesRead)
     }
 
     decode = () => {
 
-        const signature = this.fixedBuffer.readUInt32LE(0)
+        const signature = this.buffer.readUInt32LE(0)
 
         if (this.signature !== signature)
             throw `Local file header signature could not be verified: expected ${this.signature}, actual ${signature}`
 
-        const buffer = Buffer.allocUnsafe(OBJECT_LOCAL_HEADER_LENGTH)
-        this.fixedBuffer.copy(buffer, 0, 4, 26)
+        const buf = Buffer.allocUnsafe(OBJECT_LOCAL_HEADER_LENGTH)
+        this.buffer.copy(buf, 0, 4, 26)
 
-        const header = new LocalHeader(buffer)
+        const header = new LocalHeader(buf)
 
-        header.setFileName(this.extraBuffer.toString('utf8', 0, this.fileNameLength))
+        header.setFileName(this.buffer.toString('utf8', 30, this.fileNameLength))
 
         if (this.extraFieldLength > 0) {
 
             const extaFieldBuffer = Buffer.allocUnsafe(this.extraFieldLength)
-            this.extraBuffer.copy(extaFieldBuffer, 0, this.fileNameLength, this.fileNameLength + this.extraFieldLength)
+            this.buffer.copy(extaFieldBuffer, 30 + this.fileNameLength, 0, this.extraFieldLength)
             header.setExtraField(extaFieldBuffer)
         }
 

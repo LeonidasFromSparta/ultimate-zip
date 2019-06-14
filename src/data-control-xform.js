@@ -2,84 +2,37 @@ import {Transform} from 'stream'
 
 export default class DataControlXform extends Transform {
 
-    constructor(streamReader, header) {
+    constructor(header) {
 
         super()
-
-        this.streamReader = streamReader
         this.size = header.getCompressedSize()
         this.counter = 0
-
-        this.header = header
-
-        // if (this.header.getFileName() === 'node_modules/@babel/core/lib/tools/build-external-helpers.js')
-        // debugger
     }
 
     _transform(chunk, encoding, callback) {
 
-        // if (this.header.getFileName() === 'node_modules/@babel/core/lib/tools/build-external-helpers.js')
-        //    debugger
-        // console.log(this.header.getFileName() + ' wow')
-
-        debugger
-
         const nextCounterSize = chunk.length + this.counter
 
-        try {
+        if (nextCounterSize > this.size) {
 
-            if (nextCounterSize > this.size) {
+            const bytesRemaining = this.size - this.counter
+            const remainingChunk = chunk.slice(0, bytesRemaining)
 
-                const bytesRemaining = this.size - this.counter
-                const remainingChunk = chunk.slice(0, bytesRemaining)
-                const unshiftedChunk = chunk.slice(bytesRemaining)
-
-                this.push(remainingChunk)
-                this.push(null)
-                // this.end()
-
-                // callback()
-
-                this.streamReader.pause()
-                this.streamReader.unshift(unshiftedChunk)
-
-                return
-            }
-        } catch (ex) {
-
-            debugger
+            this.push(remainingChunk)
+            this.push(null)
+            return
         }
 
-        try {
+        if (nextCounterSize < this.size) {
 
-            if (nextCounterSize < this.size) {
+            this.counter += chunk.length
+            this.push(chunk)
 
-                this.counter += chunk.length
-                this.push(chunk)
-
-                callback()
-                return
-            }
-
-        } catch (ex) {
-
-            debugger
+            callback()
+            return
         }
-
-    try {
-
 
         this.push(chunk)
         this.push(null)
-        // this.end()
-
-        // callback()
-
-        this.streamReader.pause()
-
-    } catch (ex) {
-
-        debugger
-    }
     }
 }

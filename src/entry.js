@@ -4,9 +4,8 @@ import LocalHeaderInfo from './local-header-info'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import LocalHeaderWriter from './local-header-writer'
 import CRC32Writer from './crc32-writer'
-import CRC32Xform from './crc32-xform'
+import CRC32 from './crc32'
 import DataControlXform from './data-control-xform'
-import {once} from 'events'
 import LocalHeaderDecoder from './local-header-decoder'
 
 export default class Entry {
@@ -34,26 +33,40 @@ export default class Entry {
 
     _extract = async (outputPath, streamReader, decoder) => {
 
-        console.log(this.header.getFileName())
+        // console.log(this.header.getFileName())
+
+        //if ('node_modules/.bin/atob.cmd' === this.header.getFileName())
+         //   debugger
 
         const fileName = outputPath + this.header.getFileName()
 
-        const streamWriter = new LocalHeaderWriter(streamReader, this.header, decoder)
-
         const decodePromise = new Promise((resolve) => {
 
-            streamReader
-            .on('readable', () => {
+            streamReader.on('readable', () => {
 
-                const keke = streamReader.read(1024)
-                debugger
-                resolve()
+                for (;;) {
+
+                    const data = streamReader.read(1024)
+
+                    if (!data)
+                        return
+
+                    const unshiftedChunk = decoder.update(data)
+
+                    if (unshiftedChunk) {
+
+                        streamReader.removeAllListeners()
+                        streamReader.unshift(unshiftedChunk)
+
+                        decoder.decode()
+                        resolve()
+                        return
+                    }
+                }
             })
         })
 
         await decodePromise
-
-        streamReader.unpipe(streamWriter)
 
         if (this.header.isDirectory()) {
 
@@ -61,21 +74,63 @@ export default class Entry {
             return
         }
 
-        const dataControlXform = new DataControlXform(streamReader, this.header)
-        const crc32Xform = new CRC32Xform(this.header)
         const fileWriter = this.file.createWriteStream(fileName)
+        const crc32 = new CRC32()
 
-        if (!this.header.isCompressed()) {
+        if (this.header.isCompressed())
+            return await new Promise((resolve) => {
 
-            await once(streamReader.pipe(dataControlXform).pipe(crc32Xform).pipe(fileWriter), 'finish')
-            return
-        }
+                const size = this.header.getCompressedSize()
+                let counter = 0
 
-        if (this.header.isCompressed()) {
+                const inflator = createInflateRaw()
+                inflator.pipe(fileWriter)
 
-            await once(streamReader.pipe(dataControlXform).pipe(createInflateRaw()).pipe(crc32Xform).pipe(fileWriter), 'finish')
-            return
-        }
+                streamReader.on('data', (data) => {
+
+                    if ((counter + data.length) < size) {
+
+                        counter += data.length
+                        crc32.update(data)
+
+                        if (!fileWriter.write(data, 'buffer')) {
+
+                            // console.log('enough write!')
+                            streamReader.pause()
+                            return
+                        }
+                    } else {
+
+                        streamReader.pause()
+
+                        // console.log('bullshit')
+                        debugger
+
+
+                        fileWriter.end(data.slice(0, size - counter))
+                        streamReader.pause()
+                        streamReader.unshift(data.slice(size - counter))
+                        resolve()
+                    }
+                })
+
+                fileWriter.on('drain', () => {
+
+                    // console.log('driner')
+                    streamReader.resume()
+                })
+
+                streamReader.resume()
+            })
+
+            streamReader.removeAllListeners()
+
+            debugger
+            /*
+        if (this.header.isCompressed())
+            return await new Promise((resolve) =>
+                streamReader.pipe(dataControlXform).pipe(createInflateRaw()).pipe(crc32Xform).pipe(fileWriter).on('finish', resolve))
+                */
     }
 
     test = () => {
