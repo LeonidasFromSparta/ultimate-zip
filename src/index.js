@@ -24,8 +24,16 @@ zip.getEntries().then(async (data) => {
 })
 */
 
-
+/*
 zip.extractArchive('./extr').then(() => {
+
+    const end = process.hrtime.bigint()
+    console.log('unzip time: ' + new Number((end - start)) / 1e+9)
+})
+*/
+
+
+zip.testArchive().then(() => {
 
     const end = process.hrtime.bigint()
     console.log('unzip time: ' + new Number((end - start)) / 1e+9)
@@ -33,7 +41,7 @@ zip.extractArchive('./extr').then(() => {
 
 
 /*
-zip.testArchive().then(() => {
+zip.testFile('node_modules/@electron/docs-parser/yarn.lock').then(() => {
 
     const end = process.hrtime.bigint()
     console.log('unzip time: ' + new Number((end - start)) / 1e+9)
@@ -46,8 +54,10 @@ zip.extractByRegex('asd', /Eam ex.txt/).then(() => {
 })
 */
 
+/*
 process.on('uncaughtException', function (exception) {
     console.log(exception); // to see your exception details in the console
     // if you are on production, maybe you can send the exception details to your
     // email as well ?
   });
+*/

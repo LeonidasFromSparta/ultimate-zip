@@ -19,8 +19,6 @@ export default class UZip {
 
     testArchive = async () => {
 
-        debugger
-
         const entries = await this._readEntries()
         const decoder = new LocalHeaderDecoder()
         const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
@@ -34,15 +32,29 @@ export default class UZip {
 
             if (fileReaderPos !== entries[i].header.getOffsetOfLocalFileHeader()) {
 
+                console.log('chanjig')
                 const start = entries[i].header.getOffsetOfLocalFileHeader()
                 fileReader = this.file.createFdReadStream(start, end)
             }
 
-            // console.log(entries[i].header.getFileName())
             await entries[i]._test(fileReader, decoder)
         }
 
         await this.file.close()
+    }
+
+    testFile = async (fileName) => {
+
+        const entries = await this._readEntries()
+
+        for (let i=0; i < entries; i++) {
+
+            if (entries[i].header.getFileName() === fileName) {
+
+                await entries[i]._test()
+                break
+            }
+        }
     }
 
     extractArchive = async (outputPath) => {
@@ -66,7 +78,6 @@ export default class UZip {
             }
 
             await entries[i]._extract(outputPath, fileReader, decoder)
-
         }
 
         await this.file.close()

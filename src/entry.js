@@ -4,6 +4,8 @@ import LocalHeaderInfo from './local-header-info'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import CRC32 from './crc32'
 import LocalHeaderDecoder from './local-header-decoder'
+import {LOC_MAX} from './constants'
+import {Writable} from 'stream'
 
 export default class Entry {
 
@@ -20,12 +22,12 @@ export default class Entry {
         const startPos = this.header.getOffsetOfLocalFileHeader()
         const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
 
-        const streamReader = this.file.createReadStream(startPos, endPos)
+        const fileReader = this.file.createReadStream(startPos, endPos)
         const decoder = new LocalHeaderDecoder()
 
-        await this._extract(outputPath, streamReader, decoder)
+        await this._extract(outputPath, fileReader, decoder)
 
-        streamReader.destroy()
+        fileReader.destroy()
     }
 
     _extract = async (outputPath, fileReader, decoder) => {
@@ -34,32 +36,22 @@ export default class Entry {
 
         const decodePromise = new Promise((resolve) => {
 
-            fileReader.on('readable', () => {
+            fileReader.on('data', (chunk) => {
 
-                for (;;) {
+                const unshiftedChunk = decoder.update(chunk)
 
-                    const data = fileReader.read(1024)
+                if (unshiftedChunk) {
 
-                    if (!data)
-                        return
+                    fileReader.pause()
+                    fileReader.unshift(unshiftedChunk)
+                    fileReader.removeAllListeners()
 
-                    const unshiftedChunk = decoder.update(data)
-
-                    if (unshiftedChunk) {
-
-                        fileReader.removeAllListeners()
-                        fileReader.unshift(unshiftedChunk)
-
-                        decoder.decode()
-                        resolve()
-
-                        // console.log(this.header.getFileName())
-                        // console.log('loc header: ' + decoder.offset)
-                        // console.log('loc size:' + this.header.getCompressedSize())
-                        return
-                    }
+                    decoder.decode()
+                    resolve()
                 }
             })
+
+            fileReader.resume()
         })
 
         await decodePromise
@@ -110,7 +102,6 @@ export default class Entry {
 
                     fileReader.pause()
                     fileReader.unshift(chunk.slice(remainingBytes))
-                    resolve()
                 })
 
                 fileReader.resume()
@@ -161,51 +152,35 @@ export default class Entry {
 
     test = () => {
 
-        const startPos = this.header.getOffsetOfLocalFileHeader()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 - 1
+        const start = this.header.getOffsetOfLocalFileHeader()
+        const end = this.header.getOffsetOfLocalFileHeader() + LOC_MAX - 1
 
-        const readStream = this.file.createReadStream(startPos, endPos)
-        const localHeaderDecoder = new LocalHeaderDecoder()
+        const fileReader = this.file.createReadStream(start, end)
+        const decoder = new LocalHeaderDecoder()
 
-        return this._test(readStream, localHeaderDecoder)
+        return this._test(fileReader, decoder)
     }
 
     _test = async (fileReader, decoder) => {
 
-        if (this.header.getFileName() === 'node_modules/@electron/typescript-definitions/node_modules/typescript/lib/lib.dom.d.ts')
-            debugger
-
         const decodePromise = new Promise((resolve) => {
 
-            fileReader.on('readable', () => {
+            fileReader.on('data', (chunk) => {
 
-                for (;;) {
+                const unshiftedChunk = decoder.update(chunk)
 
-                    const data = fileReader.read(1024)
+                if (unshiftedChunk) {
 
-                    if (!data)
-                        return
+                    fileReader.pause()
+                    fileReader.unshift(unshiftedChunk)
+                    fileReader.removeAllListeners()
 
-                    const unshiftedChunk = decoder.update(data)
-
-                    if (unshiftedChunk) {
-
-                        fileReader.removeAllListeners()
-                        fileReader.unshift(unshiftedChunk)
-
-                        decoder.decode()
-
-                        /*
-
-                        test
-
-                        */
-
-                        resolve()
-                        return
-                    }
+                    decoder.decode()
+                    resolve()
                 }
             })
+
+            fileReader.resume()
         })
 
         await decodePromise
@@ -219,42 +194,26 @@ export default class Entry {
 
             const promise = new Promise((resolve) => {
 
-                let counter = 0
-
                 const inflater = createInflateRaw()
-                inflater.on('drain', () => {
+                const dumpStream = new Writable({
 
-                    debugger
-                    fileReader.resume()
+                    write(chunk, encoding, callback) {
+
+                        callback()
+                    },
+
+                    writev(chunks, callback) {
+
+                        callback()
+                    }
                 })
 
-                inflater.on('finish', () => {
+                inflater.pipe(dumpStream)
 
-                    console.log('finish?')
-                    resolve()
-                })
-
-                inflater.on('error', () => {
-
-
-                    debugger
-                })
-
-                fileReader.on('error', () => {
-
-
-                    debugger
-                })
-
-                fileReader.on('end', () => {
-
-
-                    debugger
-                })
+                inflater.on('drain', () => fileReader.resume())
+                dumpStream.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {
-
-                    debugger
 
                     const remainingBytes = size - counter
 
@@ -276,13 +235,10 @@ export default class Entry {
 
                     fileReader.pause()
                     fileReader.unshift(chunk.slice(remainingBytes))
-                    resolve()
                 })
 
                 fileReader.resume()
-            }).catch(function (ex) {
-                debugger
-            });
+            })
 
             await promise
         }
@@ -299,11 +255,11 @@ export default class Entry {
 
                         counter += chunk.length
                         crc32.update(chunk)
-
                         return
                     }
 
                     const partialChunk = chunk.slice(0, remainingBytes)
+
                     crc32.update(partialChunk)
 
                     fileReader.pause()
