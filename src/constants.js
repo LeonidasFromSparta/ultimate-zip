@@ -171,7 +171,21 @@ export const CEN_ATX = 38
 export const CEN_OFF = 42
 export const CEN_HDR = 46
 
-
+export const LOC_SIG = 0x04034B50
+export const LOC_SPO = 0
+export const LOC_VER = 4
+export const LOC_PLT = 5
+export const LOC_FLG = 6
+export const LOC_MTD = 8
+export const LOC_TIM = 10
+export const LOC_DAT = 12
+export const LOC_CRC = 14
+export const LOC_SIC = 18
+export const LOC_SIU = 22
+export const LOC_FLE = 26
+export const LOC_ELE = 28
+export const LOC_HDR = 30
+export const LOC_MAX = LOC_HDR + 0xFFFF + 0xFFFF
 
 export const OBJECT_CENTRAL_HEADER_LENGTH = 36
 

@@ -1,47 +1,43 @@
-import {LOCAL_HEADER_LENGTH} from './constants'
-
 export default class LocalHeader {
 
-    constructor(buffer) {
+    getSignature = () => this._sig
+    setSignature = (value) => this._sig = value
 
-        this.buffer = buffer
-        this.fileName = ''
-    }
+    getVersionNeededToExtract = () => this._verExt
+    setVersionNeededToExtract = (value) => this._verExt = value
 
-    getVersionNeededToExtract = () => this.buffer.readUInt8(0)
-    setVersionNeededToExtract = (value) => this.buffer.writeUInt8(value, 0)
+    getPlatformNeededToExtract = () => this._platExt
+    setPlatformNeededToExtract = (value) => this._platExt = value
 
-    getPlatformNeededToExtract = () => this.buffer.readUInt8(1)
-    setPlatformNeededToExtract = (value) => this.buffer.writeUInt8(value, 1)
+    getGeneralPurposeBitFlag = () => this._flag
+    setGeneralPurposeBitFlag = (value) => this._flag = value
 
-    getGeneralPurposeBitFlag = () => this.buffer.readUInt16LE(2)
-    setGeneralPurposeBitFlag = (value) => this.buffer.writeUInt16LE(value, 2)
+    getCompressionMethod = () => this._method
+    setCompressionMethod = (value) => this._method = value
 
-    getCompressionMethod = () => this.buffer.readUInt16LE(4)
-    setCompressionMethod = (value) => this.buffer.writeUInt16LE(value, 4)
+    getLastModFileTime = () => this._time
+    setLastModFileTime = (value) => this._time = value
 
-    getLastModFileTime = () => this.buffer.readUInt16LE(6)
-    setLastModFileTime = (value) => this.buffer.writeUInt16LE(value, 6)
+    getLastModFileDate = () => this._date
+    setLastModFileDate = (value) => this._date = value
 
-    getLastModFileDate = () => this.buffer.readUInt16LE(8)
-    setLastModFileDate = (value) => this.buffer.writeUInt16LE(value, 8)
+    getCRC32 = () => this._crc
+    setCRC32 = (value) => this._crc = value
 
-    getCRC32 = () => this.buffer.readUInt32LE(10)
-    setCRC32 = (value) => this.buffer.writeUInt32LE(value, 10)
+    getCompressedSize = () => this._compSize
+    setCompressedSize = (value) => this._compSize = value
 
-    getCompressedSize = () => this.buffer.readUInt32LE(14)
-    setCompressedSize = (value) => this.buffer.writeUInt32LE(value, 14)
+    getUncompressedSize = () => this._uncompSize
+    setUncompressedSize = (value) => this._uncompSize = value
 
-    getUncompressedSize = () => this.buffer.readUInt32LE(18)
-    setUncompressedSize = (value) => this.buffer.writeUInt32LE(value, 18)
+    getFileName = () => this._name
+    setFileName = (value) => this._name = value
 
-    getFileName = () => this.fileName
-    setFileName = (value) => this.fileName = value
+    getExtraField = () => this._extra
+    setExtraField = (value) => this._extra = value
 
-    getExtraField = () => this.extraField === undefined ? Buffer.alloc(0) : this.extraField
-    setExtraField = (value) => this.extraField = value
-
-    getHeaderLength = () => LOCAL_HEADER_LENGTH + this.getFileName().length + this.getExtraField().length
+    getHeaderLength = () => this._len
+    setHeaderLength = (value) => this._len = value
 
     isDirectory = () => this.getCompressedSize() === 0
 
