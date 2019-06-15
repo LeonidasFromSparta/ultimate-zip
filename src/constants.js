@@ -150,7 +150,7 @@ export const END_HDR = 22
 export const END_MAX = END_HDR + 0xFFFF
 
 export const CEN_SIG = 0x02014B50
-export const CEN_SIP = 0
+export const CEN_SPO = 0
 export const CEN_VEM = 4
 export const CEN_PLM = 5
 export const CEN_VER = 6
@@ -170,6 +170,7 @@ export const CEN_ATT = 36
 export const CEN_ATX = 38
 export const CEN_OFF = 42
 export const CEN_HDR = 46
+export const CEN_MAX = CEN_HDR + 0xFFFF + 0xFFFF + 0xFFFF
 
 export const LOC_SIG = 0x04034B50
 export const LOC_SPO = 0
@@ -186,8 +187,3 @@ export const LOC_FLE = 26
 export const LOC_ELE = 28
 export const LOC_HDR = 30
 export const LOC_MAX = LOC_HDR + 0xFFFF + 0xFFFF
-
-export const OBJECT_CENTRAL_HEADER_LENGTH = 36
-
-export const LOCAL_HEADER_LENGTH = 30
-export const OBJECT_LOCAL_HEADER_LENGTH = 22

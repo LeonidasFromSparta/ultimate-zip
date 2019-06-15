@@ -172,6 +172,9 @@ export default class Entry {
 
     _test = async (fileReader, decoder) => {
 
+        if (this.header.getFileName() === 'node_modules/@electron/typescript-definitions/node_modules/typescript/lib/lib.dom.d.ts')
+            debugger
+
         const decodePromise = new Promise((resolve) => {
 
             fileReader.on('readable', () => {
@@ -219,10 +222,39 @@ export default class Entry {
                 let counter = 0
 
                 const inflater = createInflateRaw()
-                inflater.on('drain', () => fileReader.resume())
-                inflater.on('finish', resolve)
+                inflater.on('drain', () => {
+
+                    debugger
+                    fileReader.resume()
+                })
+
+                inflater.on('finish', () => {
+
+                    console.log('finish?')
+                    resolve()
+                })
+
+                inflater.on('error', () => {
+
+
+                    debugger
+                })
+
+                fileReader.on('error', () => {
+
+
+                    debugger
+                })
+
+                fileReader.on('end', () => {
+
+
+                    debugger
+                })
 
                 fileReader.on('data', (chunk) => {
+
+                    debugger
 
                     const remainingBytes = size - counter
 
@@ -248,7 +280,9 @@ export default class Entry {
                 })
 
                 fileReader.resume()
-            })
+            }).catch(function (ex) {
+                debugger
+            });
 
             await promise
         }

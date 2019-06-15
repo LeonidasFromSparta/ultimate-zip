@@ -30,6 +30,12 @@ export default class LocalHeader {
     getUncompressedSize = () => this._uncompSize
     setUncompressedSize = (value) => this._uncompSize = value
 
+    getFileNameLength = () => this._nameLen
+    setFileNameLength = (value) => this._nameLen = value
+
+    getExtraFieldLength = () => this._extraLen
+    setExtraFieldLength = (value) => this._extraLen = value
+
     getFileName = () => this._name
     setFileName = (value) => this._name = value
 

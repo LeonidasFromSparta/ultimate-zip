@@ -33,16 +33,16 @@ export default class LocalHeaderDecoder {
 
             chunk = chunk.slice(bytesRead)
 
-            this.nameLen = this._buffer.readUInt16LE(LOC_FLE)
-            this.extraLen = this._buffer.readUInt16LE(LOC_ELE)
-            this.bufferLength += LOC_HDR + this.nameLen + this.extraLen
+            this._nameLen = this._buffer.readUInt16LE(LOC_FLE)
+            this._extraLen = this._buffer.readUInt16LE(LOC_ELE)
+            this._bufferLength = LOC_HDR + this._nameLen + this._extraLen
         }
 
-        const remainingBytes = this.bufferLength - this._offset
+        const remainingBytes = this._bufferLength - this._offset
         const bytesRead = chunk.copy(this._buffer, this._offset, 0, remainingBytes)
         this._offset += bytesRead
 
-        if (this._offset !== this.bufferLength)
+        if (this._offset !== this._bufferLength)
             return null
 
         return chunk.slice(bytesRead)
@@ -81,14 +81,16 @@ export default class LocalHeaderDecoder {
         header.setCRC32(this._buffer.readUInt32LE(LOC_CRC))
         header.setCompressedSize(this._buffer.readUInt32LE(LOC_SIC))
         header.setUncompressedSize(this._buffer.readUInt32LE(LOC_SIU))
+        header.setFileNameLength(this._nameLen)
+        header.setExtraFieldLength(this._extraLen)
 
-        header.setFileName(this._buffer.toString('utf8', LOC_HDR, LOC_HDR + this.nameLen))
+        header.setFileName(this._buffer.toString('utf8', LOC_HDR, LOC_HDR + this._nameLen))
 
-        const extraBuf = Buffer.allocUnsafe(this.extraLen)
-        this._buffer.copy(extraBuf, 0, LOC_HDR + this.nameLen, LOC_HDR + this.nameLen + this.extraLen)
+        const extraBuf = Buffer.allocUnsafe(this._extraLen)
+        this._buffer.copy(extraBuf, 0, LOC_HDR + this._nameLen, LOC_HDR + this._nameLen + this._extraLen)
         header.setExtraField(extraBuf)
 
-        header.setHeaderLength(this.bufferLength)
+        header.setHeaderLength(this._bufferLength)
 
         return header
     }

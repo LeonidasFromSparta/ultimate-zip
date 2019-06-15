@@ -1,190 +1,75 @@
-import {CEN_SIG} from './constants'
-import {CEN_SIP} from './constants'
-import {CEN_VEM} from './constants'
-import {CEN_PLM} from './constants'
-import {CEN_VER} from './constants'
-import {CEN_PLT} from './constants'
-import {CEN_FLG} from './constants'
-import {CEN_MTD} from './constants'
-import {CEN_TIM} from './constants'
-import {CEN_DAT} from './constants'
-import {CEN_CRC} from './constants'
-import {CEN_SIC} from './constants'
-import {CEN_SIU} from './constants'
-import {CEN_FLE} from './constants'
-import {CEN_ELE} from './constants'
-import {CEN_CLE} from './constants'
-import {CEN_DSK} from './constants'
-import {CEN_ATT} from './constants'
-import {CEN_ATX} from './constants'
-import {CEN_OFF} from './constants'
-import {CEN_HDR} from './constants'
-
 export default class CentralHeader {
 
-    constructor(buffer) {
+    getSignature = () => this._sig
+    setSignature = (value) => this._sig = value
 
-        this._buffer = buffer
-    }
+    getVersionMadeBy = () => this._verMade
+    setVersionMadeBy = (value) => this._verMade = value
 
-    getSignature = () => this._buffer.readUInt32LE(CEN_SIP)
-    setSignature = (value) => this._buffer.writeUInt32LE(value, CEN_SIP)
+    getPlatformCompatibility = () => this._platMade
+    setPlatformCompatibility = (value) => this._platMade = value
 
-    getVersionMadeBy = () => this._buffer.readUInt8(CEN_VEM)
-    setVersionMadeBy = (value) => this._buffer.writeUInt8(value, CEN_VEM)
+    getVersionNeededToExtract = () => this._verExt
+    setVersionNeededToExtract = (value) => this._verExt = value
 
-    getPlatformCompatibility = () => this._buffer.readUInt8(CEN_PLM)
-    setPlatformCompatibility = (value) => this._buffer.writeUInt8(value, CEN_PLM)
+    getPlatformNeededToExtract = () => this._platExt
+    setPlatformNeededToExtract = (value) => this._platExt = value
 
-    getVersionNeededToExtract = () => this._buffer.readUInt8(CEN_VER)
-    setVersionNeededToExtract = (value) => this._buffer.writeUInt8(value, CEN_VER)
+    getGeneralPurposeBitFlag = () => this._flag
+    setGeneralPurposeBitFlag = (value) => this._flag = value
 
-    getPlatformNeededToExtract = () => this._buffer.readUInt8(CEN_PLT)
-    setPlatformNeededToExtract = (value) => this._buffer.writeUInt8(value, CEN_PLT)
+    getCompressionMethod = () => this._method
+    setCompressionMethod = (value) => this._method = value
 
-    getGeneralPurposeBitFlag = () => this._buffer.readUInt16LE(CEN_FLG)
-    setGeneralPurposeBitFlag = (value) => this._buffer.writeUInt16LE(value, CEN_FLG)
+    getLastModFileTime = () => this._time
+    setLastModFileTime = (value) => this._time = value
 
-    getCompressionMethod = () => this._buffer.readUInt16LE(CEN_MTD)
-    setCompressionMethod = (value) => this._buffer.writeUInt16LE(value, CEN_MTD)
+    getLastModFileDate = () => this._date
+    setLastModFileDate = (value) => this._date = value
 
-    getLastModFileTime = () => this._buffer.readUInt16LE(CEN_TIM)
-    setLastModFileTime = (value) => this._buffer.writeUInt16LE(value, CEN_TIM)
+    getCRC32 = () => this._crc
+    setCRC32 = (value) => this._crc = value
 
-    getLastModFileDate = () => this._buffer.readUInt16LE(CEN_DAT)
-    setLastModFileDate = (value) => this._buffer.writeUInt16LE(value, CEN_DAT)
+    getCompressedSize = () => this._compSize
+    setCompressedSize = (value) => this._compSize = value
 
-    getCRC32 = () => this._buffer.readUInt32LE(CEN_CRC)
-    setCRC32 = (value) => this._buffer.writeUInt32LE(value, CEN_CRC)
+    getUncompressedSize = () => this._uncompSize
+    setUncompressedSize = (value) => this._uncompSize = value
 
-    getCompressedSize = () => this._buffer.readUInt32LE(CEN_SIC)
-    setCompressedSize = (value) => this._buffer.writeUInt32LE(value, CEN_SIC)
+    getFileNameLength = () => this._nameLen
+    setFileNameLength = (value) => this._nameLen = value
 
-    getUncompressedSize = () => this._buffer.readUInt32LE(CEN_SIU)
-    setUncompressedSize = (value) => this._buffer.writeUInt32LE(value, CEN_SIU)
+    getExtraFieldLength = () => this._extraLen
+    setExtraFieldLength = (value) => this._extraLen = value
 
-    getFileNameLength = () => this._buffer.readUInt16LE(CEN_FLE)
-    setFileNameLength = (value) => this._buffer.writeUInt16LE(value, CEN_FLE)
+    getFileCommentLength = () => this._commentLen
+    setFileCommentLength = (value) => this._commentLen = value
 
-    getExtraFieldLength = () => this._buffer.readUInt16LE(CEN_ELE)
-    setExtraFieldLength = (value) => this._buffer.writeUInt16LE(value, CEN_ELE)
+    getDiskNumberStart = () => this._disk
+    setDiskNumberStart = (value) => this._disk = value
 
-    getFileCommentLength = () => this._buffer.readUInt16LE(CEN_CLE)
-    setFileCommentLength = (value) => this._buffer.writeUInt16LE(value, CEN_CLE)
+    getInternalFileAttributes = () => this._intAtt
+    setInternalFileAttributes = (value) => this._intAtt = value
 
-    getDiskNumberStart = () => this._buffer.readUInt16LE(CEN_DSK)
-    setDiskNumberStart = (value) => this._buffer.writeUInt16LE(value, CEN_DSK)
+    getExternalFileAttributes = () => this._extAtt
+    setExternalFileAttributes = (value) => this._extAtt = value
 
-    getInternalFileAttributes = () => this._buffer.readUInt16LE(CEN_ATT)
-    setInternalFileAttributes = (value) => this._buffer.writeUInt16LE(value, CEN_ATT)
+    getOffsetOfLocalFileHeader = () => this._offset
+    setOffsetOfLocalFileHeader = (value) => this._offset = value
 
-    getExternalFileAttributes = () => this._buffer.readUInt32LE(CEN_ATX)
-    setExternalFileAttributes = (value) => this._buffer.writeUInt32LE(value, CEN_ATX)
+    getFileName = () => this._name
+    setFileName = (value) => this._name = value
 
-    getOffsetOfLocalFileHeader = () => this._buffer.readUInt32LE(CEN_OFF)
-    setOffsetOfLocalFileHeader = (value) => this._buffer.writeUInt32LE(value, CEN_OFF)
+    getExtraField = () => this._extra
+    setExtraField = (value) => this._exxtra = value
 
-    getFileName = () => this._buffer.toString('utf8', CEN_HDR, CEN_HDR + this.getFileNameLength())
-    setFileName = (value) => {
+    getFileComment = () => this._comment
+    setFileComment = (value) => this._comment = value
 
-        const nameBuffer = Buffer.from(value)
-
-        const newNameLen = nameBuffer.length
-        const oldNameLen = this.getFileNameLength()
-
-        if (oldNameLen !== newNameLen) {
-
-            const extraLen = this.getExtraFieldLength()
-            const commentLen = this.getFileCommentLength()
-
-            const newBuffer = Buffer.allocUnsafe(CEN_HDR + newNameLen + extraLen + commentLen)
-            this._buffer.copy(newBuffer, 0, 0, CEN_HDR)
-
-            this.getExtraField().copy(newBuffer, CEN_HDR + newNameLen)
-            Buffer.from(this.getFileComment()).copy(newBuffer, CEN_HDR + newNameLen + extraLen)
-
-            this._buffer = newBuffer
-            this.setFileNameLength(newNameLen)
-        }
-
-        nameBuffer.copy(this._buffer, CEN_HDR, 0)
-    }
-
-    getExtraField = () => this._buffer.slice(CEN_HDR + this.getFileNameLength(), CEN_HDR + this.getFileNameLength() + this.getExtraFieldLength())
-
-    setExtraField = (value) => {
-
-        const newExtraLen = value.length
-        const oldExtraLen = this.getExtraFieldLength()
-
-        const nameLen = this.getFileNameLength()
-
-        if (oldExtraLen !== newExtraLen) {
-
-            const commentLen = this.getFileCommentLength()
-
-            const newBuffer = Buffer.allocUnsafe(CEN_HDR + nameLen + newExtraLen + commentLen)
-            this._buffer.copy(newBuffer, 0, 0, CEN_HDR + nameLen)
-
-            // comment
-            Buffer.from(this.getFileComment()).copy(newBuffer, CEN_HDR + nameLen + newExtraLen)
-
-            this._buffer = newBuffer
-            this.setExtraFieldLength(newExtraLen)
-        }
-
-        value.copy(this._buffer, CEN_HDR + nameLen)
-    }
-
-    getFileComment = () => {
-
-        const nameLen = this.getFileNameLength()
-        const extraLen = this.getExtraFieldLength()
-        const commentLen = this.getFileCommentLength()
-        return this._buffer.toString('utf8', CEN_HDR + nameLen + extraLen, CEN_HDR + nameLen + extraLen + commentLen)
-    }
-
-    setFileComment = (value) => {
-
-        const commentBuffer = Buffer.from(value)
-
-        const newCommentLen = commentBuffer.length
-        const oldCommentLen = this.getFileComment()
-
-        const nameLen = this.getFileNameLength()
-        const extraLen = this.getExtraFieldLength()
-
-        if (oldCommentLen !== newCommentLen) {
-
-            const newBuffer = Buffer.allocUnsafe(CEN_HDR + nameLen + extraLen + newCommentLen)
-            this._buffer.copy(newBuffer, 0, 0, CEN_HDR + nameLen + extraLen)
-
-            this._buffer = newBuffer
-            this.setFileCommentLength(newCommentLen)
-        }
-
-        commentBuffer.copy(this._buffer, CEN_HDR + nameLen + extraLen)
-    }
-
-    getHeaderSize = () => CEN_HDR + this.getFileNameLength() + this.getExtraFieldLength() + this.getFileCommentLength()
+    getHeaderSize = () => this._len
+    setHeaderSize = (value) => this._len = value
 
     isDirectory = () => this.getCompressedSize() === 0
 
     isCompressed = () => this.getCompressedSize() !== this.getUncompressedSize()
-
-    _confirmSignature = () => {
-
-        const signature = this.getSignature()
-
-        if (this.getSignature() !== CEN_SIG) {
-
-            const expectedSignature = '0x' + CEN_SIG.toString(16).padStart(8, '0')
-            const actualSignature = '0x' + signature.toString(16).padStart(8, '0')
-
-            throw new ({
-                name: 'Central header signature error',
-                message: `Central header signature could not be confirmed: expected ${expectedSignature}, actual ${actualSignature}`
-            })
-        }
-    }
 }
