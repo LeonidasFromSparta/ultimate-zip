@@ -70,7 +70,7 @@ export default class CentralHeader {
     setExtraFieldLength = (value) => this._buffer.writeUInt16LE(value, CEN_ELE)
 
     getFileCommentLength = () => this._buffer.readUInt16LE(CEN_CLE)
-    setFileCommentLength = (value) => this._buffer.writeUInt32LE(value, CEN_CLE)
+    setFileCommentLength = (value) => this._buffer.writeUInt16LE(value, CEN_CLE)
 
     getDiskNumberStart = () => this._buffer.readUInt16LE(CEN_DSK)
     setDiskNumberStart = (value) => this._buffer.writeUInt16LE(value, CEN_DSK)
@@ -84,7 +84,7 @@ export default class CentralHeader {
     getOffsetOfLocalFileHeader = () => this._buffer.readUInt32LE(CEN_OFF)
     setOffsetOfLocalFileHeader = (value) => this._buffer.writeUInt32LE(value, CEN_OFF)
 
-    getFileName = () => this._buffer.toString('utf8', CEN_HDR, CEN_FLE)
+    getFileName = () => this._buffer.toString('utf8', CEN_HDR, CEN_HDR + this.getFileNameLength())
     setFileName = (value) => {
 
         const nameBuffer = Buffer.from(value)
@@ -100,35 +100,23 @@ export default class CentralHeader {
             const newBuffer = Buffer.allocUnsafe(CEN_HDR + newNameLen + extraLen + commentLen)
             this._buffer.copy(newBuffer, 0, 0, CEN_HDR)
 
-            // file len
+            this.getExtraField().copy(newBuffer, CEN_HDR + newNameLen)
+            Buffer.from(this.getFileComment()).copy(newBuffer, CEN_HDR + newNameLen + extraLen)
+
+            this._buffer = newBuffer
             this.setFileNameLength(newNameLen)
-
-            // extra
-            this._buffer.copy(newBuffer, CEN_HDR + newNameLen, CEN_HDR + oldNameLen, CEN_HDR + oldNameLen + extraLen)
-
-            // comment
-            this._buffer.copy(newBuffer, CEN_HDR + newNameLen + extraLen, CEN_HDR + oldNameLen + extraLen, CEN_HDR + oldNameLen + extraLen + commentLen)
         }
 
-        nameBuffer.copy(nameBuffer, CEN_HDR, 0)
+        nameBuffer.copy(this._buffer, CEN_HDR, 0)
     }
 
-    getExtraField = () => {
-
-        const extraFieldLen = this.getExtraFieldLength()
-        const buffer = Buffer.allocUnsafe(extraFieldLen)
-        const nameLen = this.getFileCommentLength()
-
-        this._buffer.copy(buffer, 0, CEN_HDR + nameLen, CEN_HDR + nameLen + extraFieldLen)
-        return buffer
-    }
+    getExtraField = () => this._buffer.slice(CEN_HDR + this.getFileNameLength(), CEN_HDR + this.getFileNameLength() + this.getExtraFieldLength())
 
     setExtraField = (value) => {
 
-        const extraBuffer = Buffer.from(value)
-
-        const newExtraLen = extraBuffer.length
+        const newExtraLen = value.length
         const oldExtraLen = this.getExtraFieldLength()
+
         const nameLen = this.getFileNameLength()
 
         if (oldExtraLen !== newExtraLen) {
@@ -139,13 +127,13 @@ export default class CentralHeader {
             this._buffer.copy(newBuffer, 0, 0, CEN_HDR + nameLen)
 
             // comment
-            this._buffer.copy(newBuffer, CEN_HDR + nameLen + newExtraLen, CEN_HDR + nameLen + oldExtraLen, CEN_HDR + nameLen + oldExtraLen + commentLen)
+            Buffer.from(this.getFileComment()).copy(newBuffer, CEN_HDR + nameLen + newExtraLen)
 
-            // extra len
+            this._buffer = newBuffer
             this.setExtraFieldLength(newExtraLen)
         }
 
-        extraBuffer.copy(this._buffer, CEN_HDR + nameLen, CEN_HDR + nameLen + newExtraLen)
+        value.copy(this._buffer, CEN_HDR + nameLen)
     }
 
     getFileComment = () => {
@@ -171,7 +159,7 @@ export default class CentralHeader {
             const newBuffer = Buffer.allocUnsafe(CEN_HDR + nameLen + extraLen + newCommentLen)
             this._buffer.copy(newBuffer, 0, 0, CEN_HDR + nameLen + extraLen)
 
-            // comment len
+            this._buffer = newBuffer
             this.setFileCommentLength(newCommentLen)
         }
 

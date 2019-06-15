@@ -1,5 +1,5 @@
 import {EOL} from 'os'
-import Zip32HeaderSerializer from './zip-32-header-serializer'
+import Zip32HeaderDecoder from './zip-32-header-decoder'
 
 export default class Zip32HeaderInfo {
 
@@ -10,7 +10,7 @@ export default class Zip32HeaderInfo {
 
     getSignatureInfo = () => {
 
-        return this.toHex(Zip32HeaderSerializer.SIGNATURE)
+        return this.toHex(Zip32HeaderDecoder.SIGNATURE)
     }
 
     getNumberOfThisDiskInfo = () => {

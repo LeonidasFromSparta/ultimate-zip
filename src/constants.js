@@ -137,6 +137,18 @@ export const ZIP_FORMAT_VERSIONS = {
 }
 */
 
+export const END_SIG = 0x06054B50
+export const END_SPO = 0
+export const END_DNU = 4
+export const END_DCS = 6
+export const END_CND = 8
+export const END_CDC = 12
+export const END_CDS = 12
+export const END_OFF = 16
+export const END_ZCL = 20
+export const END_HDR = 22
+export const END_MAX = END_HDR + 0xFFFF
+
 export const CEN_SIG = 0x02014B50
 export const CEN_SIP = 0
 export const CEN_VEM = 4
@@ -158,6 +170,8 @@ export const CEN_ATT = 36
 export const CEN_ATX = 38
 export const CEN_OFF = 42
 export const CEN_HDR = 46
+
+
 
 export const OBJECT_CENTRAL_HEADER_LENGTH = 36
 

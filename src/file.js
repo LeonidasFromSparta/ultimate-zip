@@ -7,27 +7,7 @@ export default class File {
         this.path = path
     }
 
-    /**
-     * Method reads last bytes of the file and return in the form of buffer.
-     * @param {int} length The length of last bytes.
-     * @returns {buffer} The buffer which contains last bytes of the file.
-     */
-    readLastBytes(length) {
-
-        const fd = fs.openSync(this.path, 'r')
-        const stats = fs.fstatSync(fd)
-
-        const numBytesToRead = stats.size < length ? stats.size : length
-        const buffer = Buffer.allocUnsafe(numBytesToRead)
-        const position = numBytesToRead < length ? 0 : stats.size - length
-
-        fs.readSync(Number(fd), buffer, 0, numBytesToRead, position)
-        fs.closeSync(fd)
-
-        return buffer
-    }
-
-    readZip32HeaderBytesSync = (length) => {
+    readEndBytesSync = (length) => {
 
         const fd = fs.openSync(this.path, 'r')
         const stats = fs.fstatSync(fd)

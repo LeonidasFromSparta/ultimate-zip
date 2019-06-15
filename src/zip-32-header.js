@@ -1,31 +1,29 @@
-import Zip32HeaderSerializer from './zip-32-header-serializer'
-
 export default class Zip32Header {
 
-    static HEADER_FIXED_LENGTH = 16
+    getSignature = () => this._sig
+    setSignature = (value) => this._sig = value
 
-    buffer = Buffer.alloc(Zip32Header.HEADER_FIXED_LENGTH)
+    getDiskNumber = () => this._disk
+    setDiskNumber = (value) => this._disk = value
 
-    getNumberOfThisDisk = () => this.buffer.readUInt16LE(0)
-    setNumberOfThisDisk = (value) => this.buffer.writeUInt16LE(value, 0)
+    getDiskNumberWhereCentralDirectoriesStart = () => this._cenDirDisk
+    setDiskNumberWhereCentralDirectoriesStart = (value) => this._cenDirDisk = value
 
-    getNumberOfDiskWhereCentralDirectoriesStart = () => this.buffer.readUInt16LE(2)
-    setNumberOfDiskWhereCentralDirectoriesStart = (value) => this.buffer.writeUInt16LE(value, 2)
+    getCentralDirectoriesNumberOnDisk = () => this._cenDirNumDisk
+    setCentralDirectoriesNumberOnDisk = (value) => this._cenDirNumDisk = value
 
-    getNumberOfCentralDirectoriesOnThisDisk = () => this.buffer.readUInt16LE(4)
-    setNumberOfCentralDirectoriesOnThisDisk = (value) => this.buffer.writeUInt16LE(value, 4)
+    getCentralDirectoriesNumber = () => this._cenDirs
+    setCentralDirectoriesNumber = (value) => this._cenDirs = value
 
-    getNumberOfCentralDirectories = () => this.buffer.readUInt16LE(6)
-    setNumberOfCentralDirectories = (value) => this.buffer.writeUInt16LE(value, 6)
+    getCentralDirectoriesSize = () => this._cenDirsSize
+    setCentralDirectoriesSize = (value) => this._cenDirsSize = value
 
-    getSizeOfCentralDirectories = () => this.buffer.readUInt32LE(8)
-    setSizeOfCentralDirectories = (value) => this.buffer.writeUInt32LE(value, 8)
+    getCentralDirectoriesOffsetWithStartingDisk = () => this._cenDirsOff
+    setCentralDirectoriesOffsetWithStartingDisk = (value) => this._cenDirsOff = value
 
-    getCentralDirectoriesOffsetWithStartingDisk = () => this.buffer.readUInt32LE(12)
-    setCentralDirectoriesOffsetWithStartingDisk = (value) => this.buffer.writeUInt32LE(value, 12)
+    getZipFileComment = () => this._comment
+    setZipFileComment = (value) => this._comment = value
 
-    getZipFileComment = () => this.zipComment !== undefined ? this.zipComment : ''
-    setZipFileComment = (value) => this.zipComment = value
-
-    getHeaderLength = () => Zip32HeaderSerializer.HEADER_FIXED_LENGTH + this.getZipFileComment().length
+    getHeaderLength = () => this._len
+    setHeaderLength = (value) => this._len = value
 }

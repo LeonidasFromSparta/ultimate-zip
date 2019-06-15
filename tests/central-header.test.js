@@ -1,81 +1,54 @@
 import {expect} from 'chai'
 import CentralHeader from './../src/central-header'
-import {OBJECT_CENTRAL_HEADER_LENGTH} from './../src/constants'
-import {CENTRAL_HEADER_LENGTH} from './../src/constants'
+import {CEN_HDR} from './../src/constants'
 
-describe('Testing central-header.js', () => {
+describe('testing central-header.js', () => {
 
-    it('should assert VersionMadeBy getter/setter', () => {
+    it('it will check VersionMadeBy getter/setter', () => {
 
-        const centralHeader = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        centralHeader.setVersionMadeBy(5)
-        const value = centralHeader.getVersionMadeBy()
+        header.setVersionMadeBy(0xFF)
+        const value = header.getVersionMadeBy()
 
-        expect(value).to.be.equal(5)
-        expect(centralHeader.getPlatformCompatibility()).to.be.equal(0)
-        expect(centralHeader.getVersionNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(centralHeader.getCompressionMethod()).to.be.equal(0)
-        expect(centralHeader.getLastModFileTime()).to.be.equal(0)
-        expect(centralHeader.getLastModFileDate()).to.be.equal(0)
-        expect(centralHeader.getCRC32()).to.be.equal(0)
-        expect(centralHeader.getCompressedSize()).to.be.equal(0)
-        expect(centralHeader.getUncompressedSize()).to.be.equal(0)
-        expect(centralHeader.getDiskNumberStart()).to.be.equal(0)
-        expect(centralHeader.getInternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getExternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(value).to.be.equal(0xFF)
+
+        expect(header.getPlatformCompatibility()).to.be.equal(0)
+        expect(header.getVersionNeededToExtract()).to.be.equal(0)
+        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
+        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
+        expect(header.getCompressionMethod()).to.be.equal(0)
+        expect(header.getLastModFileTime()).to.be.equal(0)
+        expect(header.getLastModFileDate()).to.be.equal(0)
+        expect(header.getCRC32()).to.be.equal(0)
+        expect(header.getCompressedSize()).to.be.equal(0)
+        expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
+        expect(header.getDiskNumberStart()).to.be.equal(0)
+        expect(header.getInternalFileAttributes()).to.be.equal(0)
+        expect(header.getExternalFileAttributes()).to.be.equal(0)
+        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert VersionMadeBy getter by buffer', () => {
+    it('will throw if setVersionMadeBy overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const centralHeader = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt8(5, 0)
-        const value = centralHeader.getVersionMadeBy()
-
-        expect(value).to.be.equal(5)
-        expect(centralHeader.getPlatformCompatibility()).to.be.equal(0)
-        expect(centralHeader.getVersionNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(centralHeader.getCompressionMethod()).to.be.equal(0)
-        expect(centralHeader.getLastModFileTime()).to.be.equal(0)
-        expect(centralHeader.getLastModFileDate()).to.be.equal(0)
-        expect(centralHeader.getCRC32()).to.be.equal(0)
-        expect(centralHeader.getCompressedSize()).to.be.equal(0)
-        expect(centralHeader.getUncompressedSize()).to.be.equal(0)
-        expect(centralHeader.getDiskNumberStart()).to.be.equal(0)
-        expect(centralHeader.getInternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getExternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setVersionMadeBy(0xFFF)).to.throw()
     })
 
-    it('should assert VersionMadeBy is 1 bytes unsigned', () => {
+    it('it will check PlatformCompatibility getter/setter', () => {
 
-        const centralHeader = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            centralHeader.setVersionMadeBy(300)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert PlatformCompatibility getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setPlatformCompatibility(5)
+        header.setPlatformCompatibility(0xFF)
         const value = header.getPlatformCompatibility()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFF)
+
         expect(header.getVersionNeededToExtract()).to.be.equal(0)
         expect(header.getPlatformNeededToExtract()).to.be.equal(0)
         expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
@@ -85,60 +58,33 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert PlatformCompatibility getter by buffer', () => {
+    it('will throw if PlatformCompatibility overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const centralHeader = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt8(5, 1)
-        const value = centralHeader.getPlatformCompatibility()
-
-        expect(centralHeader.getVersionMadeBy()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(centralHeader.getVersionNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(centralHeader.getCompressionMethod()).to.be.equal(0)
-        expect(centralHeader.getLastModFileTime()).to.be.equal(0)
-        expect(centralHeader.getLastModFileDate()).to.be.equal(0)
-        expect(centralHeader.getCRC32()).to.be.equal(0)
-        expect(centralHeader.getCompressedSize()).to.be.equal(0)
-        expect(centralHeader.getUncompressedSize()).to.be.equal(0)
-        expect(centralHeader.getDiskNumberStart()).to.be.equal(0)
-        expect(centralHeader.getInternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getExternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setPlatformCompatibility(0xFFF)).to.throw()
     })
 
-    it('should assert PlatformCompatibility is 1 bytes unsigned', () => {
+    it('it will check VersionNeededToExtract getter/setter', () => {
 
-        const centralHeader = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            centralHeader.setPlatformCompatibility(300)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert VersionNeededToExtract getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setVersionNeededToExtract(5)
+        header.setVersionNeededToExtract(0xFF)
         const value = header.getVersionNeededToExtract()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
         expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFF)
+
         expect(header.getPlatformNeededToExtract()).to.be.equal(0)
         expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
         expect(header.getCompressionMethod()).to.be.equal(0)
@@ -147,61 +93,34 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert VersionNeededToExtract getter by buffer', () => {
+    it('will throw if setVersionNeededToExtract overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt8(5, 2)
-        const value = header.getVersionNeededToExtract()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setVersionNeededToExtract(0xFFF)).to.throw()
     })
 
-    it('should assert VersionNeededToExtract is 1 bytes unsigned', () => {
+    it('it will check PlatformNeededToExtract getter/setter', () => {
 
-        const centralHeader = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            centralHeader.setVersionNeededToExtract(300)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert PlatformNeededToExtract getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setPlatformNeededToExtract(5)
+        header.setPlatformNeededToExtract(0xFF)
         const value = header.getPlatformNeededToExtract()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
         expect(header.getPlatformCompatibility()).to.be.equal(0)
         expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFF)
+
         expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
         expect(header.getCompressionMethod()).to.be.equal(0)
         expect(header.getLastModFileTime()).to.be.equal(0)
@@ -209,142 +128,61 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert PlatformNeededToExtract getter by buffer', () => {
+    it('will throw if setPlatformNeededToExtract overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt8(5, 3)
-        const value = header.getPlatformNeededToExtract()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setPlatformNeededToExtract(0xFFF)).to.throw()
     })
 
-    it('should assert PlatformNeededToExtract is 1 bytes unsigned', () => {
+    it('it will check GeneralPurposeBitFlag getter/setter', () => {
 
-        const centralHeader = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            centralHeader.setPlatformNeededToExtract(300)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert GeneralPurposeBitFlag getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setGeneralPurposeBitFlag(5)
+        header.setGeneralPurposeBitFlag(0xFFFF)
         const value = header.getGeneralPurposeBitFlag()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
         expect(header.getPlatformCompatibility()).to.be.equal(0)
         expect(header.getVersionNeededToExtract()).to.be.equal(0)
         expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFF)
+
         expect(header.getCompressionMethod()).to.be.equal(0)
         expect(header.getLastModFileTime()).to.be.equal(0)
         expect(header.getLastModFileDate()).to.be.equal(0)
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert GeneralPurposeBitFlag getter by buffer', () => {
+    it('will throw if setGeneralPurposeBitFlag overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt16LE(5, 4)
-        const value = header.getGeneralPurposeBitFlag()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setGeneralPurposeBitFlag(0xFFFFF)).to.throw()
     })
 
-    it('should assert GeneralPurposeBitFlag is 2 bytes unsigned', () => {
+    it('it will check CompressionMethod getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setGeneralPurposeBitFlag(70000)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert CompressionMethod getter/setter', () => {
-
-        const centralHeader = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        centralHeader.setCompressionMethod(5)
-        const value = centralHeader.getCompressionMethod()
-
-        expect(centralHeader.getVersionMadeBy()).to.be.equal(0)
-        expect(centralHeader.getPlatformCompatibility()).to.be.equal(0)
-        expect(centralHeader.getVersionNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(centralHeader.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(centralHeader.getLastModFileTime()).to.be.equal(0)
-        expect(centralHeader.getLastModFileDate()).to.be.equal(0)
-        expect(centralHeader.getCRC32()).to.be.equal(0)
-        expect(centralHeader.getCompressedSize()).to.be.equal(0)
-        expect(centralHeader.getUncompressedSize()).to.be.equal(0)
-        expect(centralHeader.getDiskNumberStart()).to.be.equal(0)
-        expect(centralHeader.getInternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getExternalFileAttributes()).to.be.equal(0)
-        expect(centralHeader.getOffsetOfLocalFileHeader()).to.be.equal(0)
-    })
-
-    it('should assert CompressionMethod getter by buffer', () => {
-
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
-
-        buffer.writeUInt16LE(5, 6)
+        header.setCompressionMethod(0xFFFF)
         const value = header.getCompressionMethod()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -352,36 +190,34 @@ describe('Testing central-header.js', () => {
         expect(header.getVersionNeededToExtract()).to.be.equal(0)
         expect(header.getPlatformNeededToExtract()).to.be.equal(0)
         expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFF)
+
         expect(header.getLastModFileTime()).to.be.equal(0)
         expect(header.getLastModFileDate()).to.be.equal(0)
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert CompressionMethod is 2 bytes unsigned', () => {
+    it('will throw if setCompressionMethod overflow', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setCompressionMethod(70000)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
+        expect(() => header.setCompressionMethod(0xFFFFF)).to.throw()
     })
 
-    it('should assert LastModFileTime getter/setter', () => {
+    it('it will check LastModFileTime getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        header.setLastModFileTime(5)
+        header.setLastModFileTime(0xFFFF)
         const value = header.getLastModFileTime()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -390,60 +226,33 @@ describe('Testing central-header.js', () => {
         expect(header.getPlatformNeededToExtract()).to.be.equal(0)
         expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
         expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFF)
+
         expect(header.getLastModFileDate()).to.be.equal(0)
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert LastModFileTime getter by buffer', () => {
+    it('will throw if setLastModFileTime overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt16LE(5, 8)
-        const value = header.getLastModFileTime()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setLastModFileTime(0xFFFFF)).to.throw()
     })
 
-    it('should assert LastModFileTime is 2 bytes unsigned', () => {
+    it('it will check LastModFileDate getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setLastModFileTime(70000)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert LastModFileDate getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setLastModFileDate(5)
+        header.setLastModFileDate(0xFFFF)
         const value = header.getLastModFileDate()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -453,59 +262,32 @@ describe('Testing central-header.js', () => {
         expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
         expect(header.getCompressionMethod()).to.be.equal(0)
         expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFF)
+
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert LastModFileDate getter by buffer', () => {
+    it('will throw if setLastModFileDate overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt16LE(5, 10)
-        const value = header.getLastModFileDate()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setLastModFileDate(0xFFFFF)).to.throw()
     })
 
-    it('should assert LastModFileDate is 2 bytes unsigned', () => {
+    it('it will check CRC32 getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setLastModFileDate(70000)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert CRC32 getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setCRC32(5)
+        header.setCRC32(0xFFFFFFFF)
         const value = header.getCRC32()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -516,58 +298,31 @@ describe('Testing central-header.js', () => {
         expect(header.getCompressionMethod()).to.be.equal(0)
         expect(header.getLastModFileTime()).to.be.equal(0)
         expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFFFFFF)
+
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert CRC32 getter by buffer', () => {
+    it('will throw if setCRC32 overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt32LE(5, 12)
-        const value = header.getCRC32()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setCRC32(0xFFFFFFFFF)).to.throw()
     })
 
-    it('should assert CRC32 is 4 bytes unsigned', () => {
+    it('it will check CompressedSize getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setLastModFileDate(4394967296)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert CompressedSize getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setCompressedSize(5)
+        header.setCompressedSize(0xFFFFFFFF)
         const value = header.getCompressedSize()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -579,57 +334,30 @@ describe('Testing central-header.js', () => {
         expect(header.getLastModFileTime()).to.be.equal(0)
         expect(header.getLastModFileDate()).to.be.equal(0)
         expect(header.getCRC32()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFFFFFF)
+
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert CompressedSize getter by buffer', () => {
+    it('will throw if setCompressedSize overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt32LE(5, 16)
-        const value = header.getCompressedSize()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setCompressedSize(0xFFFFFFFFF)).to.throw()
     })
 
-    it('should assert CompressedSize is 4 bytes unsigned', () => {
+    it('will check UncompressedSize getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setCompressedSize(4394967296)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert UncompressedSize getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setUncompressedSize(5)
+        header.setUncompressedSize(0xFFFFFFFF)
         const value = header.getUncompressedSize()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -642,20 +370,30 @@ describe('Testing central-header.js', () => {
         expect(header.getLastModFileDate()).to.be.equal(0)
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFFFFFF)
+
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert UncompressedSize getter by buffer', () => {
+    it('will throw if setUncompressedSize overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt32LE(5, 20)
-        const value = header.getUncompressedSize()
+        expect(() => header.setUncompressedSize(0xFFFFFFFFF)).to.throw()
+    })
+
+    it('will check FileNameLength getter/setter', () => {
+
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
+
+        header.setFileNameLength(0xFFFF)
+        const value = header.getFileNameLength()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
         expect(header.getPlatformCompatibility()).to.be.equal(0)
@@ -667,31 +405,105 @@ describe('Testing central-header.js', () => {
         expect(header.getLastModFileDate()).to.be.equal(0)
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFF)
+
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert UncompressedSize is 4 bytes unsigned', () => {
+    it('will throw if setFileNameLength overflow', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setUncompressedSize(4394967296)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
+        expect(() => header.setFileNameLength(0xFFFFF)).to.throw()
     })
 
-    it('should assert DiskNumberStart getter/setter', () => {
+    it('will check ExtraFieldLength getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        header.setDiskNumberStart(5)
+        header.setExtraFieldLength(0xFFFF)
+        const value = header.getExtraFieldLength()
+
+        expect(header.getVersionMadeBy()).to.be.equal(0)
+        expect(header.getPlatformCompatibility()).to.be.equal(0)
+        expect(header.getVersionNeededToExtract()).to.be.equal(0)
+        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
+        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
+        expect(header.getCompressionMethod()).to.be.equal(0)
+        expect(header.getLastModFileTime()).to.be.equal(0)
+        expect(header.getLastModFileDate()).to.be.equal(0)
+        expect(header.getCRC32()).to.be.equal(0)
+        expect(header.getCompressedSize()).to.be.equal(0)
+        expect(header.getFileNameLength()).to.be.equal(0)
+
+        expect(value).to.be.equal(0xFFFF)
+
+        expect(header.getFileCommentLength()).to.be.equal(0)
+        expect(header.getDiskNumberStart()).to.be.equal(0)
+        expect(header.getInternalFileAttributes()).to.be.equal(0)
+        expect(header.getExternalFileAttributes()).to.be.equal(0)
+        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+    })
+
+    it('will throw if setExtraFieldLength overflow', () => {
+
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
+
+        expect(() => header.setExtraFieldLength(0xFFFFF)).to.throw()
+    })
+
+
+
+
+
+
+
+    it('will check FileCommentLength getter/setter', () => {
+
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
+
+        header.setFileCommentLength(0xFFFF)
+        const value = header.getFileCommentLength()
+
+        expect(header.getVersionMadeBy()).to.be.equal(0)
+        expect(header.getPlatformCompatibility()).to.be.equal(0)
+        expect(header.getVersionNeededToExtract()).to.be.equal(0)
+        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
+        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
+        expect(header.getCompressionMethod()).to.be.equal(0)
+        expect(header.getLastModFileTime()).to.be.equal(0)
+        expect(header.getLastModFileDate()).to.be.equal(0)
+        expect(header.getCRC32()).to.be.equal(0)
+        expect(header.getCompressedSize()).to.be.equal(0)
+        expect(header.getFileNameLength()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+
+        expect(value).to.be.equal(0xFFFF)
+
+        expect(header.getDiskNumberStart()).to.be.equal(0)
+        expect(header.getInternalFileAttributes()).to.be.equal(0)
+        expect(header.getExternalFileAttributes()).to.be.equal(0)
+        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+    })
+
+    it('will throw if setFileCommentLength overflow', () => {
+
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
+
+        expect(() => header.setFileCommentLength(0xFFFFF)).to.throw()
+    })
+
+    it('will check DiskNumberStart getter/setter', () => {
+
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
+
+        header.setDiskNumberStart(0xFFFF)
         const value = header.getDiskNumberStart()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -705,55 +517,28 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
+
+        expect(value).to.be.equal(0xFFFF)
+
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert DiskNumberStart getter by buffer', () => {
+    it('will throw if setDiskNumberStart overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt16LE(5, 24)
-        const value = header.getDiskNumberStart()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setDiskNumberStart(0xFFFFF)).to.throw()
     })
 
-    it('should assert DiskNumberStart is 2 bytes unsigned', () => {
+    it('it will check InternalFileAttributes getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setDiskNumberStart(70000)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert InternalFileAttributes getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setInternalFileAttributes(5)
+        header.setInternalFileAttributes(0xFFFF)
         const value = header.getInternalFileAttributes()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -767,55 +552,28 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFF)
+
         expect(header.getExternalFileAttributes()).to.be.equal(0)
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert InternalFileAttributes getter by buffer', () => {
+    it('will throw if InternalFileAttributes overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt16LE(5, 26)
-        const value = header.getInternalFileAttributes()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setInternalFileAttributes(0xFFFFF)).to.throw()
     })
 
-    it('should assert InternalFileAttributes is 2 bytes unsigned', () => {
+    it('it will check ExternalFileAttributes getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setInternalFileAttributes(70000)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert ExternalFileAttributes getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setExternalFileAttributes(5)
+        header.setExternalFileAttributes(0xFFFFFFFF)
         const value = header.getExternalFileAttributes()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -829,55 +587,28 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFFFFFF)
+
         expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
     })
 
-    it('should assert ExternalFileAttributes getter by buffer', () => {
+    it('will throw if setExternalFileAttributes overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt32LE(5, 28)
-        const value = header.getExternalFileAttributes()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(value).to.be.equal(5)
-        expect(header.getOffsetOfLocalFileHeader()).to.be.equal(0)
+        expect(() => header.setExternalFileAttributes(0xFFFFFFFFF)).to.throw()
     })
 
-    it('should assert ExternalFileAttributes is 4 bytes unsigned', () => {
+    it('it will check OffsetOfLocalFileHeader getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setExternalFileAttributes(4394967296)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert OffsetOfLocalFileHeader getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setOffsetOfLocalFileHeader(5)
+        header.setOffsetOfLocalFileHeader(0xFFFFFFFF)
         const value = header.getOffsetOfLocalFileHeader()
 
         expect(header.getVersionMadeBy()).to.be.equal(0)
@@ -891,109 +622,68 @@ describe('Testing central-header.js', () => {
         expect(header.getCRC32()).to.be.equal(0)
         expect(header.getCompressedSize()).to.be.equal(0)
         expect(header.getUncompressedSize()).to.be.equal(0)
+        expect(header.getExtraFieldLength()).to.be.equal(0)
+        expect(header.getFileCommentLength()).to.be.equal(0)
         expect(header.getDiskNumberStart()).to.be.equal(0)
         expect(header.getInternalFileAttributes()).to.be.equal(0)
         expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+
+        expect(value).to.be.equal(0xFFFFFFFF)
     })
 
-    it('should assert OffsetOfLocalFileHeader getter by buffer', () => {
+    it('will throw if setOffsetOfLocalFileHeader overflow', () => {
 
-        const buffer = Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH)
-        const header = new CentralHeader(buffer)
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        buffer.writeUInt32LE(5, 32)
-        const value = header.getOffsetOfLocalFileHeader()
-
-        expect(header.getVersionMadeBy()).to.be.equal(0)
-        expect(header.getPlatformCompatibility()).to.be.equal(0)
-        expect(header.getVersionNeededToExtract()).to.be.equal(0)
-        expect(header.getPlatformNeededToExtract()).to.be.equal(0)
-        expect(header.getGeneralPurposeBitFlag()).to.be.equal(0)
-        expect(header.getCompressionMethod()).to.be.equal(0)
-        expect(header.getLastModFileTime()).to.be.equal(0)
-        expect(header.getLastModFileDate()).to.be.equal(0)
-        expect(header.getCRC32()).to.be.equal(0)
-        expect(header.getCompressedSize()).to.be.equal(0)
-        expect(header.getUncompressedSize()).to.be.equal(0)
-        expect(header.getDiskNumberStart()).to.be.equal(0)
-        expect(header.getInternalFileAttributes()).to.be.equal(0)
-        expect(header.getExternalFileAttributes()).to.be.equal(0)
-        expect(value).to.be.equal(5)
+        expect(() => header.setOffsetOfLocalFileHeader(0xFFFFFFFFF)).to.throw()
     })
 
-    it('should assert OffsetOfLocalFileHeader is 4 bytes unsigned', () => {
+    it('it will check FileName getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const name = 'Lorem ipsum.txt'
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        try {
-
-            header.setOffsetOfLocalFileHeader(4394967296)
-        } catch (err) {
-
-            expect(err).to.be.an('error')
-        }
-    })
-
-    it('should assert FileName getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setFileName('my filename')
+        header.setFileName(name)
         const value = header.getFileName()
 
-        expect(value).to.be.equal('my filename')
+        expect(value).to.be.equal(name)
     })
 
-    it('should assert that empty string returned if FileName not set', () => {
+    it('it will check ExtraField getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const buffer = Buffer.from([0xFF, 0xFF, 0xFF, 0xFF])
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        const value = header.getFileName()
-
-        expect(value).to.be.equal('')
-    })
-
-    it('should assert ExtraField getter/setter', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        header.setExtraField(Buffer.from([1, 2, 3, 4, 5]))
+        header.setExtraField(buffer)
         const value = header.getExtraField().toString()
 
-        expect(value).to.be.equal(Buffer.from([1, 2, 3, 4, 5]).toString())
+        expect(value).to.be.equal(buffer.toString())
     })
 
-    it('should assert that empty buffer returned if ExtraField not set', () => {
+    it('it will check comment getter/setter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
+        const comment = 'Sumo tempor virtute ad mel, duo te lorem nonumes denique, pro eu omnis intellegat'
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR))
 
-        const value = header.getExtraField().toString()
+        header.setFileComment(comment)
+        const value = header.getFileComment()
 
-        expect(value).to.be.equal(Buffer.from([]).toString())
+        expect(value).to.be.equal(comment)
     })
 
-    it('should assert HeaderLength getter with FileName, ExtraField, FileComment', () => {
+    it('it will check HeaderSize getter', () => {
 
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-        const fileName = 'my filename'
-        const extraField = Buffer.from([1, 2, 3, 4, 5])
-        const fileComment = 'file comment'
+        const name = 'Lorem ipsum.txt'
+        const extra = Buffer.from([0xFF, 0xFF, 0xFF, 0xFF])
+        const comment = 'Sumo tempor virtute ad mel, duo te lorem nonumes denique, pro eu omnis intellegat'
 
-        header.setFileName(fileName)
-        header.setExtraField(extraField)
-        header.setFileComment(fileComment)
-        const value = header.getHeaderLength()
+        const header = new CentralHeader(Buffer.alloc(CEN_HDR + name.length + extra.length + comment.length))
 
-        expect(value).to.be.equal(CENTRAL_HEADER_LENGTH + fileName.length + extraField.length + fileComment.length)
-    })
+        header.setFileName(name)
+        header.setExtraField(extra)
+        header.setFileComment(comment)
+        const value = header.getHeaderSize()
 
-    it('should assert HeaderLength getter without setting FileName, ExtraField, FileComment', () => {
-
-        const header = new CentralHeader(Buffer.alloc(OBJECT_CENTRAL_HEADER_LENGTH))
-
-        const value = header.getHeaderLength()
-
-        expect(value).to.be.equal(CENTRAL_HEADER_LENGTH)
+        expect(value).to.be.equal(CEN_HDR + name.length + extra.length + comment.length)
     })
 })

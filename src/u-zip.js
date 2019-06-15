@@ -1,21 +1,20 @@
 import {EOL} from 'os'
 import File from './file'
 import Entry from './entry'
-import Zip32HeaderSerializer from './zip-32-header-serializer'
+import Zip32HeaderDecoder from './zip-32-header-decoder'
 import Zip32HeaderInfo from './zip-32-header-info'
 import CentralHeaderDecoder from './central-header-decoder'
 import LocalHeaderDecoder from './local-header-decoder'
-import {LOCAL_HEADER_LENGTH} from './constants'
-import { CustomConsole } from '@jest/console';
+import {END_MAX} from './constants'
 
 export default class UZip {
 
     constructor(path) {
 
         this.file = new File(path)
-
-        const zip32Bytes = this.file.readZip32HeaderBytesSync(Zip32HeaderSerializer.HEADER_MAX_LENGTH)
-        this.zip32Header = Zip32HeaderSerializer.deserealize(zip32Bytes)
+        const decoder = new Zip32HeaderDecoder()
+        decoder.update(this.file.readEndBytesSync(END_MAX))
+        this.zip32Header = decoder.decode()
     }
 
     testArchive = async () => {
@@ -106,7 +105,7 @@ export default class UZip {
             return this.entries
 
         const start = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
-        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories() - 1
+        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getCentralDirectoriesSize() - 1
 
         const readStream = this.file.createReadStream(start, end)
 
@@ -121,11 +120,8 @@ export default class UZip {
 
                     chunk = decoder.update(chunk)
 
-                    if (chunk) {
-
+                    if (chunk)
                         entries.push(new Entry(decoder.decode(), this.file))
-                        decoder.reset()
-                    }
                 }
             })
 

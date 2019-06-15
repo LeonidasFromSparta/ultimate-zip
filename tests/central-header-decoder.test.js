@@ -57,7 +57,7 @@ describe('Testing central-header-decoder.js', () => {
         expect(additionalBuf.equals(remaminigChunk)).to.be.true
     })
 
-    it('will return null on update func if not enough data', () => {
+    it('will check that update func return null if not enough data', () => {
 
         const decoder = new CentralHeaderDecoder()
 
