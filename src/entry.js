@@ -2,10 +2,7 @@ import {createInflateRaw} from 'zlib'
 import CentralHeaderInfo from './central-header-info'
 import LocalHeaderInfo from './local-header-info'
 import {LOCAL_HEADER_LENGTH} from './constants'
-import LocalHeaderWriter from './local-header-writer'
-import CRC32Writer from './crc32-writer'
 import CRC32 from './crc32'
-import DataControlXform from './data-control-xform'
 import LocalHeaderDecoder from './local-header-decoder'
 
 export default class Entry {

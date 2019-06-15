@@ -1,12 +1,12 @@
 import {EOL} from 'os'
-import path from 'path'
 import File from './file'
 import Entry from './entry'
 import Zip32HeaderSerializer from './zip-32-header-serializer'
 import Zip32HeaderInfo from './zip-32-header-info'
-import CentralHeaderTransformer from './central-header-transformer'
+import CentralHeaderDecoder from './central-header-decoder'
 import LocalHeaderDecoder from './local-header-decoder'
 import {LOCAL_HEADER_LENGTH} from './constants'
+import { CustomConsole } from '@jest/console';
 
 export default class UZip {
 
@@ -109,19 +109,38 @@ export default class UZip {
         const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getSizeOfCentralDirectories() - 1
 
         const readStream = this.file.createReadStream(start, end)
-        const writeStream = new CentralHeaderTransformer()
 
         const promise = new Promise((resolve) => {
 
+            const decoder = new CentralHeaderDecoder()
             const entries = []
 
-            readStream.pipe(writeStream)
+            readStream.on('data', (chunk) => {
 
-            writeStream.on('data', (data) => entries.push(new Entry(data, this.file)))
-            writeStream.on('finish', () => resolve(entries))
+                while (chunk) {
+
+                    chunk = decoder.update(chunk)
+
+                    if (chunk) {
+
+                        entries.push(new Entry(decoder.decode(), this.file))
+                        decoder.reset()
+                    }
+                }
+            })
+
+            readStream.on('end', () => {
+
+                resolve(entries)
+            })
         })
 
         this.entries = await promise
+
+        this.entries[0].header._buffer.forEach((obj) => console.log(obj))
+
+        debugger
+
         return this.entries
     }
 

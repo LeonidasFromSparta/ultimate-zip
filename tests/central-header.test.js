@@ -3,7 +3,7 @@ import CentralHeader from './../src/central-header'
 import {OBJECT_CENTRAL_HEADER_LENGTH} from './../src/constants'
 import {CENTRAL_HEADER_LENGTH} from './../src/constants'
 
-describe('Testing central header', () => {
+describe('Testing central-header.js', () => {
 
     it('should assert VersionMadeBy getter/setter', () => {
 

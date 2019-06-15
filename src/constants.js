@@ -137,7 +137,28 @@ export const ZIP_FORMAT_VERSIONS = {
 }
 */
 
-export const CENTRAL_HEADER_LENGTH = 46
+export const CEN_SIG = 0x02014B50
+export const CEN_SIP = 0
+export const CEN_VEM = 4
+export const CEN_PLM = 5
+export const CEN_VER = 6
+export const CEN_PLT = 7
+export const CEN_FLG = 8
+export const CEN_MTD = 10
+export const CEN_TIM = 12
+export const CEN_DAT = 14
+export const CEN_CRC = 16
+export const CEN_SIC = 20
+export const CEN_SIU = 24
+export const CEN_FLE = 28
+export const CEN_ELE = 30
+export const CEN_CLE = 32
+export const CEN_DSK = 34
+export const CEN_ATT = 36
+export const CEN_ATX = 38
+export const CEN_OFF = 42
+export const CEN_HDR = 46
+
 export const OBJECT_CENTRAL_HEADER_LENGTH = 36
 
 export const LOCAL_HEADER_LENGTH = 30

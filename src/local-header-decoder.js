@@ -16,7 +16,6 @@ export default class LocalHeaderDecoder {
     reset = () => {
 
         this.offset = 0
-        this.bufferLength = 30
 
         this.fileNameLength = 0
         this.extraFieldLength = 0
@@ -24,20 +23,20 @@ export default class LocalHeaderDecoder {
 
     update = (chunk) => {
 
-        if (this.offset < 30) {
+        if (this.offset < LOCAL_HEADER_LENGTH) {
 
-            const remainingBytes = this.bufferLength - this.offset
+            const remainingBytes = LOCAL_HEADER_LENGTH - this.offset
             const bytesRead = chunk.copy(this.buffer, this.offset, 0, remainingBytes)
             this.offset += bytesRead
 
-            if (this.offset !== this.bufferLength)
+            if (this.offset !== LOCAL_HEADER_LENGTH)
                 return null
 
             chunk = chunk.slice(bytesRead)
 
             this.fileNameLength = this.buffer.readUInt16LE(26)
             this.extraFieldLength = this.buffer.readUInt16LE(28)
-            this.bufferLength += this.fileNameLength + this.extraFieldLength
+            this.bufferLength += LOCAL_HEADER_LENGTH + this.fileNameLength + this.extraFieldLength
         }
 
         const remainingBytes = this.bufferLength - this.offset
