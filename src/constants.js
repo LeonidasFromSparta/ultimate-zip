@@ -149,6 +149,13 @@ export const END_ZCL = 20
 export const END_HDR = 22
 export const END_MAX = END_HDR + 0xFFFF
 
+export const ELO_SIG = 0x07064B50
+export const ELO_SPO = 0
+export const ELO_DCS = 4
+export const ELO_OFF = 8
+export const ELO_TDN = 16
+export const ELO_HDR = 20
+
 export const CEN_SIG = 0x02014B50
 export const CEN_SPO = 0
 export const CEN_VEM = 4
