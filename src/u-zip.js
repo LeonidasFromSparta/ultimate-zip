@@ -47,7 +47,7 @@ export default class UZip {
 
         const entries = await this._readEntries()
 
-        for (let i=0; i < entries; i++) {
+        for (let i=0; i < entries.length; i++) {
 
             if (entries[i].header.getFileName() === fileName) {
 

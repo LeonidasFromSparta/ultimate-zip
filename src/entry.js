@@ -72,12 +72,10 @@ export default class Entry {
 
             const promise = new Promise((resolve) => {
 
-                let counter = 0
-
                 const inflater = createInflateRaw()
                 inflater.pipe(fileWriter)
 
-                inflater.on('drain', () => fileReader.resume())
+                inflater.on('drain', fileReader['resume'])
                 fileWriter.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {
@@ -114,7 +112,7 @@ export default class Entry {
 
             const promise = new Promise((resolve) => {
 
-                fileWriter.on('drain', () => fileReader.resume())
+                fileWriter.on('drain', fileReader['resume'])
                 fileWriter.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {
@@ -210,7 +208,7 @@ export default class Entry {
 
                 inflater.pipe(dumpStream)
 
-                inflater.on('drain', () => fileReader.resume())
+                inflater.on('drain', fileReader['resume'])
                 dumpStream.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {
