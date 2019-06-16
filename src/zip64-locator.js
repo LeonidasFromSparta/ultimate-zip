@@ -10,7 +10,7 @@ export default class Zip64Locator {
     setOffsetZip64Header = (value) => this._offZip64Header = value
 
     getTotalDisksNumber = () => this._disksNum
-    setCentralDirectoriesNumberOnDisk = (value) => this._disksNum = value
+    setTotalDisksNumber = (value) => this._disksNum = value
 
     getHeaderLength = () => this._len
     setHeaderLength = (value) => this._len = value

@@ -1,14 +1,10 @@
-import Zip64Locator from './zip-32-header'
-
-
-/*
-export const ELO_SIG = 0x07064B50
-export const ELO_SPO = 0
-export const ELO_DCS = 4
-export const ELO_OFF = 8
-export const ELO_TDN = 16
-export const ELO_HDR = 20
-*/
+import Zip64Locator from './zip64-locator'
+import {ELO_SIG} from './constants'
+import {ELO_SPO} from './constants'
+import {ELO_DCS} from './constants'
+import {ELO_OFF} from './constants'
+import {ELO_TDN} from './constants'
+import {ELO_HDR} from './constants'
 
 export default class Zip64LocatorDecoder {
 
@@ -24,38 +20,14 @@ export default class Zip64LocatorDecoder {
 
     decode = () => {
 
-        const header = new Zip64Locator()
+        const locator = new Zip64Locator()
 
-        header.setSignature(this._buffer.readUInt32LE(END_SPO))
-        header.setDiskNumber(this._buffer.readUInt16LE(END_DNU))
-        header.setDiskNumberWhereCentralDirectoriesStart(this._buffer.readUInt16LE(END_DCS))
-        header.setCentralDirectoriesNumberOnDisk(this._buffer.readUInt16LE(END_CND))
-        header.setCentralDirectoriesNumber(this._buffer.readUInt16LE(END_CDC))
-        header.setCentralDirectoriesSize(this._buffer.readUInt32LE(END_CDS))
-        header.setCentralDirectoriesOffsetWithStartingDisk(this._buffer.readUInt32LE(END_OFF))
+        locator.setSignature(this._buffer.readUInt32LE(ELO_SPO))
+        locator.setDiskNumberWhereZip64HeaderStarts(this._buffer.readUInt32LE(ELO_DCS))
+        locator.setOffsetZip64Header(this._buffer.readUInt16LE(ELO_OFF))
+        locator.setTotalDisksNumber(this._buffer.readUInt16LE(ELO_TDN))
+        locator.setHeaderLength(ELO_HDR)
 
-        const commentLen = this._buffer.readUInt16LE(END_ZCL)
-        header.setZipFileComment(this._buffer.toString('utf8', END_HDR, END_HDR + commentLen))
-
-        header.setHeaderLength(END_HDR + commentLen)
-
-        const signature = header.getSignature()
-
-        if (signature !== END_SIG) {
-
-            const actualSignature = '0x' + signature.toString(16).padStart(8, '0')
-            const expectedSignature = '0x' + END_SIG.toString(16).padStart(8, '0')
-
-            /*
-            throw {
-                name: 'End header signature error',
-                message: `End header signature could not be confirmed: expected ${expectedSignature}, actual ${actualSignature}`
-            }
-            */
-
-           throw (`End of central directory record signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
-        }
-
-        return header
+        return locator
     }
 }

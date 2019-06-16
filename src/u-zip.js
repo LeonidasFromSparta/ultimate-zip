@@ -5,6 +5,7 @@ import Zip32HeaderDecoder from './zip-32-header-decoder'
 import Zip32HeaderInfo from './zip-32-header-info'
 import CentralHeaderDecoder from './central-header-decoder'
 import LocalHeaderDecoder from './local-header-decoder'
+import Zip64LocatorDecoder from './zip64-locator-decoder'
 import {END_MAX} from './constants'
 
 export default class UZip {
@@ -12,9 +13,22 @@ export default class UZip {
     constructor(path) {
 
         this.file = new File(path)
+
+        this.type = 32
         const decoder = new Zip32HeaderDecoder()
-        decoder.update(this.file.readEndBytesSync(END_MAX))
+        const chunk1 = decoder.update(this.file.readEndBytesSync(END_MAX))
         this.zip32Header = decoder.decode()
+
+        const zip64LocatorDecoder = new Zip64LocatorDecoder()
+        const chunk2 = zip64LocatorDecoder.update(chunk1)
+
+        if (!chunk2)
+            return
+
+        this.type = 64
+        this.zip64Locator = zip64LocatorDecoder.decode()
+
+        debugger
     }
 
     testArchive = async () => {
