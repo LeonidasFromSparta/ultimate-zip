@@ -7,6 +7,7 @@ import CentralHeaderDecoder from './central-header-decoder'
 import LocalHeaderDecoder from './local-header-decoder'
 import Zip64LocatorDecoder from './zip64-locator-decoder'
 import {END_MAX} from './constants'
+import Zip64HeaderDecoder from './zip64-header-decoder'
 
 export default class UZip {
 
@@ -28,6 +29,9 @@ export default class UZip {
         this.type = 64
         this.zip64Locator = zip64LocatorDecoder.decode()
 
+        const zip64HeaderDecoder = new Zip64HeaderDecoder()
+
+        const bytes = this.file.readBytesSync(this.zip64Locator.getOffsetZip64Header(), )
         debugger
     }
 

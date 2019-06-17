@@ -31,6 +31,15 @@ export default class File {
         return buffer
     }
 
+    getFileSizeBigInt() {
+
+        const buffer = Buffer.allocUnsafe(length)
+
+        fs.readSync(Number(this.fd), buffer, 0, length, pos)
+
+        return buffer
+    }
+
     /**
      * Method creates a file read stream from - to specified positions.
      * @param {int} start The start position in the file.

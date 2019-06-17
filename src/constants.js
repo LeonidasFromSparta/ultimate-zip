@@ -139,7 +139,7 @@ export const ZIP_FORMAT_VERSIONS = {
 
 export const END_SIG = 0x06054B50
 export const END_SPO = 0
-export const END_DNU = 4
+export const END_DNU = 4  // disk number
 export const END_DCS = 6
 export const END_CND = 8
 export const END_CDC = 12
@@ -155,6 +155,21 @@ export const ELO_DCS = 4
 export const ELO_OFF = 8
 export const ELO_TDN = 16
 export const ELO_HDR = 20
+
+export const E64_SIG = 0x06064B50
+export const E64_SPO = 0  // signature
+export const E64_SIZ = 4  // size of end of zip64 directory record
+export const E64_VEM = 12 // version made by
+export const E64_PLM = 13 // platform made by
+export const E64_VER = 14 // version needed
+export const E64_PLT = 15 // platform needed
+export const E64_DSK = 16 // disk number
+export const E64_DCD = 20 // disk number with start of central directories
+export const E64_CDD = 24 // central directories number on disk
+export const E64_CDN = 32 // central directories number
+export const E64_CDS = 40 // central directories size
+export const E64_OFF = 48 // central directories offset to starting disk
+export const E64_HDR = 56
 
 export const CEN_SIG = 0x02014B50
 export const CEN_SPO = 0

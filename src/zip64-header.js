@@ -1,10 +1,12 @@
+import {E64_SIG} from './constants'
+
 export default class Zip64Header {
 
-    getSignature = () => this._sig
+    getSignature = () => this._sig ? this._sig : E64_SIG
     setSignature = (value) => this._sig = value
 
-    getZip64HeaderSize = () => this._z64hdrSize
-    setZip64HeaderSize = (value) => this._z64hdrSize = value
+    getPartialHeaderSize = () => this._hdrSize
+    setPartialHeaderSize = (value) => this._hdrSize = value
 
     getVersionMadeBy = () => this._verMade
     setVersionMadeBy = (value) => this._verMade = value
