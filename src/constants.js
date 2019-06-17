@@ -209,3 +209,6 @@ export const LOC_FLE = 26
 export const LOC_ELE = 28
 export const LOC_HDR = 30
 export const LOC_MAX = LOC_HDR + 0xFFFF + 0xFFFF
+
+export const ZIP_32 = 32
+export const ZIP_64 = 64

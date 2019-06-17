@@ -7,37 +7,18 @@ export default class File {
         this.path = path
     }
 
-    readEndBytesSync = (length) => {
+    readBytesSync(pos, end) {
 
-        const fd = fs.openSync(this.path, 'r')
-        const stats = fs.fstatSync(fd)
+        const buffer = Buffer.allocUnsafe(end - pos)
 
-        const numBytesToRead = stats.size < length ? stats.size : length
-        const buffer = Buffer.allocUnsafe(numBytesToRead)
-        const position = numBytesToRead < length ? 0 : stats.size - length
-
-        fs.readSync(Number(fd), buffer, 0, numBytesToRead, position)
-        fs.closeSync(fd)
+        fs.readSync(Number(this.fd), buffer, 0, end - pos, pos)
 
         return buffer
     }
 
-    readBytesSync(pos, length) {
+    getFileSizeBigInt = () => {
 
-        const buffer = Buffer.allocUnsafe(length)
-
-        fs.readSync(Number(this.fd), buffer, 0, length, pos)
-
-        return buffer
-    }
-
-    getFileSizeBigInt() {
-
-        const buffer = Buffer.allocUnsafe(length)
-
-        fs.readSync(Number(this.fd), buffer, 0, length, pos)
-
-        return buffer
+        return fs.fstatSync(this.fd).size
     }
 
     /**
@@ -59,6 +40,16 @@ export default class File {
     createFdReadStream(start, end) {
 
         return fs.createReadStream(null, {fd: this.fd, start, end})
+    }
+
+    openSync = () => {
+
+        this.fd = fs.openSync(this.path)
+    }
+
+    closeSync = () => {
+
+        fs.close(this.fd)
     }
 
     open = async () => {

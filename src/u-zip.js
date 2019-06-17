@@ -6,33 +6,52 @@ import Zip32HeaderInfo from './zip-32-header-info'
 import CentralHeaderDecoder from './central-header-decoder'
 import LocalHeaderDecoder from './local-header-decoder'
 import Zip64LocatorDecoder from './zip64-locator-decoder'
-import {END_MAX} from './constants'
 import Zip64HeaderDecoder from './zip64-header-decoder'
+import {END_MAX} from './constants'
+import {ELO_HDR} from './constants'
+import {ZIP_32} from './constants'
+import {ZIP_64} from './constants'
 
 export default class UZip {
 
     constructor(path) {
 
+        debugger
+
         this.file = new File(path)
 
-        this.type = 32
-        const decoder = new Zip32HeaderDecoder()
-        const chunk1 = decoder.update(this.file.readEndBytesSync(END_MAX))
-        this.zip32Header = decoder.decode()
+        this.file.openSync()
+        const fileSize = this.file.getFileSizeBigInt()
 
-        const zip64LocatorDecoder = new Zip64LocatorDecoder()
-        const chunk2 = zip64LocatorDecoder.update(chunk1)
+        const zip32Decoder = new Zip32HeaderDecoder()
 
-        if (!chunk2)
+        if ((fileSize - END_MAX) < 0)
+            zip32Decoder.update(this.file.readBytesSync(0, fileSize))
+        else
+            zip32Decoder.update(this.file.readBytesSync(fileSize - END_MAX, fileSize))
+
+        this.zip32Header = zip32Decoder.decode()
+
+        const zip64LocDecoder = new Zip64LocatorDecoder()
+        const zip64LocStart = fileSize - this.zip32Header.getHeaderLength() - ELO_HDR
+        const zip64LocEnd = fileSize - this.zip32Header.getHeaderLength()
+
+        if (zip64LocDecoder.update(this.file.readBytesSync(zip64LocStart, zip64LocEnd))) {
+
+            this.zip64Locator = zip64HeaderDecoder.decode()
+            this.zipType = ZIP_64
+        } else {
+
+            this.zipType = ZIP_32
             return
+        }
 
-        this.type = 64
-        this.zip64Locator = zip64LocatorDecoder.decode()
+        const zip64HeaderStart = this.zip64Locator.getOffsetZip64Header()
+        const zip64HeaderEnd = fileSize - this.zip32Header.getHeaderLength() - ELO_HDR
 
         const zip64HeaderDecoder = new Zip64HeaderDecoder()
-
-        const bytes = this.file.readBytesSync(this.zip64Locator.getOffsetZip64Header(), )
-        debugger
+        zip64HeaderDecoder.update(this.file.readBytesSync(zip64HeaderStart, zip64HeaderEnd))
+        this.zip64Header = zip64HeaderDecoder.decode()
     }
 
     testArchive = async () => {

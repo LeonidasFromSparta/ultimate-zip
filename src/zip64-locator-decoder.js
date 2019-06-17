@@ -10,12 +10,11 @@ export default class Zip64LocatorDecoder {
 
     update = (chunk) => {
 
-        this._buffer = chunk.slice(chunk.length - ELO_HDR)
+        if (chunk.readUInt32LE(ELO_SPO) !== ELO_SIG)
+            return false
 
-        if (this._buffer.readUInt32LE(ELO_SPO) !== ELO_SIG)
-            return null
-
-        return chunk.slice(0, chunk.length - ELO_HDR)
+        this._buffer = chunk
+        return true
     }
 
     decode = () => {

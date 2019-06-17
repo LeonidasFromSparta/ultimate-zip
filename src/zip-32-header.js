@@ -1,6 +1,8 @@
+import {END_SIG} from './constants'
+
 export default class Zip32Header {
 
-    getSignature = () => this._sig
+    getSignature = () => this._sig ? this._sig : END_SIG
     setSignature = (value) => this._sig = value
 
     getDiskNumber = () => this._disk
