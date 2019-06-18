@@ -54,8 +54,8 @@ export default class LocalHeaderDecoder {
 
         if (signature !== LOC_SIG) {
 
-            const actualSignature = '0x' + signature.toString(16).padStart(8, '0')
-            const expectedSignature = '0x' + LOC_SIG.toString(16).padStart(8, '0')
+            const actualSignature = '0x' + signature.toString(16).toUpperCase().padStart(8, '0')
+            const expectedSignature = '0x' + LOC_SIG.toString(16).toUpperCase().padStart(8, '0')
 
             /*
             throw {
@@ -71,7 +71,6 @@ export default class LocalHeaderDecoder {
 
         const header = new LocalHeader()
 
-        header.setSignature(signature)
         header.setVersionNeededToExtract(this._buffer.readUInt8(LOC_VER))
         header.setPlatformNeededToExtract(this._buffer.readUInt8(LOC_PLT))
         header.setGeneralPurposeBitFlag(this._buffer.readUInt16LE(LOC_FLG))

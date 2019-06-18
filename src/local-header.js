@@ -1,6 +1,8 @@
+import {LOC_SIG} from './constants'
+
 export default class LocalHeader {
 
-    getSignature = () => this._sig
+    getSignature = () => this._sig ? this._sig : LOC_SIG
     setSignature = (value) => this._sig = value
 
     getVersionNeededToExtract = () => this._verExt

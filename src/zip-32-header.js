@@ -23,8 +23,8 @@ export default class Zip32Header {
     getCentralDirectoriesOffsetWithStartingDisk = () => this._cenDirsOff
     setCentralDirectoriesOffsetWithStartingDisk = (value) => this._cenDirsOff = value
 
-    getZipFileComment = () => this._comment
-    setZipFileComment = (value) => this._comment = value
+    getZipFileComment = () => this._comment ? this._comment : ''
+    setZipFileComment = (value) => value !== '' ? this._comment = value : 0
 
     getHeaderLength = () => this._len
     setHeaderLength = (value) => this._len = value

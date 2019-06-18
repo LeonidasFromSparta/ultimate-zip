@@ -16,7 +16,7 @@ export default class File {
         return buffer
     }
 
-    getFileSizeBigInt = () => {
+    getFileSize = () => {
 
         return fs.fstatSync(this.fd).size
     }
@@ -49,7 +49,7 @@ export default class File {
 
     closeSync = () => {
 
-        fs.close(this.fd)
+        fs.closeSync(this.fd)
     }
 
     open = async () => {

@@ -75,7 +75,7 @@ export default class Entry {
                 const inflater = createInflateRaw()
                 inflater.pipe(fileWriter)
 
-                inflater.on('drain', fileReader['resume'])
+                inflater.on('drain', () => fileReader.resume())
                 fileWriter.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {
@@ -112,7 +112,7 @@ export default class Entry {
 
             const promise = new Promise((resolve) => {
 
-                fileWriter.on('drain', fileReader['resume'])
+                fileWriter.on('drain', () => fileReader.resume())
                 fileWriter.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {
@@ -173,7 +173,25 @@ export default class Entry {
                     fileReader.unshift(unshiftedChunk)
                     fileReader.removeAllListeners()
 
-                    decoder.decode()
+
+
+
+                    let keke
+
+                    try {
+
+                        keke = decoder.decode()
+                    } catch (e) {
+
+                        debugger
+                    }
+
+                    const hed = this.header
+                    console.log('file pos: ' + (fileReader.start + fileReader.bytesRead - fileReader.readableLength))
+                    console.log('header size: ' + keke.getHeaderLength())
+                    console.log('file comp size: ' + this.header.getCompressedSize())
+                    console.log('name: ' + this.header.getFileName())
+
                     resolve()
                 }
             })
@@ -208,7 +226,7 @@ export default class Entry {
 
                 inflater.pipe(dumpStream)
 
-                inflater.on('drain', fileReader['resume'])
+                inflater.on('drain', () => fileReader.resume())
                 dumpStream.on('finish', resolve)
 
                 fileReader.on('data', (chunk) => {

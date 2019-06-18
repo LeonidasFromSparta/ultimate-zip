@@ -1,0 +1,1 @@
+* craft zip64 with size less then 0xFFFFFFFF (4gb~) and check if zip32 offset is stored in header 64 or 32

@@ -21,10 +21,9 @@ export default class Zip64LocatorDecoder {
 
         const locator = new Zip64Locator()
 
-        locator.setSignature(this._buffer.readUInt32LE(ELO_SPO))
         locator.setDiskNumberWhereZip64HeaderStarts(this._buffer.readUInt32LE(ELO_DCS))
-        locator.setOffsetZip64Header(this._buffer.readUInt16LE(ELO_OFF))
-        locator.setTotalDisksNumber(this._buffer.readUInt16LE(ELO_TDN))
+        locator.setOffsetZip64Header(parseInt(this._buffer.readBigUInt64LE(ELO_OFF)))
+        locator.setTotalDisksNumber(this._buffer.readUInt32LE(ELO_TDN))
         locator.setHeaderLength(ELO_HDR)
 
         return locator

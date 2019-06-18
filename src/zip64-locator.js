@@ -1,6 +1,8 @@
+import {ELO_SIG} from './constants'
+
 export default class Zip64Locator {
 
-    getSignature = () => this._sig
+    getSignature = () => this._sig ? this._sig : ELO_SIG
     setSignature = (value) => this._sig = value
 
     getDiskNumberWhereZip64HeaderStarts = () => this._zip64EndDisk
