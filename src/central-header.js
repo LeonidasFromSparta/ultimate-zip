@@ -1,6 +1,8 @@
+import {CEN_SIG} from './constants'
+
 export default class CentralHeader {
 
-    getSignature = () => this._sig
+    getSignature = () => this._sig ? this._sig : CEN_SIG
     setSignature = (value) => this._sig = value
 
     getVersionMadeBy = () => this._verMade
@@ -61,7 +63,7 @@ export default class CentralHeader {
     setFileName = (value) => this._name = value
 
     getExtraField = () => this._extra
-    setExtraField = (value) => this._exxtra = value
+    setExtraField = (value) => this._extra = value
 
     getFileComment = () => this._comment
     setFileComment = (value) => this._comment = value

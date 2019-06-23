@@ -212,3 +212,7 @@ export const LOC_MAX = LOC_HDR + 0xFFFF + 0xFFFF
 
 export const ZIP_32 = 32
 export const ZIP_64 = 64
+
+export const NTFS_MOD_TIME = 12
+export const NTFS_ACC_TIME = 20
+export const NTFS_CRE_TIME = 28

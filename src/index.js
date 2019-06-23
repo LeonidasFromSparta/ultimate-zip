@@ -3,10 +3,10 @@ import UZip from './u-zip'
 const start = process.hrtime.bigint()
 console.log('start unzip: ' + start)
 
-// const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip/samples/7z-ubuntu-normal.zip')
+const zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip/samples/1file-linux.zip')
 // const zip = new UZip('./samples/big.zip')
 // const zip = new UZip('./samples/Lorem ipsum.zip')
-const zip = new UZip('./samples/4g.zip')
+// const zip = new UZip('./samples/4g.zip')
 
 // console.log(zip.getInfo())
 

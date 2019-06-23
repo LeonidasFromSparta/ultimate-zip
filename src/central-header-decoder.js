@@ -21,6 +21,7 @@ import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 import {CEN_HDR} from './constants'
 import {CEN_MAX} from './constants'
+import UnixFieldDecoder from './unix-field-decoder'
 
 export default class CentralHeaderDecoder {
 
@@ -79,7 +80,6 @@ export default class CentralHeaderDecoder {
 
         const header = new CentralHeader()
 
-		header.setSignature(signature)
         header.setVersionMadeBy(this._buffer.readUInt8(CEN_VEM))
         header.setPlatformCompatibility(this._buffer.readUInt8(CEN_PLM))
         header.setVersionNeededToExtract(this._buffer.readUInt8(CEN_VER))
@@ -105,7 +105,14 @@ export default class CentralHeaderDecoder {
         this._buffer.copy(extraBuf, 0, CEN_HDR + this._nameLen, CEN_HDR + this._nameLen + this._extraLen)
         header.setExtraField(extraBuf)
 
+        const ntfsFieldDEcoder = new UnixFieldDecoder()
+        ntfsFieldDEcoder.update(extraBuf)
+
+        ntfsFieldDEcoder.decode()
+
         header.setFileComment(this._buffer.toString('utf8', CEN_HDR + this._nameLen + this._extraLen, CEN_HDR + this._nameLen + this._extraLen + this._commentLen))
+
+        debugger
 
         return header
     }
