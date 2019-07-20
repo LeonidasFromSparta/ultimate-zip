@@ -87,7 +87,7 @@ export default class Entry {
 
                         counter += chunk.length
                         crc32.update(chunk)
-
+                        console.log(chunk.toString('utf8'))
                         return
                     }
 
@@ -95,6 +95,8 @@ export default class Entry {
 
                     crc32.update(partialChunk)
                     inflater.end(partialChunk)
+
+                    console.log(partialChunk.toString('utf8'))
 
                     fileReader.pause()
                     fileReader.unshift(chunk.slice(remainingBytes))
