@@ -21,7 +21,6 @@ import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 import {CEN_HDR} from './constants'
 import {CEN_MAX} from './constants'
-import UnixFieldDecoder from './unix-field-decoder'
 
 export default class CentralHeaderDecoder {
 
@@ -66,13 +65,6 @@ export default class CentralHeaderDecoder {
             const expectedSignature = '0x' + CEN_SIG.toString(16).padStart(8, '0')
             const actualSignature = '0x' + signature.toString(16).padStart(8, '0')
 
-            /*
-            throw new ({
-                name: 'Local file header signature error',
-                message: `Local file header signature could not be confirmed: expected ${expectedSignature}, actual ${actualSignature}`
-            })
-            */
-
             throw (`Local file header signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
         }
 
@@ -97,7 +89,7 @@ export default class CentralHeaderDecoder {
         header.setDiskNumberStart(this._buffer.readUInt16LE(CEN_DSK))
         header.setInternalFileAttributes(this._buffer.readUInt16LE(CEN_ATT))
         header.setExternalFileAttributes(this._buffer.readUInt32LE(CEN_ATX))
-        header.setOffsetOfLocalFileHeader(this._buffer.readUInt32LE(CEN_OFF))
+        header.setOffsetOfLocalHeader(this._buffer.readUInt32LE(CEN_OFF))
 
         header.setFileName(this._buffer.toString('utf8', CEN_HDR, CEN_HDR + this._nameLen))
 
@@ -105,15 +97,47 @@ export default class CentralHeaderDecoder {
         this._buffer.copy(extraBuf, 0, CEN_HDR + this._nameLen, CEN_HDR + this._nameLen + this._extraLen)
         header.setExtraField(extraBuf)
 
-        const ntfsFieldDEcoder = new UnixFieldDecoder()
-        ntfsFieldDEcoder.update(extraBuf)
+        for (let offset=0; offset < header.getExtraField().length; offset++) {
 
-        ntfsFieldDEcoder.decode()
+            const headerId = header.getExtraField().readUInt16LE(offset)
+            offset += 2
+            const dataSize = header.getExtraField().readUInt16LE(offset)
+            offset += 2
+
+            if (headerId === 0x0001) {
+
+                if (header.getUncompressedSize() === 0xFFFFFFFF) {
+
+                    header.setUncompressedSize(parseInt(header.getExtraField().readBigUInt64LE(offset)))
+                    offset += 8
+                }
+
+                if (header.getCompressedSize() === 0xFFFFFFFF) {
+
+                    header.setCompressedSize(parseInt(header.getExtraField().readBigUInt64LE(offset)))
+                    offset += 8
+                }
+
+                if (header.getOffsetOfLocalHeader() === 0xFFFFFFFF) {
+
+                    header.setOffsetOfLocalHeader(parseInt(header.getExtraField().readBigUInt64LE(offset)))
+                    offset += 8
+                }
+
+                if (header.getDiskNumberStart() === 0xFFFF) {
+
+                    header.setDiskNumberStart(parseInt(header.getExtraField().readUInt32LE(offset)))
+                    offset += 4
+                }
+
+                break
+            } else {
+
+                offset += dataSize
+            }
+        }
 
         header.setFileComment(this._buffer.toString('utf8', CEN_HDR + this._nameLen + this._extraLen, CEN_HDR + this._nameLen + this._extraLen + this._commentLen))
-
-        debugger
-
         return header
     }
 }

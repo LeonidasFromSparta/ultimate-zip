@@ -2,7 +2,6 @@ import {EOL} from 'os'
 import File from './file'
 import Entry from './entry'
 import Zip32HeaderDecoder from './zip-32-header-decoder'
-import Zip32HeaderInfo from './zip-32-header-info'
 import CentralHeaderDecoder from './central-header-decoder'
 import LocalHeaderDecoder from './local-header-decoder'
 import Zip64LocatorDecoder from './zip64-locator-decoder'
@@ -57,20 +56,19 @@ export default class UZip {
 
         const entries = await this._readEntries()
         const decoder = new LocalHeaderDecoder()
-        const end = - 1 + this.zipType === ZIP_32 ? this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() : this.zip64Header.getCentralDirectoriesOffsetWithStartingDisk()
+
+        const end = this.zipType === ZIP_32 ? this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() : this.zip64Header.getCentralDirectoriesOffsetWithStartingDisk() - 1
 
         await this.file.open()
         let fileReader = this.file.createReadStream(0, end)
-
-        debugger
 
         for (let i=0; i < entries.length; i++) {
 
             const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
 
-            if (fileReaderPos !== entries[i].header.getOffsetOfLocalFileHeader()) {
+            if (fileReaderPos !== entries[i].header.getOffsetOfLocalHeader()) {
 
-                const start = entries[i].header.getOffsetOfLocalFileHeader()
+                const start = entries[i].header.getOffsetOfLocalHeader()
                 fileReader = this.file.createFdReadStream(start, end)
             }
 
@@ -108,9 +106,9 @@ export default class UZip {
 
             const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
 
-            if (fileReaderPos !== entries[i].header.getOffsetOfLocalFileHeader()) {
+            if (fileReaderPos !== entries[i].header.getOffsetOfLocalHeader()) {
 
-                const start = entries[i].header.getOffsetOfLocalFileHeader()
+                const start = entries[i].header.getOffsetOfLocalHeader()
                 fileReader = this.file.createFdReadStream(start, end)
             }
 

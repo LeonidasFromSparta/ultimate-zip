@@ -36,16 +36,16 @@ const table = [
 
 export default class CRC32 {
 
-    crc = -1
+    _crc = -1
 
     update = (bytes) => {
 
         for (let i=0; i < bytes.length; i++)
-            this.crc = (this.crc >>> 8) ^ table[(this.crc ^ bytes[i]) & 0xFF]
+            this._crc = (this._crc >>> 8) ^ table[(this._crc ^ bytes[i]) & 0xFF]
     }
 
     getValue = () => {
 
-        return (this.crc ^ (-1)) >>> 0
+        return (this._crc ^ (-1)) >>> 0
     }
 }

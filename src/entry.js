@@ -1,6 +1,4 @@
 import {createInflateRaw} from 'zlib'
-import CentralHeaderInfo from './central-header-info'
-import LocalHeaderInfo from './local-header-info'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import CRC32 from './crc32'
 import LocalHeaderDecoder from './local-header-decoder'
@@ -106,6 +104,12 @@ export default class Entry {
             })
 
             await promise
+
+            if (crc32.getValue() !== this.header.getCRC32()) {
+
+                debugger
+                console.log(crc32.getValue())
+            }
         }
 
         if (!this.header.isCompressed()) {
@@ -173,25 +177,7 @@ export default class Entry {
                     fileReader.unshift(unshiftedChunk)
                     fileReader.removeAllListeners()
 
-
-
-
-                    let keke
-
-                    try {
-
-                        keke = decoder.decode()
-                    } catch (e) {
-
-                        debugger
-                    }
-
-                    const hed = this.header
-                    console.log('file pos: ' + (fileReader.start + fileReader.bytesRead - fileReader.readableLength))
-                    console.log('header size: ' + keke.getHeaderLength())
-                    console.log('file comp size: ' + this.header.getCompressedSize())
-                    console.log('name: ' + this.header.getFileName())
-
+                    decoder.decode()
                     resolve()
                 }
             })
@@ -251,6 +237,9 @@ export default class Entry {
 
                     fileReader.pause()
                     fileReader.unshift(chunk.slice(remainingBytes))
+
+                    if (crc32.getValue() !== this.header.getCRC32())
+                        throw 'compressed keke'
                 })
 
                 fileReader.resume()
@@ -280,6 +269,10 @@ export default class Entry {
 
                     fileReader.pause()
                     fileReader.unshift(chunk.slice(remainingBytes))
+
+                    if (crc32.getValue() !== this.header.getCRC32())
+                        throw 'uncompressed keke'
+
                     resolve()
                 })
 
@@ -303,37 +296,5 @@ export default class Entry {
 
         this.localHeader = await this._readLocalHeader()
         return this.localHeader
-    }
-
-    _readLocalHeader = async () => {
-
-        const start = this.header.getOffsetOfLocalFileHeader()
-        const end = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + 65536 + 65536 - 1 // -1 because inclusive
-        const highWaterMark = 1024
-
-        const readStream = this.file.createReadStreamWithHighWaterMark(start, end, highWaterMark)
-        const writeStream = new LocalHeaderWriter()
-
-        const promise = new Promise((resolve) => {
-
-            let header
-
-            readStream.pipe(writeStream)
-
-            writeStream.on('data', (data) => header = data)
-            writeStream.on('finish', () => resolve(header))
-        })
-
-        return promise
-    }
-
-    getCentralHeaderInfo = () => {
-
-        return new CentralHeaderInfo(this.header).toString()
-    }
-
-    getLocalHeaderInfo = async () => {
-
-        return new LocalHeaderInfo(await this._readLocalHeader()).toString()
     }
 }

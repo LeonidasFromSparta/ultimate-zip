@@ -57,14 +57,7 @@ export default class LocalHeaderDecoder {
             const actualSignature = '0x' + signature.toString(16).toUpperCase().padStart(8, '0')
             const expectedSignature = '0x' + LOC_SIG.toString(16).toUpperCase().padStart(8, '0')
 
-            /*
-            throw {
-                name: 'End header signature error',
-                message: `End header signature could not be confirmed: expected ${expectedSignature}, actual ${actualSignature}`
-            }
-            */
-
-           throw (`Local file header signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
+            throw (`Local file header signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
         }
 
         this._offset = 0

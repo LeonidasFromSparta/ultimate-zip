@@ -56,8 +56,8 @@ export default class CentralHeader {
     getExternalFileAttributes = () => this._extAtt
     setExternalFileAttributes = (value) => this._extAtt = value
 
-    getOffsetOfLocalFileHeader = () => this._offset
-    setOffsetOfLocalFileHeader = (value) => this._offset = value
+    getOffsetOfLocalHeader = () => this._offset
+    setOffsetOfLocalHeader = (value) => this._offset = value
 
     getFileName = () => this._name
     setFileName = (value) => this._name = value
@@ -71,7 +71,9 @@ export default class CentralHeader {
     getHeaderSize = () => this._len
     setHeaderSize = (value) => this._len = value
 
-    isDirectory = () => this.getCompressedSize() === 0
+    isDirectory = () => (this.getExternalFileAttributes() & 0x10) === 0x10
 
     isCompressed = () => this.getCompressedSize() !== this.getUncompressedSize()
+
+    isZip64Extended = () => this._uncompSize === 0xFFFFFFFF || this._compSize === 0xFFFFFFFF || this._offset === 0xFFFFFFFF || this._disk === 0xFFFF
 }
