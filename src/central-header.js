@@ -73,7 +73,7 @@ export default class CentralHeader {
 
     isDirectory = () => (this.getExternalFileAttributes() & 0x10) === 0x10
 
-    isCompressed = () => this.getCompressedSize() !== this.getUncompressedSize()
+    isCompressed = () => this._method !== 0
 
     isZip64Extended = () => this._uncompSize === 0xFFFFFFFF || this._compSize === 0xFFFFFFFF || this._offset === 0xFFFFFFFF || this._disk === 0xFFFF
 }
