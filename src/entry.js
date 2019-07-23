@@ -5,6 +5,7 @@ import CRC32 from './crc32'
 import LocalHeaderDecoder from './local-header-decoder'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
+import CRC32Stream from './crc32-stream'
 
 export default class Entry {
 
@@ -58,48 +59,44 @@ export default class Entry {
         await this._operator(dumpWriter, fileReader)
     }
 
-    _operator = async (fileWriter, fileReader) => {
+    _operator = async (writer, reader) => {
 
         const size = this.header.getCompressedSize()
-        const crc32 = new CRC32()
         const inflater = this.header.isCompressed() ? createInflateRaw() : new PassThrough()
-        let counter = 0
+        const crc32Stream = new CRC32Stream(new CRC32())
 
         const promise = new Promise((resolve) => {
 
-            inflater.pipe(fileWriter)
-            inflater.on('drain', () => fileReader.resume())
-            fileWriter.on('finish', resolve)
+            let bytesCounter = 0
 
-            fileReader.on('data', (chunk) => {
+            reader.on('data', (chunk) => {
 
-                const remainingBytes = size - counter
+                const remainingBytes = size - bytesCounter
 
                 if (chunk.length < remainingBytes) {
 
                     if (!inflater.write(chunk, 'buffer'))
-                        fileReader.pause()
+                        reader.pause()
 
-                    counter += chunk.length
-                    crc32.update(chunk)
+                    bytesCounter += chunk.length
                     return
                 }
 
-                const partialChunk = chunk.slice(0, remainingBytes)
+                inflater.end(chunk.slice(0, remainingBytes))
 
-                crc32.update(partialChunk)
-                inflater.end(partialChunk)
-
-                fileReader.pause()
-                fileReader.unshift(chunk.slice(remainingBytes))
+                reader.pause()
+                reader.removeAllListeners()
+                reader.unshift(chunk.slice(remainingBytes))
             })
 
-            fileReader.resume()
+            inflater.pipe(crc32Stream).pipe(writer)
+            inflater.on('drain', () => reader.resume())
+            writer.on('finish', resolve)
+
+            reader.resume()
         })
 
         await promise
-
-       fileReader.removeAllListeners()
     }
 
     isDirectory = () => this.header.isDirectory()

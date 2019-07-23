@@ -27,21 +27,27 @@ zip.getEntries().then(async (data) => {
 })
 */
 
-/*
 zip.extractArchive('./extr').then(() => {
 
     const end = process.hrtime.bigint()
     console.log('unzip time: ' + new Number((end - start)) / 1e+9)
 
     console.log('testo now')
-})
-*/
 
+    zip.testArchive().then(() => {
+
+        const end = process.hrtime.bigint()
+        console.log('unzip time: ' + new Number((end - start)) / 1e+9)
+    })
+})
+
+/*
 zip.testArchive().then(() => {
 
     const end = process.hrtime.bigint()
     console.log('unzip time: ' + new Number((end - start)) / 1e+9)
 })
+*/
 
 /*
 zip.testFile('node_modules/@electron/docs-parser/yarn.lock').then(() => {
