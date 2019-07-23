@@ -26,7 +26,7 @@ zip.getEntries().then(async (data) => {
     await data[0].getLocalHeader()
 })
 */
-
+//
 zip.extractArchive('./extr').then(() => {
 
     const end = process.hrtime.bigint()

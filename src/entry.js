@@ -35,7 +35,7 @@ export default class Entry {
             return await this.file.makeDir(fileName)
 
         const fileWriter = this.file.createWriteStream(fileName)
-        await this._operator(fileWriter, fileReader)
+        await this._inflater(fileReader, fileWriter)
     }
 
     test = () => {
@@ -56,10 +56,10 @@ export default class Entry {
             return
 
         const dumpWriter = new DumpWriter()
-        await this._operator(dumpWriter, fileReader)
+        await this._inflater(fileReader, dumpWriter)
     }
 
-    _operator = async (writer, reader) => {
+    _inflater = async (reader, writer) => {
 
         const size = this.header.getCompressedSize()
         const inflater = this.header.isCompressed() ? createInflateRaw() : new PassThrough()
@@ -98,7 +98,7 @@ export default class Entry {
 
         await promise
 
-        if (this.header.getCRC32() !== crc32Stream.crc32.getValue())
+        if (this.header.getCRC32() !== crc32Stream.getValue())
             throw 'keke again'
     }
 

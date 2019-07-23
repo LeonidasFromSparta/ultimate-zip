@@ -92,7 +92,6 @@ export default class UZip {
 
     extractArchive = async (outputPath) => {
 
-        outputPath = outputPath + '/'
         const entries = await this._readEntries()
         const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
 
@@ -105,6 +104,7 @@ export default class UZip {
 
             if (fileReaderPos !== entries[i].header.getOffsetOfLocalHeader()) {
 
+                console.log('keke')
                 const start = entries[i].header.getOffsetOfLocalHeader()
                 fileReader = this.file.createFdReadStream(start, end)
             }
@@ -117,7 +117,7 @@ export default class UZip {
 
     extractByRegex = async (regex, path) => {
 
-        const entries = this._readEntries().filter((obj) => obj.getFilename().test(regex))
+        const entries = (await this._readEntries()).filter((obj) => obj.getFilename().test(regex))
 
         this.file.openFile()
 
@@ -129,7 +129,7 @@ export default class UZip {
 
     extractFile = async (filename, path) => {
 
-        const entries = this._readEntries().filter((obj) => obj.getFilename() === filename)
+        const entries = (await this._readEntries()).filter((obj) => obj.getFilename() === filename)
 
         this.file.openFile()
 
@@ -139,9 +139,9 @@ export default class UZip {
         this.file.closeFile()
     }
 
-    getEntries = () => {
+    getEntries = async () => {
 
-        return this._readEntries()
+        return await this._readEntries()
     }
 
     _readEntries = async () => {
