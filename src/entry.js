@@ -21,38 +21,17 @@ export default class Entry {
         const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
 
         const fileReader = this.file.createReadStream(startPos, endPos)
-        const decoder = new LocalHeaderDecoder()
 
-        await this._extract(outputPath, fileReader, decoder)
+        await this._extract(outputPath, fileReader)
 
         fileReader.destroy()
     }
 
-    _extract = async (outputPath, fileReader, decoder) => {
+    _extract = async (outputPath, fileReader) => {
 
         const fileName = outputPath + this.header.getFileName()
 
-        const decodePromise = new Promise((resolve) => {
-
-            fileReader.on('data', (chunk) => {
-
-                const unshiftedChunk = decoder.update(chunk)
-
-                if (unshiftedChunk) {
-
-                    fileReader.pause()
-                    fileReader.unshift(unshiftedChunk)
-                    fileReader.removeAllListeners()
-
-                    decoder.decode()
-                    resolve()
-                }
-            })
-
-            fileReader.resume()
-        })
-
-        await decodePromise
+        await this._readLocalHeader(fileReader)
 
         if (this.header.isDirectory()) {
 
@@ -160,34 +139,13 @@ export default class Entry {
         const end = this.header.getOffsetOfLocalFileHeader() + LOC_MAX - 1
 
         const fileReader = this.file.createReadStream(start, end)
-        const decoder = new LocalHeaderDecoder()
 
-        return this._test(fileReader, decoder)
+        return this._test(fileReader)
     }
 
-    _test = async (fileReader, decoder) => {
+    _test = async (fileReader) => {
 
-        const decodePromise = new Promise((resolve) => {
-
-            fileReader.on('data', (chunk) => {
-
-                const unshiftedChunk = decoder.update(chunk)
-
-                if (unshiftedChunk) {
-
-                    fileReader.pause()
-                    fileReader.unshift(unshiftedChunk)
-                    fileReader.removeAllListeners()
-
-                    decoder.decode()
-                    resolve()
-                }
-            })
-
-            fileReader.resume()
-        })
-
-        await decodePromise
+        await this._readLocalHeader(fileReader)
 
         const size = this.header.getCompressedSize()
         const crc32 = new CRC32()
@@ -291,12 +249,28 @@ export default class Entry {
 
     getFilename = () => this.header.getFileName()
 
-    getLocalHeader = async () => {
+    _readLocalHeader = async (fileReader) => {
 
-        if (this.localHeader)
-            return this.localHeader
+        await new Promise((resolve) => {
 
-        this.localHeader = await this._readLocalHeader()
-        return this.localHeader
+            const decoder = new LocalHeaderDecoder()
+
+            fileReader.on('data', (chunk) => {
+
+                const unshiftedChunk = decoder.update(chunk)
+
+                if (unshiftedChunk) {
+
+                    fileReader.pause()
+                    fileReader.removeAllListeners()
+                    fileReader.unshift(unshiftedChunk)
+
+                    decoder.decode()
+                    resolve()
+                }
+            })
+
+            fileReader.resume()
+        })
     }
 }

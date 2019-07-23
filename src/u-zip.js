@@ -3,7 +3,6 @@ import File from './file'
 import Entry from './entry'
 import Zip32HeaderDecoder from './zip-32-header-decoder'
 import CentralHeaderDecoder from './central-header-decoder'
-import LocalHeaderDecoder from './local-header-decoder'
 import Zip64LocatorDecoder from './zip64-locator-decoder'
 import Zip64HeaderDecoder from './zip64-header-decoder'
 import {END_MAX} from './constants'
@@ -55,7 +54,6 @@ export default class UZip {
     testArchive = async () => {
 
         const entries = await this._readEntries()
-        const decoder = new LocalHeaderDecoder()
 
         const end = this.zipType === ZIP_32 ? this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() : this.zip64Header.getCentralDirectoriesOffsetWithStartingDisk() - 1
 
@@ -72,7 +70,7 @@ export default class UZip {
                 fileReader = this.file.createFdReadStream(start, end)
             }
 
-            await entries[i]._test(fileReader, decoder)
+            await entries[i]._test(fileReader)
         }
 
         await this.file.close()
@@ -96,7 +94,6 @@ export default class UZip {
 
         outputPath = outputPath + '/'
         const entries = await this._readEntries()
-        const decoder = new LocalHeaderDecoder()
         const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
 
         await this.file.open()
@@ -112,7 +109,7 @@ export default class UZip {
                 fileReader = this.file.createFdReadStream(start, end)
             }
 
-            await entries[i]._extract(outputPath, fileReader, decoder)
+            await entries[i]._extract(outputPath, fileReader)
         }
 
         await this.file.close()
@@ -191,15 +188,5 @@ export default class UZip {
         this.entries = await promise
 
         return this.entries
-    }
-
-    getInfo = () => {
-
-        const entries = this._readEntries()
-        // const localFileHeaders = await this.readLocalFileHeaders()
-
-        // return this.zip32Header.toString() + EOL + centralHeaders.join(EOL) + EOL + localFileHeaders.join(EOL)
-        const d = new Zip32HeaderInfo(this.zip32Header).toString() + EOL + entries.reduce((accu, obj) => accu + obj.getInfo() + EOL, '')
-        return d
     }
 }
