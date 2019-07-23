@@ -97,6 +97,9 @@ export default class Entry {
         })
 
         await promise
+
+        if (this.header.getCRC32() !== crc32Stream.crc32.getValue())
+            throw 'keke again'
     }
 
     isDirectory = () => this.header.isDirectory()
