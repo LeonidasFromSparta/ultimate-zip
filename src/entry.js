@@ -1,9 +1,10 @@
 import {createInflateRaw} from 'zlib'
+import {PassThrough} from 'stream'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import CRC32 from './crc32'
 import LocalHeaderDecoder from './local-header-decoder'
 import {LOC_MAX} from './constants'
-import {Writable} from 'stream'
+import DumpWriter from './dump-writer'
 
 export default class Entry {
 
@@ -15,11 +16,8 @@ export default class Entry {
 
     extract = async (outputPath) => {
 
-        outputPath = outputPath + '/'
-
         const startPos = this.header.getOffsetOfLocalFileHeader()
         const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
-
         const fileReader = this.file.createReadStream(startPos, endPos)
 
         await this._extract(outputPath, fileReader)
@@ -29,108 +27,14 @@ export default class Entry {
 
     _extract = async (outputPath, fileReader) => {
 
-        const fileName = outputPath + this.header.getFileName()
-
+        const fileName = outputPath + '/' + this.header.getFileName()
         await this._readLocalHeader(fileReader)
 
-        if (this.header.isDirectory()) {
-
-            await this.file.makeDir(fileName)
-            return
-        }
+        if (this.header.isDirectory())
+            return await this.file.makeDir(fileName)
 
         const fileWriter = this.file.createWriteStream(fileName)
-        const size = this.header.getCompressedSize()
-        const crc32 = new CRC32()
-
-        let counter = 0
-
-        if (this.header.isCompressed()) {
-
-            const promise = new Promise((resolve) => {
-
-                const inflater = createInflateRaw()
-                inflater.pipe(fileWriter)
-
-                inflater.on('drain', () => fileReader.resume())
-                fileWriter.on('finish', resolve)
-
-                fileReader.on('data', (chunk) => {
-
-                    const remainingBytes = size - counter
-
-                    if (chunk.length < remainingBytes) {
-
-                        if (!inflater.write(chunk, 'buffer'))
-                            fileReader.pause()
-
-                        counter += chunk.length
-                        crc32.update(chunk)
-                        console.log(chunk.toString('utf8'))
-                        return
-                    }
-
-                    const partialChunk = chunk.slice(0, remainingBytes)
-
-                    crc32.update(partialChunk)
-                    inflater.end(partialChunk)
-
-                    console.log(partialChunk.toString('utf8'))
-
-                    fileReader.pause()
-                    fileReader.unshift(chunk.slice(remainingBytes))
-                })
-
-                fileReader.resume()
-            })
-
-            await promise
-
-            if (crc32.getValue() !== this.header.getCRC32()) {
-
-                debugger
-                console.log(crc32.getValue())
-            }
-        }
-
-        if (!this.header.isCompressed()) {
-
-            const promise = new Promise((resolve) => {
-
-                fileWriter.on('drain', () => fileReader.resume())
-                fileWriter.on('finish', resolve)
-
-                fileReader.on('data', (chunk) => {
-
-                    const remainingBytes = size - counter
-
-                    if (chunk.length < remainingBytes) {
-
-                        if (!fileWriter.write(chunk, 'buffer'))
-                            fileReader.pause()
-
-                        counter += chunk.length
-                        crc32.update(chunk)
-
-                        return
-                    }
-
-                    const partialChunk = chunk.slice(0, remainingBytes)
-
-                    crc32.update(partialChunk)
-                    fileWriter.end(partialChunk)
-
-                    fileReader.pause()
-                    fileReader.unshift(chunk.slice(remainingBytes))
-                })
-
-                fileReader.resume()
-            })
-
-            await promise
-        }
-
-       fileReader.removeAllListeners()
+        await this._operator(fileWriter, fileReader)
     }
 
     test = () => {
@@ -147,100 +51,53 @@ export default class Entry {
 
         await this._readLocalHeader(fileReader)
 
+        if (this.header.isDirectory())
+            return
+
+        const dumpWriter = new DumpWriter()
+        await this._operator(dumpWriter, fileReader)
+    }
+
+    _operator = async (fileWriter, fileReader) => {
+
         const size = this.header.getCompressedSize()
         const crc32 = new CRC32()
-
+        const inflater = this.header.isCompressed() ? createInflateRaw() : new PassThrough()
         let counter = 0
 
-        if (this.header.isCompressed()) {
+        const promise = new Promise((resolve) => {
 
-            const promise = new Promise((resolve) => {
+            inflater.pipe(fileWriter)
+            inflater.on('drain', () => fileReader.resume())
+            fileWriter.on('finish', resolve)
 
-                const inflater = createInflateRaw()
-                const dumpStream = new Writable({
+            fileReader.on('data', (chunk) => {
 
-                    write(chunk, encoding, callback) {
+                const remainingBytes = size - counter
 
-                        callback()
-                    },
+                if (chunk.length < remainingBytes) {
 
-                    writev(chunks, callback) {
+                    if (!inflater.write(chunk, 'buffer'))
+                        fileReader.pause()
 
-                        callback()
-                    }
-                })
+                    counter += chunk.length
+                    crc32.update(chunk)
+                    return
+                }
 
-                inflater.pipe(dumpStream)
+                const partialChunk = chunk.slice(0, remainingBytes)
 
-                inflater.on('drain', () => fileReader.resume())
-                dumpStream.on('finish', resolve)
+                crc32.update(partialChunk)
+                inflater.end(partialChunk)
 
-                fileReader.on('data', (chunk) => {
-
-                    const remainingBytes = size - counter
-
-                    if (chunk.length < remainingBytes) {
-
-                        if (!inflater.write(chunk, 'buffer'))
-                            fileReader.pause()
-
-                        counter += chunk.length
-                        crc32.update(chunk)
-
-                        return
-                    }
-
-                    const partialChunk = chunk.slice(0, remainingBytes)
-
-                    crc32.update(partialChunk)
-                    inflater.end(partialChunk)
-
-                    fileReader.pause()
-                    fileReader.unshift(chunk.slice(remainingBytes))
-
-                    if (crc32.getValue() !== this.header.getCRC32())
-                        throw 'compressed keke'
-                })
-
-                fileReader.resume()
+                fileReader.pause()
+                fileReader.unshift(chunk.slice(remainingBytes))
             })
 
-            await promise
-        }
+            fileReader.resume()
+        })
 
-        if (!this.header.isCompressed()) {
-
-            const promise = new Promise((resolve) => {
-
-                fileReader.on('data', (chunk) => {
-
-                    const remainingBytes = size - counter
-
-                    if (chunk.length < remainingBytes) {
-
-                        counter += chunk.length
-                        crc32.update(chunk)
-                        return
-                    }
-
-                    const partialChunk = chunk.slice(0, remainingBytes)
-
-                    crc32.update(partialChunk)
-
-                    fileReader.pause()
-                    fileReader.unshift(chunk.slice(remainingBytes))
-
-                    if (crc32.getValue() !== this.header.getCRC32())
-                        throw 'uncompressed keke'
-
-                    resolve()
-                })
-
-                fileReader.resume()
-            })
-
-            await promise
-        }
+        await promise
 
        fileReader.removeAllListeners()
     }
