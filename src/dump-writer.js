@@ -2,13 +2,7 @@ import {Writable} from 'stream'
 
 export default class DumpWriter extends Writable {
 
-    _write = (chunk, encoding, callback) => {
+    _write = (chunk, encoding, callback) => callback()
 
-        callback()
-    }
-
-    _writev = (chunks, callback) => {
-
-        callback()
-    }
+    _writev = (chunks, callback) => callback()
 }
