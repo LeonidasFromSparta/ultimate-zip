@@ -12,21 +12,13 @@ import {ZIP_64} from './constants'
 
 export default class UZip {
 
-    constructor(path) {
+    constructor(path, file = new File(path)) {
 
-        this.file = new File(path)
+        this.file = file
 
         this.file.openSync()
-        const fileSize = this.file.getFileSize()
 
-        const zip32Decoder = new Zip32HeaderDecoder()
 
-        if ((fileSize - END_MAX) < 0)
-            zip32Decoder.update(this.file.readBytesSync(0, fileSize))
-        else
-            zip32Decoder.update(this.file.readBytesSync(fileSize - END_MAX, fileSize))
-
-        this.zip32Header = zip32Decoder.decode()
 
         const zip64LocDecoder = new Zip64LocatorDecoder()
         const zip64LocStart = fileSize - this.zip32Header.getHeaderLength() - ELO_HDR
@@ -49,6 +41,20 @@ export default class UZip {
         zip64HeaderDecoder.update(this.file.readBytesSync(zip64HeaderStart, zip64HeaderEnd))
         this.zip64Header = zip64HeaderDecoder.decode()
         this.file.closeSync()
+    }
+
+    _decodeZipHeader = (file) => {
+
+        const fileSize = file.getFileSize()
+
+        const zip32Decoder = new Zip32HeaderDecoder()
+
+        if ((fileSize - END_MAX) < 0)
+            zip32Decoder.update(this.file.readBytesSync(0, fileSize))
+        else
+            zip32Decoder.update(this.file.readBytesSync(fileSize - END_MAX, fileSize))
+
+        this.zip32Header = zip32Decoder.decode()
     }
 
     testArchive = async () => {

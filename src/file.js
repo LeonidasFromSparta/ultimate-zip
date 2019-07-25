@@ -21,12 +21,6 @@ export default class File {
         return fs.fstatSync(this.fd).size
     }
 
-    /**
-     * Method creates a file read stream from - to specified positions.
-     * @param {int} start The start position in the file.
-     * @param {int} end The end position in the file.
-     * @returns {fs.ReadStream} The readable stream from - to specified positions.
-     */
     createReadStreamWithHighWaterMark(start, end, highWaterMark) {
 
         return fs.createReadStream(this.path, {start, end, highWaterMark})

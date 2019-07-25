@@ -61,15 +61,16 @@ export default class Entry {
 
     _inflater = async (reader, writer) => {
 
+        const readerResume = () => reader.resume()
         const crc32Stream = new CRC32Stream(new CRC32())
 
         const promise = new Promise((resolve) => {
 
+            const size = this.header.getCompressedSize()
             let bytesCounter = 0
 
-            reader.on('data', (chunk) => {
+            const callback = (chunk) => {
 
-                const size = this.header.getCompressedSize()
                 const remainingBytes = size - bytesCounter
 
                 if (chunk.length < remainingBytes) {
@@ -86,15 +87,17 @@ export default class Entry {
                 reader.pause()
                 reader.removeAllListeners()
                 reader.unshift(chunk.slice(remainingBytes))
-            })
+            }
+
+            reader.on('data', callback)
 
             const inflater = this.header.isCompressed() ? createInflateRaw() : new PassThrough()
             inflater.pipe(crc32Stream).pipe(writer)
-            inflater.on('drain', () => reader.resume())
+            inflater.on('drain', readerResume)
 
             writer.on('finish', resolve)
 
-            reader.resume()
+            readerResume()
         })
 
         await promise
