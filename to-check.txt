@@ -1,1 +1,17 @@
 * craft zip64 with size less then 0xFFFFFFFF (4gb~) and check if zip32 offset is stored in header 64 or 32
+
+
+
+
+
+
+        await this._readLocalHeader(fileReader)
+
+        if (this.header.isDirectory()) {
+
+            await this.file.makeDir(fileName)
+            return
+        }
+		
+		
+		const fileWriter = this.file.createWriteStream(fileName)

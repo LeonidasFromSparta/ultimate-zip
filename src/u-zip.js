@@ -1,4 +1,3 @@
-import {EOL} from 'os'
 import File from './file'
 import Entry from './entry'
 import Zip32HeaderDecoder from './zip-32-header-decoder'
@@ -7,61 +6,98 @@ import Zip64LocatorDecoder from './zip64-locator-decoder'
 import Zip64HeaderDecoder from './zip64-header-decoder'
 import {END_MAX} from './constants'
 import {ELO_HDR} from './constants'
-import {ZIP_32} from './constants'
-import {ZIP_64} from './constants'
 
 export default class UZip {
 
     constructor(path, file = new File(path)) {
 
         this.file = file
-
         this.file.openSync()
+        this._decodeZip32Header(file)
 
+        const locPos = this._decodeZip64Locator(file)
 
+        if (locPos !== -1)
+            this._decodeZip64Header(file)
 
-        const zip64LocDecoder = new Zip64LocatorDecoder()
-        const zip64LocStart = fileSize - this.zip32Header.getHeaderLength() - ELO_HDR
-        const zip64LocEnd = fileSize - this.zip32Header.getHeaderLength()
-
-        if (zip64LocDecoder.update(this.file.readBytesSync(zip64LocStart, zip64LocEnd))) {
-
-            this.zip64Locator = zip64LocDecoder.decode()
-            this.zipType = ZIP_64
-        } else {
-
-            this.zipType = ZIP_32
-            return
-        }
-
-        const zip64HeaderDecoder = new Zip64HeaderDecoder()
-        const zip64HeaderStart = this.zip64Locator.getOffsetZip64Header()
-        const zip64HeaderEnd = fileSize - this.zip32Header.getHeaderLength() - ELO_HDR
-
-        zip64HeaderDecoder.update(this.file.readBytesSync(zip64HeaderStart, zip64HeaderEnd))
-        this.zip64Header = zip64HeaderDecoder.decode()
         this.file.closeSync()
     }
 
-    _decodeZipHeader = (file) => {
+    _decodeZip32Header = (file, decoder = new Zip32HeaderDecoder()) => {
 
-        const fileSize = file.getFileSize()
+        const size = file.getFileSize()
 
-        const zip32Decoder = new Zip32HeaderDecoder()
+        const bytes = this.file.readBytesSync((size - END_MAX) < 0 ? 0 : size - END_MAX, size)
+        decoder.update(bytes)
 
-        if ((fileSize - END_MAX) < 0)
-            zip32Decoder.update(this.file.readBytesSync(0, fileSize))
+        this.zipHeader = decoder.decode()
+    }
+
+    _decodeZip64Locator = (file, decoder = new Zip64LocatorDecoder()) => {
+
+        const size = file.getFileSize()
+
+        const locStart = size - this.zipHeader.getHeaderLength() - ELO_HDR
+        const locEnd = size - this.zipHeader.getHeaderLength() + 16
+
+        if (decoder.update(this.file.readBytesSync(locStart, locEnd)))
+            return decoder.decode().getOffsetZip64Header()
         else
-            zip32Decoder.update(this.file.readBytesSync(fileSize - END_MAX, fileSize))
+            return -1
+    }
 
-        this.zip32Header = zip32Decoder.decode()
+    _decodeZip64Header = (file, startPos, zip64HeaderDecoder = new Zip64HeaderDecoder()) => {
+
+        const endPos = startPos + 48
+        zip64HeaderDecoder.update(this.file.readBytesSync(startPos, endPos))
+        const zip64Header = zip64HeaderDecoder.decode()
+
+        this.zipHeader.setCentralDirectoriesNumber(zip64Header.getCentralDirectoriesNumber())
+        this.zipHeader.setCentralDirectoriesSize(zip64Header.getCentralDirectoriesSize())
+        this.zipHeader.setCentralDirectoriesOffsetWithStartingDisk(zip64Header.getCentralDirectoriesOffsetWithStartingDisk())
+    }
+
+    _readEntries = async () => {
+
+        if (this.entries)
+            return this.entries
+
+        const start = this.zipHeader.getCentralDirectoriesOffsetWithStartingDisk()
+        const end = this.zipHeader.getCentralDirectoriesOffsetWithStartingDisk() + this.zipHeader.getCentralDirectoriesSize() - 1
+
+        const promise = new Promise((resolve) => {
+
+            const readStream = this.file.createReadStream(start, end)
+            const decoder = new CentralHeaderDecoder()
+            const entries = []
+
+            readStream.on('data', (chunk) => {
+
+                while (chunk) {
+
+                    chunk = decoder.update(chunk)
+
+                    if (chunk)
+                        entries.push(new Entry(decoder.decode(), this.file))
+                }
+            })
+
+            readStream.on('end', () => {
+
+                resolve(entries)
+            })
+        })
+
+        this.entries = await promise
+
+        return this.entries
     }
 
     testArchive = async () => {
 
         const entries = await this._readEntries()
 
-        const end = this.zipType === ZIP_32 ? this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() : this.zip64Header.getCentralDirectoriesOffsetWithStartingDisk() - 1
+        const end = this.zipHeader.getCentralDirectoriesOffsetWithStartingDisk() - 1
 
         await this.file.open()
         let fileReader = this.file.createReadStream(0, end)
@@ -148,51 +184,5 @@ export default class UZip {
     getEntries = async () => {
 
         return await this._readEntries()
-    }
-
-    _readEntries = async () => {
-
-        if (this.entries)
-            return this.entries
-
-        let start = 0
-        let end = 0
-
-        if (this.zipType === ZIP_32) {
-
-            start = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
-            end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip32Header.getCentralDirectoriesSize() - 1
-        } else {
-
-            start = this.zip64Header.getCentralDirectoriesOffsetWithStartingDisk()
-            end = this.zip64Header.getCentralDirectoriesOffsetWithStartingDisk() + this.zip64Header.getCentralDirectoriesSize() - 1
-        }
-
-        const promise = new Promise((resolve) => {
-
-            const readStream = this.file.createReadStream(start, end)
-            const decoder = new CentralHeaderDecoder()
-            const entries = []
-
-            readStream.on('data', (chunk) => {
-
-                while (chunk) {
-
-                    chunk = decoder.update(chunk)
-
-                    if (chunk)
-                        entries.push(new Entry(decoder.decode(), this.file))
-                }
-            })
-
-            readStream.on('end', () => {
-
-                resolve(entries)
-            })
-        })
-
-        this.entries = await promise
-
-        return this.entries
     }
 }

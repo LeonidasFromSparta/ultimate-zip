@@ -16,11 +16,6 @@ export default class File {
         return buffer
     }
 
-    getFileSize = () => {
-
-        return fs.fstatSync(this.fd).size
-    }
-
     createReadStreamWithHighWaterMark(start, end, highWaterMark) {
 
         return fs.createReadStream(this.path, {start, end, highWaterMark})
@@ -44,6 +39,11 @@ export default class File {
     closeSync = () => {
 
         fs.closeSync(this.fd)
+    }
+
+    getFileSize = () => {
+
+        return fs.fstatSync(this.fd).size
     }
 
     open = async () => {
