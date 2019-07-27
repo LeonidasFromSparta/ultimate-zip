@@ -130,7 +130,7 @@ export default class UZip {
     extractArchive = async (outputPath) => {
 
         const entries = await this.getEntries()
-        const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
+        const end = this.zipHeader.getCentralDirectoriesOffset()
 
         await this.file.open()
         let fileReader = this.file.createFdReadStream(0, end)
@@ -178,10 +178,12 @@ export default class UZip {
 
     getEntries = async () => {
 
-        if (!this.zipHeader)
-            await this._decodeZipHeader
+        if (!this.zipHeader) {
 
-        if (this.entries)
+            await this._decodeZipHeader()
             return await this._readEntries()
+        }
+
+        return this.entries
     }
 }
