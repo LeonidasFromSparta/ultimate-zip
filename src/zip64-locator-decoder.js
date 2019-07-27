@@ -7,11 +7,11 @@ export default class Zip64LocatorDecoder {
 
     decode = (data) => {
 
-        if (data.readUInt32LE(ELO_SPO) !== ELO_SIG)
-            return undefined
+        if (data.readUInt32LE(ELO_SPO) === ELO_SIG) {
 
-        const locator = new Zip64Locator()
-        locator.setOffsetZip64Header(parseInt(data.readBigUInt64LE(ELO_OFF)))
-        return locator
+            const locator = new Zip64Locator()
+            locator.setOffsetZip64Header(parseInt(data.readBigUInt64LE(ELO_OFF)))
+            return locator
+        }
     }
 }
