@@ -20,43 +20,45 @@ import {CEN_ATT} from './constants'
 import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 import {CEN_HDR} from './constants'
-import {CEN_MAX} from './constants'
 
 export default class CentralHeaderDecoder {
 
-    _buffer = Buffer.alloc(CEN_MAX)
+    _buffer = []
     _offset = 0
 
-    update = (chunk) => {
+    _extraBuffer = []
+    _extraOffset = 0
 
-        if (this._offset < CEN_HDR) {
+    _nameLen = 0
+    _extraLen = 0
+    _commentLen = 0
+    _extraBufferLen = 0
 
-            const remainingBytes = CEN_HDR - this._offset
-            const bytesRead = chunk.copy(this._buffer, this._offset, 0, remainingBytes)
-            this._offset += bytesRead
+    update = (data) => {
 
-            if (this._offset !== CEN_HDR)
-                return null
+        if (data.length >= (CEN_HDR - this._offset)) {
 
-            chunk = chunk.slice(bytesRead)
+            this._buffer.push(data.slice(0, CEN_HDR - this._offset))
+            this._offset += (CEN_HDR - this._offset)
 
-            this._nameLen = this._buffer.readUInt16LE(CEN_FLE)
-            this._extraLen = this._buffer.readUInt16LE(CEN_ELE)
-            this._commentLen = this._buffer.readUInt16LE(CEN_CLE)
-            this._bufferLen = CEN_HDR + this._nameLen + this._extraLen + this._commentLen
+            this._buffer = this._mergeBuffers(this._buffer)
+            this._verifySignature()
+            return data.slice(CEN_HDR - this._offset)
         }
 
-        const remainingBytes = this._bufferLen - this._offset
-        const bytesRead = chunk.copy(this._buffer, this._offset, 0, remainingBytes)
-        this._offset += bytesRead
+        if (data.length < (CEN_HDR - this._offset)) {
 
-        if (this._offset !== this._bufferLen)
-            return null
-
-        return chunk.slice(bytesRead)
+            this._buffer.push(data)
+            this._offset += data.length
+        }
     }
 
-    decode = () => {
+    _mergeBuffers = (buffers) => {
+
+        Buffer.concat(buffers, buffers.reduce((obj, acc) => acc + obj.length, 0))
+    }
+
+    _verifySignature = () => {
 
         const signature = this._buffer.readUInt32LE(CEN_SPO)
 
@@ -65,8 +67,42 @@ export default class CentralHeaderDecoder {
             const expectedSignature = '0x' + CEN_SIG.toString(16).padStart(8, '0')
             const actualSignature = '0x' + signature.toString(16).padStart(8, '0')
 
-            throw (`Local file header signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
+            throw (`Central file header signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
         }
+    }
+
+    updateInconstant = (data) => {
+
+        this._createInconstantLength()
+
+        if (data.length >= (this._extraBufferLen - this._extraOffset)) {
+
+            this._extraBuffer.push(data.slice(0, this._extraBufferLen - this._extraOffset))
+            this._extraOffset += (this._extraBufferLen - this._extraOffset)
+
+            this._extraBuffer = this._mergeBuffers(this._extraBuffer)
+            return data.slice(this._extraBufferLen - this._extraOffset)
+        }
+
+        if (data.length < (this._extraBufferLen - this._extraOffset)) {
+
+            this._extraBuffer.push(data)
+            this._offset += data.length
+        }
+    }
+
+    _createInconstantLength = () => {
+
+        if (this._extraOffset === 0) {
+
+            this._nameLen = this._buffer.readUInt16LE(CEN_FLE)
+            this._extraLen = this._buffer.readUInt16LE(CEN_ELE)
+            this._commentLen = this._buffer.readUInt16LE(CEN_CLE)
+            this._extraBufferLen = this._nameLen + this._extraLen + this._commentLen
+        }
+    }
+
+    decode = () => {
 
         this._offset = 0
 
