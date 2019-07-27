@@ -5,19 +5,13 @@ import {ELO_OFF} from './constants'
 
 export default class Zip64LocatorDecoder {
 
-    update = (chunk) => {
+    decode = (data) => {
 
-        if (chunk.readUInt32LE(ELO_SPO) !== ELO_SIG)
-            return false
-
-        this._buffer = chunk
-        return true
-    }
-
-    decode = () => {
+        if (data.readUInt32LE(ELO_SPO) !== ELO_SIG)
+            return undefined
 
         const locator = new Zip64Locator()
-        locator.setOffsetZip64Header(parseInt(this._buffer.readBigUInt64LE(ELO_OFF)))
+        locator.setOffsetZip64Header(parseInt(data.readBigUInt64LE(ELO_OFF)))
         return locator
     }
 }

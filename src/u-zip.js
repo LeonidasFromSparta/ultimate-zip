@@ -12,58 +12,53 @@ export default class UZip {
     constructor(path, file = new File(path)) {
 
         this.file = file
+    }
+
+    _decodeZipHeader = () => {
+
         this.file.openSync()
-        this._decodeZip32Header(file)
+        this._decodeZip32Header()
 
-        const locPos = this._decodeZip64Locator(file)
+        const zip64Locator = this._decodeZip64Locator()
 
-        if (locPos !== -1)
-            this._decodeZip64Header(file)
+        if (zip64Locator) {
+
+            const offset = zip64Locator.getOffsetZip64Header()
+            this._decodeZip64Header(offset)
+        }
 
         this.file.closeSync()
     }
 
-    _decodeZip32Header = (file, decoder = new Zip32HeaderDecoder()) => {
+    _decodeZip32Header = (decoder = new Zip32HeaderDecoder()) => {
 
-        const size = file.getFileSize()
-
+        const size = this.file.getFileSize()
         const bytes = this.file.readBytesSync((size - END_MAX) < 0 ? 0 : size - END_MAX, size)
-        decoder.update(bytes)
 
-        this.zipHeader = decoder.decode()
+        this.zipHeader = decoder.decode(bytes, size)
     }
 
-    _decodeZip64Locator = (file, decoder = new Zip64LocatorDecoder()) => {
+    _decodeZip64Locator = (decoder = new Zip64LocatorDecoder()) => {
 
-        const size = file.getFileSize()
+        const start = this.zipHeader.getHeaderOffset() - ELO_HDR
+        const end = this.zipHeader.getHeaderOffset()
 
-        const locStart = size - this.zipHeader.getHeaderLength() - ELO_HDR
-        const locEnd = size - this.zipHeader.getHeaderLength() + 16
-
-        if (decoder.update(this.file.readBytesSync(locStart, locEnd)))
-            return decoder.decode().getOffsetZip64Header()
-        else
-            return -1
+        return decoder.decode(this.file.readBytesSync(start, end))
     }
 
-    _decodeZip64Header = (file, startPos, zip64HeaderDecoder = new Zip64HeaderDecoder()) => {
+    _decodeZip64Header = (startPos, decoder = new Zip64HeaderDecoder()) => {
 
-        const endPos = startPos + 48
-        zip64HeaderDecoder.update(this.file.readBytesSync(startPos, endPos))
-        const zip64Header = zip64HeaderDecoder.decode()
+        const zip64Header = decoder.decode(this.file.readBytesSync(startPos, startPos + 48))
 
         this.zipHeader.setCentralDirectoriesNumber(zip64Header.getCentralDirectoriesNumber())
         this.zipHeader.setCentralDirectoriesSize(zip64Header.getCentralDirectoriesSize())
-        this.zipHeader.setCentralDirectoriesOffsetWithStartingDisk(zip64Header.getCentralDirectoriesOffsetWithStartingDisk())
+        this.zipHeader.setCentralDirectoriesOffset(zip64Header.getCentralDirectoriesOffset())
     }
 
     _readEntries = async () => {
 
-        if (this.entries)
-            return this.entries
-
-        const start = this.zipHeader.getCentralDirectoriesOffsetWithStartingDisk()
-        const end = this.zipHeader.getCentralDirectoriesOffsetWithStartingDisk() + this.zipHeader.getCentralDirectoriesSize() - 1
+        const start = this.zipHeader.getCentralDirectoriesOffset()
+        const end = this.zipHeader.getCentralDirectoriesOffset() + this.zipHeader.getCentralDirectoriesSize() - 1
 
         const promise = new Promise((resolve) => {
 
@@ -95,9 +90,9 @@ export default class UZip {
 
     testArchive = async () => {
 
-        const entries = await this._readEntries()
+        const entries = await this.getEntries()
 
-        const end = this.zipHeader.getCentralDirectoriesOffsetWithStartingDisk() - 1
+        const end = this.zipHeader.getCentralDirectoriesOffset() - 1
 
         await this.file.open()
         let fileReader = this.file.createReadStream(0, end)
@@ -120,7 +115,7 @@ export default class UZip {
 
     testFile = async (fileName) => {
 
-        const entries = await this._readEntries()
+        const entries = await this.getEntries()
 
         for (let i=0; i < entries.length; i++) {
 
@@ -134,7 +129,7 @@ export default class UZip {
 
     extractArchive = async (outputPath) => {
 
-        const entries = await this._readEntries()
+        const entries = await this.getEntries()
         const end = this.zip32Header.getCentralDirectoriesOffsetWithStartingDisk()
 
         await this.file.open()
@@ -159,7 +154,7 @@ export default class UZip {
 
     extractByRegex = async (regex, path) => {
 
-        const entries = (await this._readEntries()).filter((obj) => obj.getFilename().test(regex))
+        const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
 
         this.file.openFile()
 
@@ -171,7 +166,7 @@ export default class UZip {
 
     extractFile = async (filename, path) => {
 
-        const entries = (await this._readEntries()).filter((obj) => obj.getFilename() === filename)
+        const entries = (await this.getEntries()).filter((obj) => obj.getFilename() === filename)
 
         this.file.openFile()
 
@@ -183,6 +178,10 @@ export default class UZip {
 
     getEntries = async () => {
 
-        return await this._readEntries()
+        if (!this.zipHeader)
+            await this._decodeZipHeader
+
+        if (this.entries)
+            return await this._readEntries()
     }
 }

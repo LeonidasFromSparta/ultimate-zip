@@ -6,9 +6,12 @@ export default class Zip32Header {
     getCentralDirectoriesSize = () => this._cenDirsSize
     setCentralDirectoriesSize = (value) => this._cenDirsSize = value
 
-    getCentralDirectoriesOffsetWithStartingDisk = () => this._cenDirsOff
-    setCentralDirectoriesOffsetWithStartingDisk = (value) => this._cenDirsOff = value
+    getCentralDirectoriesOffset = () => this._cenDirsOff
+    setCentralDirectoriesOffset = (value) => this._cenDirsOff = value
 
-    getHeaderLength = () => this._cenDirsOff
+    getHeaderOffset = () => this._headerOffset
+    setHeaderOffset = (value) => this._headerOffset = value
+
+    getHeaderLength = () => this._length
     setHeaderLength = (value) => this._length = value
 }

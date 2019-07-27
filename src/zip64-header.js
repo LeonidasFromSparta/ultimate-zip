@@ -6,6 +6,6 @@ export default class Zip64Header {
     getCentralDirectoriesSize = () => this._cenDirsSize
     setCentralDirectoriesSize = (value) => this._cenDirsSize = value
 
-    getCentralDirectoriesOffsetWithStartingDisk = () => this._cenDirsOff
-    setCentralDirectoriesOffsetWithStartingDisk = (value) => this._cenDirsOff = value
+    getCentralDirectoriesOffset = () => this._cenDirsOff
+    setCentralDirectoriesOffset = (value) => this._cenDirsOff = value
 }

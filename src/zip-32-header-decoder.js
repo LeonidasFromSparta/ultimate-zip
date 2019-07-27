@@ -8,38 +8,29 @@ import {END_HDR} from './constants'
 
 export default class Zip32HeaderDecoder {
 
-    update = (chunk) => {
+    decode = (data, size) => {
 
-        let offset = chunk.length - (END_HDR - 4)
-
-        for (; offset !== -1; offset--)
-            if (chunk.readUInt32LE(offset) === END_SIG)
-                break
-
-        if (offset === -1) {
-
-            const signature = '0x' + END_SIG.toString(16).padStart(8, '0')
-
-            throw new ({
-                name: 'End of central directory record signature error',
-                message: `End of central directory record signature ${signature} could not be located`
-            })
-        }
-
-        this._buffer = chunk.slice(offset)
-    }
-
-    decode = () => {
+        const offset = this._findOffset(data)
+        const headerData = data.slice(offset)
 
         const header = new Zip32Header()
+        header.setCentralDirectoriesNumber(headerData.readUInt16LE(END_CDC))
+        header.setCentralDirectoriesSize(headerData.readUInt32LE(END_CDS))
+        header.setCentralDirectoriesOffset(headerData.readUInt32LE(END_OFF))
+        header.setHeaderOffset(size - offset)
 
-        header.setCentralDirectoriesNumber(this._buffer.readUInt16LE(END_CDC))
-        header.setCentralDirectoriesSize(this._buffer.readUInt32LE(END_CDS))
-        header.setCentralDirectoriesOffsetWithStartingDisk(this._buffer.readUInt32LE(END_OFF))
-
-        const commentLen = this._buffer.readUInt16LE(END_ZCL)
+        const commentLen = headerData.readUInt16LE(END_ZCL)
         header.setHeaderLength(END_HDR + commentLen)
 
         return header
+    }
+
+    _findOffset = (data) => {
+
+        for (let offset = data.length - (END_HDR - 4); offset !== -1; offset--)
+            if (data.readUInt32LE(offset) === END_SIG)
+                return offset
+
+        throw (`Zip32 end of central directory record signature could not be found`)
     }
 }
