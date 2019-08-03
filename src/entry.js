@@ -17,8 +17,8 @@ export default class Entry {
 
     extract = async (outputPath) => {
 
-        const startPos = this.header.getOffsetOfLocalFileHeader()
-        const endPos = this.header.getOffsetOfLocalFileHeader() + LOCAL_HEADER_LENGTH + this.header.getFileName().length + 65536 + this.header.getCompressedSize() - 1
+        const startPos = this.header.localOffset
+        const endPos = this.header.localOffset + LOCAL_HEADER_LENGTH + this.header.fileName.length + 65536 + this.header.deflatedSize - 1
         const fileReader = this.file.createReadStream(startPos, endPos)
 
         await this._extract(outputPath, fileReader)
@@ -28,7 +28,7 @@ export default class Entry {
 
     _extract = async (outputPath, fileReader) => {
 
-        const fileName = outputPath + '/' + this.header.getFileName()
+        const fileName = outputPath + '/' + this.header.fileName
         await this._readLocalHeader(fileReader)
 
         if (this.header.isDirectory())
@@ -40,8 +40,8 @@ export default class Entry {
 
     test = () => {
 
-        const start = this.header.getOffsetOfLocalFileHeader()
-        const end = this.header.getOffsetOfLocalFileHeader() + LOC_MAX - 1
+        const start = this.header.localOffset
+        const end = this.header.localOffset + LOC_MAX - 1
 
         const fileReader = this.file.createReadStream(start, end)
 
@@ -66,7 +66,7 @@ export default class Entry {
 
         const promise = new Promise((resolve) => {
 
-            const size = this.header.getCompressedSize()
+            const size = this.header.inflatedSize
             let bytesCounter = 0
 
             const callback = (chunk) => {
@@ -91,7 +91,7 @@ export default class Entry {
 
             reader.on('data', callback)
 
-            const inflater = this.header.isCompressed() ? createInflateRaw() : new PassThrough()
+            const inflater = this.header.isDeflated() ? createInflateRaw() : new PassThrough()
             inflater.pipe(crc32Stream).pipe(writer)
             inflater.on('drain', readerResume)
 
@@ -102,13 +102,9 @@ export default class Entry {
 
         await promise
 
-        if (this.header.getCRC32() !== crc32Stream.getValue())
+        if (this.header.checksum !== crc32Stream.getValue())
             throw 'keke again'
     }
-
-    isDirectory = () => this.header.isDirectory()
-
-    getFilename = () => this.header.getFileName()
 
     _readLocalHeader = async (fileReader) => {
 

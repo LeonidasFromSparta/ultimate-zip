@@ -34,11 +34,13 @@ zip.extractArchive('./extr').then(() => {
 
     console.log('testo now')
 
+    /*
     zip.testArchive().then(() => {
 
         const end = process.hrtime.bigint()
         console.log('unzip time: ' + new Number((end - start)) / 1e+9)
     })
+    */
 })
 
 /*

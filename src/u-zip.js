@@ -1,7 +1,7 @@
 import File from './file'
 import Entry from './entry'
 import Zip32HeaderDecoder from './zip-32-header-decoder'
-import CentralHeaderDecoder from './central-header-decoder'
+import CentralHeaderWriter from './cen-header-writer'
 import Zip64LocatorDecoder from './zip64-locator-decoder'
 import Zip64HeaderDecoder from './zip64-header-decoder'
 import {END_MAX} from './constants'
@@ -11,6 +11,7 @@ export default class UZip {
 
     constructor(path, file = new File(path)) {
 
+    debugger
         this.file = file
     }
 
@@ -57,33 +58,16 @@ export default class UZip {
 
     _readEntries = async () => {
 
-        const start = this.zipHeader.getCentralDirectoriesOffset()
-        const end = this.zipHeader.getCentralDirectoriesOffset() + this.zipHeader.getCentralDirectoriesSize() - 1
+        this.entries = await new Promise((resolve) => {
 
-        const promise = new Promise((resolve) => {
+            const start = this.zipHeader.getCentralDirectoriesOffset()
+            const end = this.zipHeader.getCentralDirectoriesOffset() + this.zipHeader.getCentralDirectoriesSize() - 1
 
-            const readStream = this.file.createReadStream(start, end)
-            const decoder = new CentralHeaderDecoder()
-            const entries = []
+            const reader = this.file.createReadStream(start, end)
+            const writer = new CentralHeaderWriter()
 
-            readStream.on('data', (chunk) => {
-
-                while (chunk) {
-
-                    chunk = decoder.update(chunk)
-
-                    if (chunk)
-                        entries.push(new Entry(decoder.decode(), this.file))
-                }
-            })
-
-            readStream.on('end', () => {
-
-                resolve(entries)
-            })
+            reader.pipe(writer).on('finish', () => resolve(writer.getHeaders().map((obj) => new Entry(obj, this.file))))
         })
-
-        this.entries = await promise
 
         return this.entries
     }
@@ -139,7 +123,7 @@ export default class UZip {
 
             const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
 
-            if (fileReaderPos !== entries[i].header.getOffsetOfLocalHeader()) {
+            if (fileReaderPos !== entries[i].header.localOffset) {
 
                 console.log('keke')
                 const start = entries[i].header.getOffsetOfLocalHeader()
