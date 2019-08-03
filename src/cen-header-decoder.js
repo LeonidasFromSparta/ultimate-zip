@@ -24,54 +24,48 @@ import {copy, verifySignature} from './funcz'
 
 export default class CentralHeaderDecoder {
 
-    _buffer = Buffer.alloc(CEN_HDR)
+    _buffer = Buffer.allocUnsafe(CEN_HDR)
     _offset = 0
 
-    _extraBuffer = Buffer.alloc(0)
+    _extraBuffer = null
     _extraOffset = 0
 
     _nameLen = 0
     _extraLen = 0
     _commentLen = 0
 
-    update = (data) => this._cacheVolatileHeader(this._cacheFixedHeader(data))
+    update = (data) =>  {
 
-    _cacheFixedHeader = (data) => {
+        const bytesCopied1 = copy(this._buffer, this._offset, data)
+        this._offset += bytesCopied1
 
-        const bytesCopied = copy(this._buffer, this._offset, data)
-        this._offset += bytesCopied
+        data = data.slice(bytesCopied1)
 
-        this._beforeVolatileHeader()
+        if (data.length === 0)
+            return data
 
-        return data.slice(bytesCopied)
+        this._declareVolatilePart()
+
+        const bytesCopied2 = copy(this._extraBuffer, this._extraOffset, data)
+        this._extraOffset += bytesCopied2
+
+        return data.slice(bytesCopied2)
     }
 
     _fixedHeaderDoneOnce = () => this._offset === this._buffer.length && this._extraOffset === 0
 
-    _cacheVolatileHeader = (data) => {
-
-        const bytesCopied = copy(this._extraBuffer, this._extraOffset, data)
-        this._extraOffset += bytesCopied
-
-        return data.slice(bytesCopied)
-    }
-
-    _beforeVolatileHeader = () => {
+    _declareVolatilePart = () => {
 
         if (this._fixedHeaderDoneOnce()) {
 
             verifySignature(this._buffer, CEN_SPO, CEN_SIG, 'Bad central file header signature error')
-            this._calcVolatileHeader()
+
+            this._nameLen = this._buffer.readUInt16LE(CEN_FLE)
+            this._extraLen = this._buffer.readUInt16LE(CEN_ELE)
+            this._commentLen = this._buffer.readUInt16LE(CEN_CLE)
+
+            this._extraBuffer = Buffer.allocUnsafe(this._nameLen + this._extraLen + this._commentLen)
         }
-    }
-
-    _calcVolatileHeader = () => {
-
-        this._nameLen = this._buffer.readUInt16LE(CEN_FLE)
-        this._extraLen = this._buffer.readUInt16LE(CEN_ELE)
-        this._commentLen = this._buffer.readUInt16LE(CEN_CLE)
-
-        this._extraBuffer = Buffer.alloc(this._nameLen + this._extraLen + this._commentLen)
     }
 
     decode = () => {

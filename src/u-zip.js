@@ -1,11 +1,7 @@
 import File from './file'
 import Entry from './entry'
-import Zip32HeaderDecoder from './zip-32-header-decoder'
 import CentralHeaderWriter from './cen-header-writer'
-import Zip64LocatorDecoder from './zip64-locator-decoder'
-import Zip64HeaderDecoder from './zip64-header-decoder'
-import {END_MAX} from './constants'
-import {ELO_HDR} from './constants'
+import zipHeaderDecoder from './zip-header-decoders'
 
 export default class UZip {
 
@@ -17,51 +13,15 @@ export default class UZip {
 
     _decodeZipHeader = () => {
 
-        this.file.openSync()
-        this._decodeZip32Header()
-
-        const zip64Locator = this._decodeZip64Locator()
-
-        if (zip64Locator) {
-
-            const offset = zip64Locator.getOffsetZip64Header()
-            this._decodeZip64Header(offset)
-        }
-
-        this.file.closeSync()
-    }
-
-    _decodeZip32Header = (decoder = new Zip32HeaderDecoder()) => {
-
-        const size = this.file.getFileSize()
-        const bytes = this.file.readBytesSync((size - END_MAX) < 0 ? 0 : size - END_MAX, size)
-
-        this.zipHeader = decoder.decode(bytes, size)
-    }
-
-    _decodeZip64Locator = (decoder = new Zip64LocatorDecoder()) => {
-
-        const start = this.zipHeader.getHeaderOffset() - ELO_HDR
-        const end = this.zipHeader.getHeaderOffset()
-
-        return decoder.decode(this.file.readBytesSync(start, end))
-    }
-
-    _decodeZip64Header = (startPos, decoder = new Zip64HeaderDecoder()) => {
-
-        const zip64Header = decoder.decode(this.file.readBytesSync(startPos, startPos + 48))
-
-        this.zipHeader.setCentralDirectoriesNumber(zip64Header.getCentralDirectoriesNumber())
-        this.zipHeader.setCentralDirectoriesSize(zip64Header.getCentralDirectoriesSize())
-        this.zipHeader.setCentralDirectoriesOffset(zip64Header.getCentralDirectoriesOffset())
+        this.zipHeader = zipHeaderDecoder(this.file)
     }
 
     _readEntries = async () => {
 
         this.entries = await new Promise((resolve) => {
 
-            const start = this.zipHeader.getCentralDirectoriesOffset()
-            const end = this.zipHeader.getCentralDirectoriesOffset() + this.zipHeader.getCentralDirectoriesSize() - 1
+            const start = this.zipHeader.cenDirsOffset
+            const end = this.zipHeader.cenDirsOffset + this.zipHeader.cenDirsSize - 1
 
             const reader = this.file.createReadStream(start, end)
             const writer = new CentralHeaderWriter()
@@ -114,7 +74,7 @@ export default class UZip {
     extractArchive = async (outputPath) => {
 
         const entries = await this.getEntries()
-        const end = this.zipHeader.getCentralDirectoriesOffset()
+        const end = this.zipHeader.cenDirsOffset
 
         await this.file.open()
         let fileReader = this.file.createFdReadStream(0, end)

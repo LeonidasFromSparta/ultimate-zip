@@ -17,3 +17,4 @@ export const verifySignature = (buffer, pos, expected, message) => {
     if (signature !== expected)
         throw (message)
 }
+

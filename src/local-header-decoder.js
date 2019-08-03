@@ -7,7 +7,7 @@ import {copy, verifySignature} from './funcz'
 
 export default class LocalHeaderDecoder {
 
-    _buffer = Buffer.alloc(LOC_HDR)
+    _buffer = Buffer.allocUnsafe(LOC_HDR)
     _offset = 0
 
     _extraBuffer = null
@@ -23,7 +23,7 @@ export default class LocalHeaderDecoder {
         if (data.length === 0)
             return data
 
-        this.declareVolatilePart()
+        this._declareVolatilePart()
 
         const bytesCopied2 = copy(this._extraBuffer, this._extraOffset, data)
         this._extraOffset += bytesCopied2
@@ -33,7 +33,7 @@ export default class LocalHeaderDecoder {
 
     _fixedHeaderDoneOnce = () => this._offset === this._buffer.length && this._extraOffset === 0
 
-    declareVolatilePart = () => {
+    _declareVolatilePart = () => {
 
         if (this._fixedHeaderDoneOnce()) {
 
