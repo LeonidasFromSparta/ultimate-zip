@@ -114,15 +114,14 @@ export default class Entry {
 
             fileReader.on('data', (chunk) => {
 
-                const unshiftedChunk = decoder.update(chunk)
+                chunk = decoder.update(chunk)
 
-                if (unshiftedChunk) {
+                if (chunk.length) {
 
                     fileReader.pause()
                     fileReader.removeAllListeners()
-                    fileReader.unshift(unshiftedChunk)
+                    fileReader.unshift(chunk)
 
-                    decoder.decode()
                     resolve()
                 }
             })

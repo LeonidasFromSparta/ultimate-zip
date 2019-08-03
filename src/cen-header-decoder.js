@@ -20,6 +20,7 @@ import {CEN_ATT} from './constants'
 import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 import {CEN_HDR} from './constants'
+import {copy, verifySignature} from './funcz'
 
 export default class CentralHeaderDecoder {
 
@@ -32,13 +33,12 @@ export default class CentralHeaderDecoder {
     _nameLen = 0
     _extraLen = 0
     _commentLen = 0
-    _extraBufferLen = 0
 
     update = (data) => this._cacheVolatileHeader(this._cacheFixedHeader(data))
 
     _cacheFixedHeader = (data) => {
 
-        const bytesCopied = this._copy(this._buffer, this._offset, data)
+        const bytesCopied = copy(this._buffer, this._offset, data)
         this._offset += bytesCopied
 
         this._beforeVolatileHeader()
@@ -50,38 +50,19 @@ export default class CentralHeaderDecoder {
 
     _cacheVolatileHeader = (data) => {
 
-        const bytesCopied = this._copy(this._extraBuffer, this._extraOffset, data)
+        const bytesCopied = copy(this._extraBuffer, this._extraOffset, data)
         this._extraOffset += bytesCopied
 
         return data.slice(bytesCopied)
     }
 
-    _copy = (target, targetOff, source) => {
-
-        let sourceOff = 0
-
-        while (this._capableOfCopy(targetOff, target.length, sourceOff, source.length))
-            target[targetOff++] = source[sourceOff++]
-
-        return sourceOff
-    }
-
-    _capableOfCopy = (targetOff, targetLength, sourceOff, sourceLength) => targetOff < targetLength && sourceOff < sourceLength
-
     _beforeVolatileHeader = () => {
 
         if (this._fixedHeaderDoneOnce()) {
 
-            const signature = this._buffer.readUInt32LE(CEN_SPO)
-            this._verifySignature(signature)
+            verifySignature(this._buffer, CEN_SPO, CEN_SIG, 'Bad central file header signature error')
             this._calcVolatileHeader()
         }
-    }
-
-    _verifySignature = (signature) => {
-
-        if (signature !== CEN_SIG)
-            throw ('Bad central file header signature error')
     }
 
     _calcVolatileHeader = () => {
@@ -89,8 +70,8 @@ export default class CentralHeaderDecoder {
         this._nameLen = this._buffer.readUInt16LE(CEN_FLE)
         this._extraLen = this._buffer.readUInt16LE(CEN_ELE)
         this._commentLen = this._buffer.readUInt16LE(CEN_CLE)
-        this._extraBufferLen = this._nameLen + this._extraLen + this._commentLen
-        this._extraBuffer = Buffer.alloc(this._extraBufferLen)
+
+        this._extraBuffer = Buffer.alloc(this._nameLen + this._extraLen + this._commentLen)
     }
 
     decode = () => {

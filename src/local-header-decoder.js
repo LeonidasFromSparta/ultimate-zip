@@ -1,89 +1,48 @@
-import LocalHeader from './local-header'
 import {LOC_SIG} from './constants'
 import {LOC_SPO} from './constants'
-import {LOC_VER} from './constants'
-import {LOC_PLT} from './constants'
-import {LOC_FLG} from './constants'
-import {LOC_MTD} from './constants'
-import {LOC_TIM} from './constants'
-import {LOC_DAT} from './constants'
-import {LOC_CRC} from './constants'
-import {LOC_SIC} from './constants'
-import {LOC_SIU} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 import {LOC_HDR} from './constants'
-import {LOC_MAX} from './constants'
+import {copy, verifySignature} from './funcz'
 
 export default class LocalHeaderDecoder {
 
-    _buffer = Buffer.alloc(LOC_MAX)
+    _buffer = Buffer.alloc(LOC_HDR)
     _offset = 0
 
-    update = (chunk) => {
+    _extraBuffer = null
+    _extraOffset = 0
 
-        if (this._offset < LOC_HDR) {
+    update = (data) => {
 
-            const remainingBytes = LOC_HDR - this._offset
-            const bytesRead = chunk.copy(this._buffer, this._offset, 0, remainingBytes)
-            this._offset += bytesRead
+        const bytesCopied1 = copy(this._buffer, this._offset, data)
+        this._offset += bytesCopied1
 
-            if (this._offset !== LOC_HDR)
-                return null
+        data = data.slice(bytesCopied1)
 
-            chunk = chunk.slice(bytesRead)
+        if (data.length === 0)
+            return data
 
-            this._nameLen = this._buffer.readUInt16LE(LOC_FLE)
-            this._extraLen = this._buffer.readUInt16LE(LOC_ELE)
-            this._bufferLength = LOC_HDR + this._nameLen + this._extraLen
-        }
+        this.declareVolatilePart()
 
-        const remainingBytes = this._bufferLength - this._offset
-        const bytesRead = chunk.copy(this._buffer, this._offset, 0, remainingBytes)
-        this._offset += bytesRead
+        const bytesCopied2 = copy(this._extraBuffer, this._extraOffset, data)
+        this._extraOffset += bytesCopied2
 
-        if (this._offset !== this._bufferLength)
-            return null
-
-        return chunk.slice(bytesRead)
+        return data.slice(bytesCopied2)
     }
 
-    decode = () => {
+    _fixedHeaderDoneOnce = () => this._offset === this._buffer.length && this._extraOffset === 0
 
-        const signature = this._buffer.readUInt32LE(LOC_SPO)
+    declareVolatilePart = () => {
 
-        if (signature !== LOC_SIG) {
+        if (this._fixedHeaderDoneOnce()) {
 
-            const actualSignature = '0x' + signature.toString(16).toUpperCase().padStart(8, '0')
-            const expectedSignature = '0x' + LOC_SIG.toString(16).toUpperCase().padStart(8, '0')
+            verifySignature(this._buffer, LOC_SPO, LOC_SIG, 'Bad local file header signature error')
 
-            throw (`Local file header signature could not be confirmed: actual ${actualSignature} expected ${expectedSignature}`)
+            const nameLen = this._buffer.readUInt16LE(LOC_FLE)
+            const extraLen = this._buffer.readUInt16LE(LOC_ELE)
+
+            this._extraBuffer = Buffer.alloc(nameLen + extraLen)
         }
-
-        this._offset = 0
-
-        const header = new LocalHeader()
-
-        header.setVersionNeededToExtract(this._buffer.readUInt8(LOC_VER))
-        header.setPlatformNeededToExtract(this._buffer.readUInt8(LOC_PLT))
-        header.setGeneralPurposeBitFlag(this._buffer.readUInt16LE(LOC_FLG))
-        header.setCompressionMethod(this._buffer.readUInt16LE(LOC_MTD))
-        header.setLastModFileTime(this._buffer.readUInt16LE(LOC_TIM))
-        header.setLastModFileDate(this._buffer.readUInt16LE(LOC_DAT))
-        header.setCRC32(this._buffer.readUInt32LE(LOC_CRC))
-        header.setCompressedSize(this._buffer.readUInt32LE(LOC_SIC))
-        header.setUncompressedSize(this._buffer.readUInt32LE(LOC_SIU))
-        header.setFileNameLength(this._nameLen)
-        header.setExtraFieldLength(this._extraLen)
-
-        header.setFileName(this._buffer.toString('utf8', LOC_HDR, LOC_HDR + this._nameLen))
-
-        const extraBuf = Buffer.allocUnsafe(this._extraLen)
-        this._buffer.copy(extraBuf, 0, LOC_HDR + this._nameLen, LOC_HDR + this._nameLen + this._extraLen)
-        header.setExtraField(extraBuf)
-
-        header.setHeaderLength(this._bufferLength)
-
-        return header
     }
 }
