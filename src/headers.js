@@ -8,17 +8,17 @@ export const verifySignature = (buffer, pos, expected, message) => {
         throw (message)
 }
 
-export const update = (data, headerData, lengthUpdater) =>  {
+export const update = (buffer, header, lengthUpdater) =>  {
 
     let dataOff = 0
 
-    while (capableOfCopying(headerData.array.length, headerData.maxSize, dataOff, data.length)) {
+    while (capableOfCopying(header.array.length, header.maxSize, dataOff, buffer.length)) {
 
-        headerData.array.push(data[dataOff++])
-        headerData.maxSize += lengthUpdater(headerData.array.length, headerData.array)
+        header.array.push(buffer[dataOff++])
+        header.maxSize += lengthUpdater(header.array.length - 1, header.array)
     }
 
-    return data.slice(dataOff)
+    return buffer.slice(dataOff)
 }
 
 import {CEN_HDR} from './constants'
@@ -37,21 +37,21 @@ import {CEN_CLE} from './constants'
 import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 
-export const updateCenLength = (offset, data) => {
+export const updateCenLength = (idx, data) => {
 
-    switch (offset - 1) {
+    switch (idx) {
 
         case CEN_SPO + 1:
             return 0
 
         case CEN_FLE + 1:
-            return (data[CEN_FLE] | data[CEN_FLE + 1] << 8)
+            return data[CEN_FLE] | data[CEN_FLE + 1] << 8
 
         case CEN_ELE + 1:
-            return (data[CEN_ELE] | data[CEN_ELE + 1] << 8)
+            return data[CEN_ELE] | data[CEN_ELE + 1] << 8
 
         case CEN_CLE + 1:
-            return (data[CEN_CLE] | data[CEN_CLE + 1] << 8)
+            return data[CEN_CLE] | data[CEN_CLE + 1] << 8
 
         default:
             return 0
@@ -121,21 +121,20 @@ import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 
-export const updateLocLength = (offset, data) => {
+export const updateLocLength = (idx, data) => {
 
-    switch (offset - 1) {
+    switch (idx) {
 
         case LOC_SPO + 1:
             return 0
 
         case LOC_FLE + 1:
-            return (data[LOC_FLE] | data[LOC_FLE + 1] << 8)
+            return data[LOC_FLE] | data[LOC_FLE + 1] << 8
 
         case LOC_ELE + 1:
-            return (data[LOC_ELE] | data[LOC_ELE + 1] << 8)
+            return data[LOC_ELE] | data[LOC_ELE + 1] << 8
 
         default:
             return 0
     }
 }
-
