@@ -2,10 +2,11 @@ import {createInflateRaw} from 'zlib'
 import {PassThrough} from 'stream'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import CRC32 from './crc32'
-import LocalHeaderDecoder from './local-header-decoder'
+import {update} from './local-header-decoder'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
+import { makeLocHeaderData } from './headers'
 
 export default class Entry {
 
@@ -110,11 +111,11 @@ export default class Entry {
 
         await new Promise((resolve) => {
 
-            const decoder = new LocalHeaderDecoder()
+            const headerData = makeLocHeaderData()
 
             fileReader.on('data', (chunk) => {
 
-                chunk = decoder.update(chunk)
+                chunk = update(chunk, headerData)
 
                 if (chunk.length) {
 

@@ -18,7 +18,7 @@ import {E64_OFF} from './constants'
 
 import {END_MAX} from './constants'
 
-import { verifySignature } from './funcz'
+import { verifySignature } from './headers'
 
 const findOffset = (data) => {
 

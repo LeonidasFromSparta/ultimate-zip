@@ -2,38 +2,32 @@ import {LOC_SIG} from './constants'
 import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
-import {LOC_HDR} from './constants'
-import {capableOfCopying} from './funcz'
 
-export default class LocalHeaderDecoder {
+import {capableOfCopying} from './headers'
 
-    _array = []
-    _maxSize = LOC_HDR
+export const update = (data, headerData) =>  {
 
-    update = (data) =>  {
+    let dataOff = 0
 
-        let dataOff = 0
+    while (capableOfCopying(headerData.array.length, headerData.maxSize, dataOff, data.length)) {
 
-        while (capableOfCopying(this._array.length, this._maxSize, dataOff, data.length)) {
+        headerData.array.push(data[dataOff++])
 
-            this._array.push(data[dataOff++])
+        switch (headerData.array.length - 1) {
 
-            switch (this._array.length - 1) {
+            case LOC_SPO + 1:
+                headerData.maxSize += 0
+                break
 
-                case LOC_SPO + 1:
-                    this._maxSize += 0
-                    break
+            case LOC_FLE + 1:
+                headerData.maxSize += (headerData.array[LOC_FLE] | headerData.array[LOC_FLE + 1] << 8)
+                break
 
-                case LOC_FLE + 1:
-                    this._maxSize += (this._array[LOC_FLE] | this._array[LOC_FLE + 1] << 8)
-                    break
-
-                case LOC_ELE + 1:
-                    this._maxSize += (this._array[LOC_ELE] | this._array[LOC_ELE + 1] << 8)
-                    break
-            }
+            case LOC_ELE + 1:
+                headerData.maxSize += (headerData.array[LOC_ELE] | headerData.array[LOC_ELE + 1] << 8)
+                break
         }
-
-        return data.slice(dataOff)
     }
+
+    return data.slice(dataOff)
 }

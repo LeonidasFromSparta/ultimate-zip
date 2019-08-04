@@ -1,21 +1,21 @@
 import {Writable} from 'stream'
-import CenHeaderDecoder from './cen-header-decoder'
+import {makeCenHeaderData, cenUpdate, cenDecode} from './headers'
 
 export default class DumpWriter extends Writable {
 
-    _decoder = new CenHeaderDecoder()
     _headers = []
+    header = makeCenHeaderData()
 
     _write = (chunk, encoding, callback) => {
 
         while (chunk.length) {
 
-            chunk = this._decoder.update(chunk)
+            chunk = cenUpdate(chunk, this.header)
 
             if (chunk.length) {
 
-                this._headers.push(this._decoder.decode())
-                this._decoder = new CenHeaderDecoder()
+                this._headers.push(cenDecode(this.header))
+                this.header = makeCenHeaderData()
             }
         }
 
