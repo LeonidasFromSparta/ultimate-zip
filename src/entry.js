@@ -2,11 +2,10 @@ import {createInflateRaw} from 'zlib'
 import {PassThrough} from 'stream'
 import {LOCAL_HEADER_LENGTH} from './constants'
 import CRC32 from './crc32'
-import {update} from './local-header-decoder'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
-import { makeLocHeaderData } from './headers'
+import {makeLocHeaderData, locUpdate} from './headers'
 
 export default class Entry {
 
@@ -115,7 +114,7 @@ export default class Entry {
 
             fileReader.on('data', (chunk) => {
 
-                chunk = update(chunk, headerData)
+                chunk = locUpdate(chunk, headerData)
 
                 if (chunk.length) {
 
