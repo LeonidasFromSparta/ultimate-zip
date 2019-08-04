@@ -1,14 +1,4 @@
-export const capableOfCopying = (targetLength, targetMaxLength, sourceOff, sourceLength) => targetLength < targetMaxLength && sourceOff < sourceLength
-
-export const copy = (target, targetOff, source) => {
-
-    let sourceOff = 0
-
-    while (capableOfCopying(targetOff, target.length, sourceOff, source.length))
-        target[targetOff++] = source[sourceOff++]
-
-    return sourceOff
-}
+const capableOfCopying = (targetOffset, targetLength, sourceOffset, sourceLength) => targetOffset < targetLength && sourceOffset < sourceLength
 
 export const verifySignature = (buffer, pos, expected, message) => {
 
@@ -16,6 +6,19 @@ export const verifySignature = (buffer, pos, expected, message) => {
 
     if (signature !== expected)
         throw (message)
+}
+
+export const update = (data, headerData, lengthUpdater) =>  {
+
+    let dataOff = 0
+
+    while (capableOfCopying(headerData.array.length, headerData.maxSize, dataOff, data.length)) {
+
+        headerData.array.push(data[dataOff++])
+        headerData.maxSize += lengthUpdater(headerData.array.length, headerData.array)
+    }
+
+    return data.slice(dataOff)
 }
 
 import {CEN_HDR} from './constants'
@@ -34,35 +37,25 @@ import {CEN_CLE} from './constants'
 import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 
-export const cenUpdate = (data, headerData) => {
+export const updateCenLength = (offset, data) => {
 
-    let dataOff = 0
+    switch (offset - 1) {
 
-    while (capableOfCopying(headerData.array.length, headerData.maxSize, dataOff, data.length)) {
+        case CEN_SPO + 1:
+            return 0
 
-        headerData.array.push(data[dataOff++])
+        case CEN_FLE + 1:
+            return (data[CEN_FLE] | data[CEN_FLE + 1] << 8)
 
-        switch (headerData.array.length - 1) {
+        case CEN_ELE + 1:
+            return (data[CEN_ELE] | data[CEN_ELE + 1] << 8)
 
-            case CEN_SPO + 1:
-                headerData.maxSize += 0
-                break
+        case CEN_CLE + 1:
+            return (data[CEN_CLE] | data[CEN_CLE + 1] << 8)
 
-            case CEN_FLE + 1:
-                headerData.maxSize += (headerData.array[CEN_FLE] | headerData.array[CEN_FLE + 1] << 8)
-                break
-
-            case CEN_ELE + 1:
-                headerData.maxSize += (headerData.array[CEN_ELE] | headerData.array[CEN_ELE + 1] << 8)
-                break
-
-            case CEN_CLE + 1:
-                headerData.maxSize += (headerData.array[CEN_CLE] | headerData.array[CEN_CLE + 1] << 8)
-                break
-        }
+        default:
+            return 0
     }
-
-    return data.slice(dataOff)
 }
 
 export const cenDecode = (headerData) => {
@@ -128,29 +121,21 @@ import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 
-export const locUpdate = (data, headerData) =>  {
+export const updateLocLength = (offset, data) => {
 
-    let dataOff = 0
+    switch (offset - 1) {
 
-    while (capableOfCopying(headerData.array.length, headerData.maxSize, dataOff, data.length)) {
+        case LOC_SPO + 1:
+            return 0
 
-        headerData.array.push(data[dataOff++])
+        case LOC_FLE + 1:
+            return (data[LOC_FLE] | data[LOC_FLE + 1] << 8)
 
-        switch (headerData.array.length - 1) {
+        case LOC_ELE + 1:
+            return (data[LOC_ELE] | data[LOC_ELE + 1] << 8)
 
-            case LOC_SPO + 1:
-                headerData.maxSize += 0
-                break
-
-            case LOC_FLE + 1:
-                headerData.maxSize += (headerData.array[LOC_FLE] | headerData.array[LOC_FLE + 1] << 8)
-                break
-
-            case LOC_ELE + 1:
-                headerData.maxSize += (headerData.array[LOC_ELE] | headerData.array[LOC_ELE + 1] << 8)
-                break
-        }
+        default:
+            return 0
     }
-
-    return data.slice(dataOff)
 }
+

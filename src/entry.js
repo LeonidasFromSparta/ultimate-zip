@@ -5,7 +5,7 @@ import CRC32 from './crc32'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
-import {makeLocHeaderData, locUpdate} from './headers'
+import {makeLocHeaderData, update, updateLocLength} from './headers'
 
 export default class Entry {
 
@@ -114,7 +114,7 @@ export default class Entry {
 
             fileReader.on('data', (chunk) => {
 
-                chunk = locUpdate(chunk, headerData)
+                chunk = update(chunk, headerData, updateLocLength)
 
                 if (chunk.length) {
 

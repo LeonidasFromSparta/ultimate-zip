@@ -1,5 +1,5 @@
 import {Writable} from 'stream'
-import {makeCenHeaderData, cenUpdate, cenDecode} from './headers'
+import {makeCenHeaderData, update, updateCenLength, cenDecode} from './headers'
 
 export default class DumpWriter extends Writable {
 
@@ -10,7 +10,7 @@ export default class DumpWriter extends Writable {
 
         while (chunk.length) {
 
-            chunk = cenUpdate(chunk, this.header)
+            chunk = update(chunk, this.header, updateCenLength)
 
             if (chunk.length) {
 
