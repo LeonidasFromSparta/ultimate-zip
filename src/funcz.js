@@ -1,4 +1,4 @@
-const capableOfCopying = (targetOff, targetLength, sourceOff, sourceLength) => targetOff < targetLength && sourceOff < sourceLength
+export const capableOfCopying = (targetLength, targetMaxLength, sourceOff, sourceLength) => targetLength < targetMaxLength && sourceOff < sourceLength
 
 export const copy = (target, targetOff, source) => {
 
@@ -17,4 +17,3 @@ export const verifySignature = (buffer, pos, expected, message) => {
     if (signature !== expected)
         throw (message)
 }
-

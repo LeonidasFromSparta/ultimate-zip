@@ -1,9 +1,9 @@
 import {Writable} from 'stream'
-import CentralHeaderDecoder from './cen-header-decoder'
+import CenHeaderDecoder from './cen-header-decoder'
 
 export default class DumpWriter extends Writable {
 
-    _decoder = new CentralHeaderDecoder()
+    _decoder = new CenHeaderDecoder()
     _headers = []
 
     _write = (chunk, encoding, callback) => {
@@ -15,7 +15,7 @@ export default class DumpWriter extends Writable {
             if (chunk.length) {
 
                 this._headers.push(this._decoder.decode())
-                this._decoder = new CentralHeaderDecoder()
+                this._decoder = new CenHeaderDecoder()
             }
         }
 

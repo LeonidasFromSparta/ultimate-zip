@@ -3,46 +3,37 @@ import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 import {LOC_HDR} from './constants'
-import {copy, verifySignature} from './funcz'
+import {capableOfCopying} from './funcz'
 
 export default class LocalHeaderDecoder {
 
-    _buffer = Buffer.allocUnsafe(LOC_HDR)
-    _offset = 0
+    _array = []
+    _maxSize = LOC_HDR
 
-    _extraBuffer = null
-    _extraOffset = 0
+    update = (data) =>  {
 
-    update = (data) => {
+        let dataOff = 0
 
-        const bytesCopied1 = copy(this._buffer, this._offset, data)
-        this._offset += bytesCopied1
+        while (capableOfCopying(this._array.length, this._maxSize, dataOff, data.length)) {
 
-        data = data.slice(bytesCopied1)
+            this._array.push(data[dataOff++])
 
-        if (data.length === 0)
-            return data
+            switch (this._array.length - 1) {
 
-        this._declareVolatilePart()
+                case LOC_SPO + 1:
+                    this._maxSize += 0
+                    break
 
-        const bytesCopied2 = copy(this._extraBuffer, this._extraOffset, data)
-        this._extraOffset += bytesCopied2
+                case LOC_FLE + 1:
+                    this._maxSize += (this._array[LOC_FLE] | this._array[LOC_FLE + 1] << 8)
+                    break
 
-        return data.slice(bytesCopied2)
-    }
-
-    _fixedHeaderDoneOnce = () => this._offset === this._buffer.length && this._extraOffset === 0
-
-    _declareVolatilePart = () => {
-
-        if (this._fixedHeaderDoneOnce()) {
-
-            verifySignature(this._buffer, LOC_SPO, LOC_SIG, 'Bad local file header signature error')
-
-            const nameLen = this._buffer.readUInt16LE(LOC_FLE)
-            const extraLen = this._buffer.readUInt16LE(LOC_ELE)
-
-            this._extraBuffer = Buffer.alloc(nameLen + extraLen)
+                case LOC_ELE + 1:
+                    this._maxSize += (this._array[LOC_ELE] | this._array[LOC_ELE + 1] << 8)
+                    break
+            }
         }
+
+        return data.slice(dataOff)
     }
 }
