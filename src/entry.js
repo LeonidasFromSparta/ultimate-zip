@@ -5,7 +5,12 @@ import CRC32 from './crc32'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
-import {makeLocHeaderData, update, updateLocLength} from './headers'
+import {calculateLength, verifySignature} from './headers'
+import {LOC_SIG} from './constants'
+import {LOC_SPO} from './constants'
+import {LOC_FLE} from './constants'
+import {LOC_ELE} from './constants'
+import {LOC_HDR} from './constants'
 
 export default class Entry {
 
@@ -110,19 +115,28 @@ export default class Entry {
 
         await new Promise((resolve) => {
 
-            const headerData = makeLocHeaderData()
+            let addedData = Buffer.alloc(0)
+            const fieldArray = [LOC_FLE, LOC_ELE]
 
             fileReader.on('data', (chunk) => {
 
-                chunk = update(chunk, headerData, updateLocLength)
+                addedData = Buffer.concat([addedData, chunk], addedData.length + chunk.length)
 
-                if (chunk.length) {
+                while (addedData.length >= LOC_HDR) {
+
+                    const length = calculateLength(addedData, fieldArray, LOC_HDR)
+
+                    if (addedData.length < length)
+                        return
+
+                    const signature = addedData.readUInt32LE(0)
+                    verifySignature(signature, LOC_SIG, 'loc dir sig err')
 
                     fileReader.pause()
                     fileReader.removeAllListeners()
-                    fileReader.unshift(chunk)
-
+                    fileReader.unshift(addedData.slice(length))
                     resolve()
+                    break
                 }
             })
 

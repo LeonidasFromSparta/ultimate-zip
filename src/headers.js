@@ -1,24 +1,14 @@
 const capableOfCopying = (targetOffset, targetLength, sourceOffset, sourceLength) => targetOffset < targetLength && sourceOffset < sourceLength
 
-export const verifySignature = (buffer, pos, expected, message) => {
+export const verifySignature = (expected, observed, message) => {
 
-    const signature = buffer.readUInt32LE(pos)
-
-    if (signature !== expected)
+    if (observed !== expected)
         throw (message)
 }
 
-export const update = (buffer, header, lengthUpdater) =>  {
+export const update = (data, length) => {
 
-    let dataOff = 0
-
-    while (capableOfCopying(header.array.length, header.maxSize, dataOff, buffer.length)) {
-
-        header.array.push(buffer[dataOff++])
-        header.maxSize += lengthUpdater(header.array.length - 1, header.array)
-    }
-
-    return buffer.slice(dataOff)
+    return data.slice(length)
 }
 
 import {CEN_HDR} from './constants'
@@ -37,30 +27,9 @@ import {CEN_CLE} from './constants'
 import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 
-export const updateCenLength = (idx, data) => {
+export const calculateLength = (data, fields, initialLength) => fields.reduce((acc, pos) => acc + (data[pos] | data[pos + 1] << 8), initialLength)
 
-    switch (idx) {
-
-        case CEN_SPO + 1:
-            return 0
-
-        case CEN_FLE + 1:
-            return data[CEN_FLE] | data[CEN_FLE + 1] << 8
-
-        case CEN_ELE + 1:
-            return data[CEN_ELE] | data[CEN_ELE + 1] << 8
-
-        case CEN_CLE + 1:
-            return data[CEN_CLE] | data[CEN_CLE + 1] << 8
-
-        default:
-            return 0
-    }
-}
-
-export const cenDecode = (headerData) => {
-
-    const buffer = Buffer.from(headerData.array)
+export const cenDecode = (buffer) => {
 
     const header = new CenHeader()
     header.checksum = buffer.readUInt32LE(CEN_CRC)
@@ -121,7 +90,7 @@ import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 
-export const updateLocLength = (idx, data) => {
+export const calcLocLength = (idx, data) => {
 
     switch (idx) {
 

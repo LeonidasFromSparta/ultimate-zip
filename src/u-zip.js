@@ -45,9 +45,9 @@ export default class UZip {
 
             const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
 
-            if (fileReaderPos !== entries[i].header.getOffsetOfLocalHeader()) {
+            if (fileReaderPos !== entries[i].header.localOffset) {
 
-                const start = entries[i].header.getOffsetOfLocalHeader()
+                const start = entries[i].header.localOffset
                 fileReader = this.file.createFdReadStream(start, end)
             }
 
@@ -81,14 +81,16 @@ export default class UZip {
 
         for (let i=0; i < entries.length; i++) {
 
+            /*
             const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
 
             if (fileReaderPos !== entries[i].header.localOffset) {
 
-                console.log('keke')
-                const start = entries[i].header.getOffsetOfLocalHeader()
+                console.log('reader pos change')
+                const start = entries[i].header.localOffset
                 fileReader = this.file.createFdReadStream(start, end)
             }
+            */
 
             await entries[i]._extract(outputPath, fileReader)
         }
