@@ -1,6 +1,6 @@
 import File from './file'
 import Entry from './entry'
-import CentralHeaderWriter from './cen-header-writer'
+import {CenHeaderWriter} from './headers'
 import zipHeaderDecoder from './zip-header-decoders'
 
 export default class UZip {
@@ -24,7 +24,7 @@ export default class UZip {
             const end = this.zipHeader.cenDirsOffset + this.zipHeader.cenDirsSize - 1
 
             const reader = this.file.createReadStream(start, end)
-            const writer = new CentralHeaderWriter()
+            const writer = new CenHeaderWriter()
 
             reader.pipe(writer).on('finish', () => resolve(writer.getHeaders().map((obj) => new Entry(obj, this.file))))
         })

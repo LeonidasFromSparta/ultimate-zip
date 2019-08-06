@@ -1,20 +1,10 @@
-const capableOfCopying = (targetOffset, targetLength, sourceOffset, sourceLength) => targetOffset < targetLength && sourceOffset < sourceLength
-
 export const verifySignature = (expected, observed, message) => {
 
-    if (observed !== expected)
+    if (expected !== observed)
         throw (message)
 }
 
-export const update = (data, length) => {
-
-    return data.slice(length)
-}
-
 import {CEN_HDR} from './constants'
-export const makeCenHeaderData = () => ({array: [], maxSize: CEN_HDR})
-
-import CenHeader from './cen-header'
 import {CEN_SIG} from './constants'
 import {CEN_SPO} from './constants'
 import {CEN_MTD} from './constants'
@@ -31,6 +21,47 @@ export const cenInconstantOffsets = [CEN_FLE, CEN_ELE, CEN_CLE]
 export const locInconstantOffsets = [LOC_FLE, LOC_ELE]
 
 export const calculateLength = (data, fields, initialLength) => fields.reduce((acc, pos) => acc + data.readUInt16LE(pos), initialLength)
+
+import {Writable} from 'stream'
+
+export class CenHeaderWriter extends Writable {
+
+    _headers = []
+    _addedData = Buffer.alloc(0)
+
+    _write = (chunk, encoding, callback) => {
+
+        chunk = Buffer.concat([this._addedData, chunk], this._addedData.length + chunk.length)
+
+        while (chunk.length >= CEN_HDR) {
+
+            const length = calculateLength(chunk, cenInconstantOffsets, CEN_HDR)
+
+            if (chunk.length < length)
+            break
+
+            const signature = chunk.readUInt32LE(0)
+
+            verifySignature(signature, CEN_SIG, 'cen dir sig err')
+
+            const headerBuffer = chunk.slice(0, length)
+            const header = cenDecode(headerBuffer, 0)
+            this._headers.push(header)
+
+            chunk = chunk.slice(length)
+        }
+
+        this._addedData = chunk
+        callback()
+    }
+
+    getHeaders = () => {
+
+        return this._headers
+    }
+}
+
+import CenHeader from './cen-header'
 
 export const cenDecode = (buffer, index) => {
 
@@ -86,27 +117,40 @@ export const cenDecode = (buffer, index) => {
 }
 
 import {LOC_HDR} from './constants'
-export const makeLocHeaderData = () => ({array: [], maxSize: LOC_HDR})
-
 import {LOC_SIG} from './constants'
 import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 
-export const calcLocLength = (idx, data) => {
+export const locHeaderPromise = (reader) => {
 
-    switch (idx) {
+    return new Promise((resolve) => {
 
-        case LOC_SPO + 1:
-            return 0
+        let addedData = Buffer.alloc(0)
 
-        case LOC_FLE + 1:
-            return data[LOC_FLE] | data[LOC_FLE + 1] << 8
+        reader.on('data', (chunk) => {
 
-        case LOC_ELE + 1:
-            return data[LOC_ELE] | data[LOC_ELE + 1] << 8
+            chunk = Buffer.concat([addedData, chunk], addedData.length + chunk.length)
 
-        default:
-            return 0
-    }
+            while (chunk.length >= LOC_HDR) {
+
+                const length = calculateLength(chunk, locInconstantOffsets, LOC_HDR)
+
+                if (chunk.length < length)
+                    break
+
+                const signature = chunk.readUInt32LE(0)
+                verifySignature(signature, LOC_SIG, 'loc dir sig err')
+
+                reader.pause()
+                reader.removeAllListeners()
+                reader.unshift(chunk.slice(length))
+                return resolve()
+            }
+
+            addedData = chunk
+        })
+
+        reader.resume()
+    })
 }
