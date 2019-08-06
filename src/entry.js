@@ -5,7 +5,7 @@ import CRC32 from './crc32'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
-import {calculateLength, verifySignature} from './headers'
+import {calculateLength, verifySignature, locInconstantOffsets} from './headers'
 import {LOC_SIG} from './constants'
 import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
@@ -116,7 +116,6 @@ export default class Entry {
         await new Promise((resolve) => {
 
             let addedData = Buffer.alloc(0)
-            const fieldArray = [LOC_FLE, LOC_ELE]
 
             fileReader.on('data', (chunk) => {
 
@@ -124,7 +123,7 @@ export default class Entry {
 
                 while (addedData.length >= LOC_HDR) {
 
-                    const length = calculateLength(addedData, fieldArray, LOC_HDR)
+                    const length = calculateLength(addedData, locInconstantOffsets, LOC_HDR)
 
                     if (addedData.length < length)
                         return

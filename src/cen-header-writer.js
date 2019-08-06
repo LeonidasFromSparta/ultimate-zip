@@ -1,5 +1,5 @@
 import {Writable} from 'stream'
-import {calculateLength, cenDecode, verifySignature} from './headers'
+import {calculateLength, cenDecode, verifySignature, cenInconstantOffsets} from './headers'
 import {CEN_FLE, CEN_HDR} from './constants'
 import {CEN_ELE} from './constants'
 import {CEN_CLE} from './constants'
@@ -9,31 +9,30 @@ export default class DumpWriter extends Writable {
 
     _headers = []
     _addedData = Buffer.alloc(0)
-    _fieldArray = [CEN_FLE, CEN_ELE, CEN_CLE]
 
-    _write = (data, encoding, callback) => {
+    _write = (chunk, encoding, callback) => {
 
-        this._addedData = Buffer.concat([this._addedData, data], this._addedData.length + data.length)
+        chunk = Buffer.concat([this._addedData, chunk], this._addedData.length + chunk.length)
 
-        while (this._addedData.length >= CEN_HDR) {
+        while (chunk.length >= CEN_HDR) {
 
-            const length = calculateLength(this._addedData, this._fieldArray, CEN_HDR)
+            const length = calculateLength(chunk, cenInconstantOffsets, CEN_HDR)
 
-            if (this._addedData.length < length)
+            if (chunk.length < length)
                 break
 
-            const signature = this._addedData.readUInt32LE(0)
+            const signature = chunk.readUInt32LE(0)
 
             verifySignature(signature, CEN_SIG, 'cen dir sig err')
 
-            const headerBuffer = this._addedData.slice(0, length)
-            const header = cenDecode(headerBuffer)
+            const headerBuffer = chunk.slice(0, length)
+            const header = cenDecode(headerBuffer, 0)
             this._headers.push(header)
 
-            this._addedData = this._addedData.slice(length)
+            chunk = chunk.slice(length)
         }
 
-        // console.log(this._addedData.length)
+        this._addedData = chunk
         callback()
     }
 

@@ -7,7 +7,7 @@ export default class UZip {
 
     constructor(path, file = new File(path)) {
 
-    debugger
+        debugger
         this.file = file
     }
 

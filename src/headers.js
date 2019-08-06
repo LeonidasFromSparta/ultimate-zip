@@ -27,24 +27,27 @@ import {CEN_CLE} from './constants'
 import {CEN_ATX} from './constants'
 import {CEN_OFF} from './constants'
 
-export const calculateLength = (data, fields, initialLength) => fields.reduce((acc, pos) => acc + (data[pos] | data[pos + 1] << 8), initialLength)
+export const cenInconstantOffsets = [CEN_FLE, CEN_ELE, CEN_CLE]
+export const locInconstantOffsets = [LOC_FLE, LOC_ELE]
 
-export const cenDecode = (buffer) => {
+export const calculateLength = (data, fields, initialLength) => fields.reduce((acc, pos) => acc + data.readUInt16LE(pos), initialLength)
+
+export const cenDecode = (buffer, index) => {
 
     const header = new CenHeader()
-    header.checksum = buffer.readUInt32LE(CEN_CRC)
-    header.method = buffer.readUInt16LE(CEN_MTD)
-    header.inflatedSize = buffer.readUInt32LE(CEN_SIC)
-    header.deflatedSize = buffer.readUInt32LE(CEN_SIU)
-    header.externalFileAttrs = buffer.readUInt32LE(CEN_ATX)
-    header.localOffset = buffer.readUInt32LE(CEN_OFF)
+    header.checksum = buffer.readUInt32LE(index + CEN_CRC)
+    header.method = buffer.readUInt16LE(index + CEN_MTD)
+    header.inflatedSize = buffer.readUInt32LE(index + CEN_SIC)
+    header.deflatedSize = buffer.readUInt32LE(index + CEN_SIU)
+    header.externalFileAttrs = buffer.readUInt32LE(index + CEN_ATX)
+    header.localOffset = buffer.readUInt32LE(index + CEN_OFF)
 
-    const nameLen = buffer.readUInt16LE(CEN_FLE)
-    header.fileName = buffer.toString('utf8', CEN_HDR, CEN_HDR + nameLen)
+    const nameLen = buffer.readUInt16LE(index + CEN_FLE)
+    header.fileName = buffer.toString('utf8', index + CEN_HDR, index + CEN_HDR + nameLen)
 
-    const extraLen = buffer.readUInt16LE(CEN_ELE)
+    const extraLen = buffer.readUInt16LE(index + CEN_ELE)
     const extraBuf = Buffer.allocUnsafe(extraLen)
-    buffer.copy(extraBuf, 0, CEN_HDR + nameLen, CEN_HDR + nameLen + extraLen)
+    buffer.copy(extraBuf, 0, index + CEN_HDR + nameLen, index + CEN_HDR + nameLen + extraLen)
 
     for (let offset=0; offset < extraBuf.length; offset++) {
 
