@@ -1,6 +1,6 @@
 import File from './file'
 import Entry from './entry'
-import {CenHeaderWriter} from './headers'
+import {CenHeaderWriter, cenDirStream} from './headers'
 import zipHeaderDecoder from './zip-header-decoders'
 
 export default class UZip {
@@ -18,18 +18,12 @@ export default class UZip {
 
     _readEntries = async () => {
 
-        this.entries = await new Promise((resolve) => {
+        const start = this.zipHeader.cenDirsOffset
+        const end = this.zipHeader.cenDirsOffset + this.zipHeader.cenDirsSize - 1
 
-            const start = this.zipHeader.cenDirsOffset
-            const end = this.zipHeader.cenDirsOffset + this.zipHeader.cenDirsSize - 1
+        const reader = this.file.createReadStream(start, end)
 
-            const reader = this.file.createReadStream(start, end)
-            const writer = new CenHeaderWriter()
-
-            reader.pipe(writer).on('finish', () => resolve(writer.getHeaders().map((obj) => new Entry(obj, this.file))))
-        })
-
-        return this.entries
+        return (await cenDirStream(reader)).map((obj) => new Entry(obj, this.file))
     }
 
     testArchive = async () => {
