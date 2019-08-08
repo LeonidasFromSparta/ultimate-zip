@@ -22,74 +22,51 @@ export const locInconstantOffsets = [LOC_FLE, LOC_ELE]
 
 export const calculateLength = (data, fields, initialLength) => fields.reduce((acc, pos) => acc + data.readUInt16LE(pos), initialLength)
 
-export const cenDirStream = async (reader) => {
+export const readCenDirProm = (stream) => {
 
-    const headers = []
-    let extra = Buffer.alloc(0)
+    return new Promise((resolve) => {
 
-    for await (const chunk of reader) {
+        const headers = []
+        let extra = Buffer.alloc(0)
 
-        extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
+        stream.on('readable', function() {
 
-        while (extra.length >= CEN_HDR) {
+            let chunk = this.read()
 
-            const length = calculateLength(extra, cenInconstantOffsets, CEN_HDR)
+            while (chunk !== null) {
 
-            if (extra.length < length)
-                break
+                const chunk = this.read()
 
-            const signature = extra.readUInt32LE(0)
+                if (chunk === null)
+                    return
 
-            verifySignature(signature, CEN_SIG, 'cen dir sig err')
+                extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
 
-            const headerBuffer = extra.slice(0, length)
-            const header = cenDecode(headerBuffer, 0)
-            headers.push(header)
+                while (CEN_HDR < extra.length) {
 
-            extra = extra.slice(length)
-        }
-    }
+                    if (extra.length < CEN_HDR)
+                        break
 
-    return headers
-}
+                    const length = calculateLength(extra, cenInconstantOffsets, CEN_HDR)
 
-import {Writable} from 'stream'
+                    if (extra.length < length)
+                        break
 
-export class CenHeaderWriter extends Writable {
+                    const signature = extra.readUInt32LE(0)
 
-    _headers = []
-    _addedData = Buffer.alloc(0)
+                    verifySignature(signature, CEN_SIG, 'cen dir sig err')
 
-    _write = (chunk, encoding, callback) => {
+                    const headerBuffer = extra.slice(0, length)
+                    const header = cenDecode(headerBuffer, 0)
+                    headers.push(header)
 
-        chunk = Buffer.concat([this._addedData, chunk], this._addedData.length + chunk.length)
+                    extra = extra.slice(length)
+                }
+            }
+        })
 
-        while (chunk.length >= CEN_HDR) {
-
-            const length = calculateLength(chunk, cenInconstantOffsets, CEN_HDR)
-
-            if (chunk.length < length)
-            break
-
-            const signature = chunk.readUInt32LE(0)
-
-            verifySignature(signature, CEN_SIG, 'cen dir sig err')
-
-            const headerBuffer = chunk.slice(0, length)
-            const header = cenDecode(headerBuffer, 0)
-            this._headers.push(header)
-
-            chunk = chunk.slice(length)
-        }
-
-        this._addedData = chunk
-        callback()
-    }
-
-    getHeaders = () => {
-
-        return this._headers
-    }
+        stream.on('end', () => resolve(headers))
+    })
 }
 
 import CenHeader from './cen-header'
@@ -153,16 +130,15 @@ import {LOC_SPO} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 
-export const locHeaderPromise = function(reader) {
+export const locHeaderPromise = (reader) => {
 
-    return new Promise(function(resolve) {
+    return new Promise((resolve) => {
 
-        reader.resume()
-        let extra = Buffer.alloc(0)
+        let addedData = Buffer.alloc(0)
 
-        reader.on('data', function(chunk) {
+        reader.on('data', (chunk) => {
 
-            chunk = Buffer.concat([extra, chunk], extra.length + chunk.length)
+            chunk = Buffer.concat([addedData, chunk], addedData.length + chunk.length)
 
             while (chunk.length >= LOC_HDR) {
 
@@ -174,64 +150,15 @@ export const locHeaderPromise = function(reader) {
                 const signature = chunk.readUInt32LE(0)
                 verifySignature(signature, LOC_SIG, 'loc dir sig err')
 
-                this.pause()
-                this.removeAllListeners()
-                this.unshift(chunk.slice(length))
+                reader.pause()
+                reader.removeAllListeners()
+                reader.unshift(chunk.slice(length))
                 return resolve()
             }
 
-            extra = chunk
+            addedData = chunk
         })
+
+        reader.resume()
     })
-}
-
-export const locHeaderGen = async (reader) => {
-
-    let extra = Buffer.alloc(0)
-
-    for await (const chunk of streamAsyncIterator(reader)) {
-
-        extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
-
-        if (extra.length < LOC_HDR)
-            continue
-
-        const length = calculateLength(extra, locInconstantOffsets, LOC_HDR)
-
-        if (extra.length < length)
-            continue
-
-        const signature = extra.readUInt32LE(0)
-        verifySignature(signature, LOC_SIG, 'loc dir sig err')
-        extra = extra.slice(length)
-        break
-    }
-
-    reader.unshift(extra)
-}
-
-async function* streamAsyncIterator(stream) {
-
-    while (true) {
-
-        const prom = new Promise((resolve) => {
-
-            stream.on('readable', function() {
-
-                this.removeAllListeners()
-                return resolve(this.read(100))
-            })
-        })
-
-        await prom
-
-        try {
-
-            yield prom
-        } catch (ex) {
-
-
-            console.log()
-        }
-    }
 }
