@@ -31,14 +31,9 @@ export const readCenDirProm = (stream) => {
 
         stream.on('readable', function() {
 
-            let chunk = this.read()
+            let chunk
 
-            while (chunk !== null) {
-
-                const chunk = this.read()
-
-                if (chunk === null)
-                    return
+            while (null !== (chunk = this.read())) {
 
                 extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
 
