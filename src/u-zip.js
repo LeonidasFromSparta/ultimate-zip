@@ -72,14 +72,13 @@ export default class UZip {
     extractArchiveSync = (outputPath) => {
 
         const entries = this.getEntriesSync()
-        const end = this.zipHeader.cenDirsOffset
 
         this.file.openSync()
-        let fileReader = this.file.createFdReadStream(0, end)
 
+        for (let i=0; i < entries.length; i++)
+            entries[i]._extractSync(outputPath)
 
-
-        this.file.close()
+        this.file.closeSync()
     }
 
     extractByRegex = async (regex, path) => {

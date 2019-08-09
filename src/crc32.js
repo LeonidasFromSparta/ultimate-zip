@@ -42,6 +42,8 @@ export default class CRC32 {
 
         for (let i=0; i < bytes.length; i++)
             this._crc = (this._crc >>> 8) ^ table[(this._crc ^ bytes[i]) & 0xFF]
+
+        return this
     }
 
     getValue = () => {

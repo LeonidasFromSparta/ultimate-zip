@@ -76,6 +76,11 @@ export default class File {
         return new Promise((resolve) => fs.mkdir(dir, resolve))
     }
 
+    makeDirSync = (dir) => {
+
+        return fs.mkdirSync(dir)
+    }
+
     createWriteStream = (fileName) => {
 
         return fs.createWriteStream(fileName)

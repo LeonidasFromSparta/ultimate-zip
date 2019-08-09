@@ -5,7 +5,7 @@ import CRC32 from './crc32'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
-import {readLocHeader} from './headers'
+import {readLocHeader, readLocHeaderSync} from './headers'
 
 export default class Entry {
 
@@ -36,6 +36,17 @@ export default class Entry {
 
         const fileWriter = this.file.createWriteStream(fileName)
         await this._inflater(fileReader, fileWriter)
+    }
+
+    _extractSync = async (outputPath) => {
+
+        const fileName = outputPath + '/' + this.header.fileName
+
+        if (this.header.isDirectory())
+            return this.file.makeDirSync(fileName)
+
+        const pos = this._readLocalHeaderSync()
+        this._inflaterSync()
     }
 
     test = () => {
@@ -109,5 +120,11 @@ export default class Entry {
     _readLocalHeader = async (fileReader) => {
 
         await readLocHeader(fileReader)
+    }
+
+    _readLocalHeaderSync = () => {
+
+        const header = readLocHeaderSync(this.header.localOffset, this.file)
+        return header.length
     }
 }
