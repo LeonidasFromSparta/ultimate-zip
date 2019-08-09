@@ -5,7 +5,7 @@ import CRC32 from './crc32'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
 import CRC32Stream from './crc32-stream'
-import {locHeaderPromise} from './headers'
+import {readLocHeader} from './headers'
 
 export default class Entry {
 
@@ -108,6 +108,6 @@ export default class Entry {
 
     _readLocalHeader = async (fileReader) => {
 
-        await locHeaderPromise(fileReader)
+        await readLocHeader(fileReader)
     }
 }

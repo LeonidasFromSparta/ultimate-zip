@@ -1,6 +1,6 @@
 import File from './file'
 import Entry from './entry'
-import {readCenDirProm, readCenDirSync} from './headers'
+import {readCenDir, readCenDirSync} from './headers'
 import zipHeaderDecoder from './zip-header-decoders'
 
 export default class UZip {
@@ -14,22 +14,6 @@ export default class UZip {
     _decodeZipHeader = () => {
 
         this.zipHeader = zipHeaderDecoder(this.file)
-    }
-
-    _readEntries = async () => {
-
-        const start = this.zipHeader.cenDirsOffset
-        const length = this.zipHeader.cenDirsSize
-        return (await readCenDirProm(start, length, this.file)).map((obj) => new Entry(obj, this.file))
-    }
-
-    _readEntriesSync = () => {
-
-        const start = this.zipHeader.cenDirsOffset
-        const length = this.zipHeader.cenDirsSize
-
-        const entries = readCenDirSync(start, length, this.file)
-        return entries.map((obj) => new Entry(obj, this.file))
     }
 
     testArchive = async () => {
@@ -122,15 +106,31 @@ export default class UZip {
         this.file.closeFile()
     }
 
+    _readEntries = async () => {
+
+        const start = this.zipHeader.cenDirsOffset
+        const length = this.zipHeader.cenDirsSize
+        return (await readCenDir(start, length, this.file)).map((obj) => new Entry(obj, this.file))
+    }
+
     getEntries = async () => {
 
         if (!this.zipHeader) {
 
             this._decodeZipHeader()
-            return await this._readEntries()
+            this.entries = await this._readEntries()
         }
 
         return this.entries
+    }
+
+    _readEntriesSync = () => {
+
+        const start = this.zipHeader.cenDirsOffset
+        const length = this.zipHeader.cenDirsSize
+
+        const entries = readCenDirSync(start, length, this.file)
+        return entries.map((obj) => new Entry(obj, this.file))
     }
 
     getEntriesSync = () => {
@@ -138,7 +138,7 @@ export default class UZip {
         if (!this.zipHeader) {
 
             this._decodeZipHeader()
-            return this._readEntriesSync()
+            this.entries = this._readEntriesSync()
         }
 
         return this.entries

@@ -7,6 +7,7 @@ const CenHeader = function() {
     this.externalFileAttrs = 0
     this.localOffset = 0
     this.fileName = ''
+    this.length = 0
 }
 
 CenHeader.prototype.isDirectory = function() {
@@ -19,4 +20,9 @@ CenHeader.prototype.isDeflated = function() {
     return this.method !== 0
 }
 
-export default CenHeader
+const LocHeader = function() {
+
+    this.length = 0
+}
+
+export {CenHeader, LocHeader}
