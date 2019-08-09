@@ -9,9 +9,24 @@ export default class File {
 
     readBytesSync(pos, end) {
 
-        const buffer = Buffer.allocUnsafe(end - pos)
+        if (pos < 0)
+            pos = 0
 
-        fs.readSync(Number(this.fd), buffer, 0, end - pos, pos)
+        const length = end - pos
+        const buffer = Buffer.allocUnsafe(length)
+
+        fs.readSync(Number(this.fd), buffer, 0, length, pos)
+
+        return buffer
+    }
+
+    readBytesSyncLength(pos, length) {
+
+        if (pos < 0)
+            pos = 0
+
+        const buffer = Buffer.allocUnsafe(length)
+        fs.readSync(Number(this.fd), buffer, 0, length, pos)
 
         return buffer
     }

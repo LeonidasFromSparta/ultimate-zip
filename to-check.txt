@@ -1,17 +1,7 @@
-* craft zip64 with size less then 0xFFFFFFFF (4gb~) and check if zip32 offset is stored in header 64 or 32
 
 
-
-
-
-
-        await this._readLocalHeader(fileReader)
-
-        if (this.header.isDirectory()) {
-
-            await this.file.makeDir(fileName)
-            return
-        }
-		
-		
-		const fileWriter = this.file.createWriteStream(fileName)
+    SYNC
+    - display extracted data on place via entries with utf8 (sync) on demand
+    - display extracted data on place via global with utf8 (sync) on demand
+    - extract expecific data via global
+    - extract expecific data via entry

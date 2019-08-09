@@ -1,32 +1,24 @@
 import {expect} from 'chai'
-import Decoder from '../src/central-header-decoder'
-import {CEN_SIG} from '../src/constants'
+import * as headers from '../src/headers'
 
 describe('Testing cen-header-decoder.js', () => {
 
-    it('should assert _capableOfCopy method', () => {
+    it('should assert private _verifySignature method', () => {
 
-        const decoder = new Decoder()
-
-        decoder._capableOfCopy(0, 50, 0, 50)
-
-        expect(decoder._capableOfCopy(0, 50, 0, 50)).to.be.true
-        expect(decoder._capableOfCopy(50, 50, 0, 50)).to.be.false
-        expect(decoder._capableOfCopy(100, 50, 0, 50)).to.be.false
-
-        expect(decoder._capableOfCopy(50, 0, 0, 50)).to.be.false
-        expect(decoder._capableOfCopy(50, 50, 0, 50)).to.be.false
-        expect(decoder._capableOfCopy(50, 100, 0, 50)).to.be.true
-
-        expect(decoder._capableOfCopy(0, 50, 0, 50)).to.be.true
-        expect(decoder._capableOfCopy(0, 50, 50, 50)).to.be.false
-        expect(decoder._capableOfCopy(0, 50, 100, 50)).to.be.false
-
-        expect(decoder._capableOfCopy(0, 50, 50, 0)).to.be.false
-        expect(decoder._capableOfCopy(0, 50, 50, 50)).to.be.false
-        expect(decoder._capableOfCopy(0, 50, 50, 100)).to.be.true
+        expect(() => headers.__private__._verifySignature(0x0, 0x1, 'bad')).to.throw('bad')
+        expect(() => headers.__private__._verifySignature(0x5, 0x5, 'good')).not.to.throw('good')
     })
 
+    it('should assert private _calculateLength method', () => {
+
+        const data = {readUInt16LE: (pos) => pos}
+        const fields = [5, 7]
+        const initial = 0
+
+        expect(headers.__private__._calculateLength(data, fields, initial)).to.equal(12)
+    })
+
+    /*
     it('should assert _verifySignature method', () => {
 
         const decoder = new Decoder()
@@ -83,6 +75,7 @@ describe('Testing cen-header-decoder.js', () => {
             expect(bytesCopied).to.equal(3)
         }
     })
+        */
 })
 
 

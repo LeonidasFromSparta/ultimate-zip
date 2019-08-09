@@ -1,6 +1,6 @@
 import File from './file'
 import Entry from './entry'
-import {readCenDirProm} from './headers'
+import {readCenDirProm, readCenDirSync} from './headers'
 import zipHeaderDecoder from './zip-header-decoders'
 
 export default class UZip {
@@ -19,10 +19,17 @@ export default class UZip {
     _readEntries = async () => {
 
         const start = this.zipHeader.cenDirsOffset
-        const end = this.zipHeader.cenDirsOffset + this.zipHeader.cenDirsSize - 1
-        const reader = this.file.createReadStream(start, end)
+        const length = this.zipHeader.cenDirsSize
+        return (await readCenDirProm(start, length, this.file)).map((obj) => new Entry(obj, this.file))
+    }
 
-        return (await readCenDirProm(reader)).map((obj) => new Entry(obj, this.file))
+    _readEntriesSync = () => {
+
+        const start = this.zipHeader.cenDirsOffset
+        const length = this.zipHeader.cenDirsSize
+
+        const entries = readCenDirSync(start, length, this.file)
+        return entries.map((obj) => new Entry(obj, this.file))
     }
 
     testArchive = async () => {
@@ -72,23 +79,23 @@ export default class UZip {
         await this.file.open()
         let fileReader = this.file.createFdReadStream(0, end)
 
-        for (let i=0; i < entries.length; i++) {
-
-            /*
-            const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
-
-            if (fileReaderPos !== entries[i].header.localOffset) {
-
-                console.log('reader pos change')
-                const start = entries[i].header.localOffset
-                fileReader = this.file.createFdReadStream(start, end)
-            }
-            */
-
+        for (let i=0; i < entries.length; i++)
             await entries[i]._extract(outputPath, fileReader)
-        }
 
         await this.file.close()
+    }
+
+    extractArchiveSync = (outputPath) => {
+
+        const entries = this.getEntriesSync()
+        const end = this.zipHeader.cenDirsOffset
+
+        this.file.openSync()
+        let fileReader = this.file.createFdReadStream(0, end)
+
+
+
+        this.file.close()
     }
 
     extractByRegex = async (regex, path) => {
@@ -119,8 +126,19 @@ export default class UZip {
 
         if (!this.zipHeader) {
 
-            await this._decodeZipHeader()
+            this._decodeZipHeader()
             return await this._readEntries()
+        }
+
+        return this.entries
+    }
+
+    getEntriesSync = () => {
+
+        if (!this.zipHeader) {
+
+            this._decodeZipHeader()
+            return this._readEntriesSync()
         }
 
         return this.entries

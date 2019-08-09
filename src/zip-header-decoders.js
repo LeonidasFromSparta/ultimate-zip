@@ -32,7 +32,7 @@ const findOffset = (data) => {
 const zip32HeaderDecoder = (file) => {
 
     const size = file.getFileSize()
-    const buffer = file.readBytesSync((size - END_MAX) < 0 ? 0 : size - END_MAX, size)
+    const buffer = file.readBytesSync(size - END_MAX, size)
 
     const offset = findOffset(buffer)
 
