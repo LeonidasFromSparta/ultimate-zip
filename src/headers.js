@@ -126,8 +126,8 @@ const cenDecode = (buffer, index) => {
     const header = new CenHeader()
     header.checksum = buffer.readUInt32LE(index + CEN_CRC)
     header.method = buffer.readUInt16LE(index + CEN_MTD)
-    header.inflatedSize = buffer.readUInt32LE(index + CEN_SIC)
-    header.deflatedSize = buffer.readUInt32LE(index + CEN_SIU)
+    header.inflatedSize = buffer.readUInt32LE(index + CEN_SIU)
+    header.deflatedSize = buffer.readUInt32LE(index + CEN_SIC)
     header.externalFileAttrs = buffer.readUInt32LE(index + CEN_ATX)
     header.localOffset = buffer.readUInt32LE(index + CEN_OFF)
 

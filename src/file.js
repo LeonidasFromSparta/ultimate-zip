@@ -78,11 +78,17 @@ export default class File {
 
     makeDirSync = (dir) => {
 
-        return fs.mkdirSync(dir)
+        if (!fs.existsSync(dir))
+            fs.mkdirSync(dir)
     }
 
     createWriteStream = (fileName) => {
 
         return fs.createWriteStream(fileName)
+    }
+
+    writeFileSync = (file, data) => {
+
+        fs.writeFileSync(file, data)
     }
 }

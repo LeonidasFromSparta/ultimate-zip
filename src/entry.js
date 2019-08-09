@@ -1,11 +1,8 @@
-import {createInflateRaw} from 'zlib'
-import {PassThrough} from 'stream'
 import {LOCAL_HEADER_LENGTH} from './constants'
-import CRC32 from './crc32'
 import {LOC_MAX} from './constants'
 import DumpWriter from './dump-writer'
-import CRC32Stream from './crc32-stream'
 import {readLocHeader, readLocHeaderSync} from './headers'
+import {inflater, inflaterSync} from './inflater'
 
 export default class Entry {
 
@@ -35,7 +32,7 @@ export default class Entry {
             return await this.file.makeDir(fileName)
 
         const fileWriter = this.file.createWriteStream(fileName)
-        await this._inflater(fileReader, fileWriter)
+        await inflater(this.header, fileReader, fileWriter)
     }
 
     _extractSync = async (outputPath) => {
@@ -46,7 +43,9 @@ export default class Entry {
             return this.file.makeDirSync(fileName)
 
         const pos = this._readLocalHeaderSync()
-        this._inflaterSync()
+        const deflated = inflaterSync(pos, this.header, this.file)
+
+        this.file.writeFileSync(fileName, deflated)
     }
 
     test = () => {
@@ -68,53 +67,6 @@ export default class Entry {
 
         const dumpWriter = new DumpWriter()
         await this._inflater(fileReader, dumpWriter)
-    }
-
-    _inflater = async (reader, writer) => {
-
-        const readerResume = () => reader.resume()
-        const crc32Stream = new CRC32Stream(new CRC32())
-
-        const promise = new Promise((resolve) => {
-
-            const size = this.header.inflatedSize
-            let bytesCounter = 0
-
-            const callback = (chunk) => {
-
-                const remainingBytes = size - bytesCounter
-
-                if (chunk.length < remainingBytes) {
-
-                    if (!inflater.write(chunk, 'buffer'))
-                        reader.pause()
-
-                    bytesCounter += chunk.length
-                    return
-                }
-
-                inflater.end(chunk.slice(0, remainingBytes))
-
-                reader.pause()
-                reader.removeAllListeners()
-                reader.unshift(chunk.slice(remainingBytes))
-            }
-
-            reader.on('data', callback)
-
-            const inflater = this.header.isDeflated() ? createInflateRaw() : new PassThrough()
-            inflater.pipe(crc32Stream).pipe(writer)
-            inflater.on('drain', readerResume)
-
-            writer.on('finish', resolve)
-
-            readerResume()
-        })
-
-        await promise
-
-        if (this.header.checksum !== crc32Stream.getValue())
-            throw 'keke again'
     }
 
     _readLocalHeader = async (fileReader) => {

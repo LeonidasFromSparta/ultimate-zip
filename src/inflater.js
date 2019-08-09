@@ -1,19 +1,34 @@
+import {createInflateRaw, inflateRawSync} from 'zlib'
+import CRC32 from './crc32'
+import CRC32Stream from './crc32-stream'
 
+const inflater = async (header, reader, writer) => {
 
-inflaterSync = (pos, header, file) => {
-
-    const buffer = file.readBytesSyncLength(pos, header.length)
-
-    if (header.checksum !== new CRC32().update(buffer).getValue())
-        throw 'keke chekisum'
-
+    const crc32Stream = new CRC32Stream(new CRC32())
 
     const promise = new Promise((resolve) => {
 
-        const size = this.header.inflatedSize
+        const size = header.deflatedSize
         let bytesCounter = 0
 
-        const callback = (chunk) => {
+        let inflater
+
+        if (header.isDeflated()) {
+
+            inflater = createInflateRaw()
+            inflater.pipe(crc32Stream).pipe(writer)
+        } else {
+
+            inflater = crc32Stream
+            inflater.pipe(writer)
+        }
+
+        inflater.on('drain', () => reader.resume())
+        writer.on('finish', resolve)
+
+        reader.resume()
+
+        reader.on('data', (chunk) => {
 
             const remainingBytes = size - bytesCounter
 
@@ -31,23 +46,25 @@ inflaterSync = (pos, header, file) => {
             reader.pause()
             reader.removeAllListeners()
             reader.unshift(chunk.slice(remainingBytes))
-        }
-
-        reader.on('data', callback)
-
-        const inflater = this.header.isDeflated() ? createInflateRaw() : new PassThrough()
-        inflater.pipe(crc32Stream).pipe(writer)
-        inflater.on('drain', readerResume)
-
-        writer.on('finish', resolve)
-
-        readerResume()
+        })
     })
 
     await promise
 
-    if (this.header.checksum !== crc32Stream.getValue())
-        throw 'keke again'
+    if (header.checksum !== crc32Stream.getValue())
+        throw 'bad file cheksum'
 }
 
-export {inflaterSync}
+const inflaterSync = (locLength, header, file) => {
+
+    const buffer = file.readBytesSyncLength(header.localOffset + locLength, header.deflatedSize)
+
+    const deflated = header.isDeflated() ? inflateRawSync(buffer) : buffer
+
+    if (header.checksum !== new CRC32().update(deflated).getValue())
+        throw 'bad file cheksum'
+
+    return deflated
+}
+
+export {inflater, inflaterSync}

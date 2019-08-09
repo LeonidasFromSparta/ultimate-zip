@@ -11,6 +11,7 @@ export default class CRC32Stream extends Transform {
     _transform(chunk, encoding, callback) {
 
         this._crc32.update(chunk)
+        this.push(chunk)
         callback()
     }
 
