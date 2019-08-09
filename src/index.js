@@ -28,7 +28,7 @@ zip.getEntries().then(async (data) => {
 */
 //
 
-
+/*
 zip.extractArchive('./extr').then(() => {
 
     const end = process.hrtime.bigint()
@@ -36,15 +36,15 @@ zip.extractArchive('./extr').then(() => {
 
     console.log('testo now')
 })
-
+*/
 
 /*
 zip.extractArchiveSync('./extr')
 
 const end = process.hrtime.bigint()
 console.log('unzip time: ' + new Number((end - start)) / 1e+9)
-
 */
+
 /*
 zip.testArchive().then(() => {
 
@@ -53,6 +53,10 @@ zip.testArchive().then(() => {
 })
 */
 
+zip.testArchiveSync()
+
+const end = process.hrtime.bigint()
+console.log('unzip time: ' + new Number((end - start)) / 1e+9)
 /*
 zip.testFile('node_modules/@electron/docs-parser/yarn.lock').then(() => {
 

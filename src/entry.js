@@ -48,14 +48,14 @@ export default class Entry {
         this.file.writeFileSync(fileName, deflated)
     }
 
-    test = () => {
+    test = async () => {
 
         const start = this.header.localOffset
         const end = this.header.localOffset + LOC_MAX - 1
 
         const fileReader = this.file.createReadStream(start, end)
 
-        return this._test(fileReader)
+        return await this._test(fileReader)
     }
 
     _test = async (fileReader) => {
@@ -65,8 +65,16 @@ export default class Entry {
         if (this.header.isDirectory())
             return
 
-        const dumpWriter = new DumpWriter()
-        await this._inflater(fileReader, dumpWriter)
+        await inflater(this.header, fileReader, new DumpWriter())
+    }
+
+    testSync = () => {
+
+        if (this.header.isDirectory())
+            return
+
+        const pos = this._readLocalHeaderSync()
+        inflaterSync(pos, this.header, this.file)
     }
 
     _readLocalHeader = async (fileReader) => {

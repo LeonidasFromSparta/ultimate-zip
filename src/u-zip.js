@@ -19,26 +19,27 @@ export default class UZip {
     testArchive = async () => {
 
         const entries = await this.getEntries()
-
-        const end = this.zipHeader.getCentralDirectoriesOffset() - 1
+        const end = this.zipHeader.cenDirsOffset - 1
 
         await this.file.open()
         let fileReader = this.file.createReadStream(0, end)
 
-        for (let i=0; i < entries.length; i++) {
-
-            const fileReaderPos = fileReader.start + fileReader.bytesRead - fileReader.readableLength
-
-            if (fileReaderPos !== entries[i].header.localOffset) {
-
-                const start = entries[i].header.localOffset
-                fileReader = this.file.createFdReadStream(start, end)
-            }
-
+        for (let i=0; i < entries.length; i++)
             await entries[i]._test(fileReader)
-        }
 
         await this.file.close()
+    }
+
+    testArchiveSync = () => {
+
+        const entries = this.getEntriesSync()
+
+        this.file.openSync()
+
+        for (let i=0; i < entries.length; i++)
+            entries[i].testSync()
+
+        this.file.closeSync()
     }
 
     testFile = async (fileName) => {
