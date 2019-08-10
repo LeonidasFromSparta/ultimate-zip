@@ -1,4 +1,4 @@
-import UZip from './u-zip'
+import UZip from './u-zip-api'
 
 let start, end
 

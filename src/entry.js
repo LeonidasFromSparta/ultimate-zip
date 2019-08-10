@@ -1,47 +1,54 @@
-import {extractSync, testSync, getAsBufferSync} from './entry-sync'
-import {extract, test, getAsBuffer} from './entry-async'
+import DumpWriter from './dump-writer'
+import {readLocHeader} from './headers'
+import {bufferedInflater, streamingInflater} from './inflater'
 
-export default class Entry {
+const extract = async (path, header, file) => {
 
-    constructor(header, file) {
+    const name = path + '/' + header.fileName
 
-        this.header = header
-        this.file = file
+    if (header.isDirectory())
+        return await file.makeDir(name)
+
+    const locHeader = await readLocHeader(header.localOffset, file)
+    const pos = locHeader.length
+
+    if (header.isEmpty())
+        return
+
+    if (header.deflatedSize < 1048576) {
+
+        const deflated = await bufferedInflater(header, pos, file)
+        file.writeFile(name, deflated)
     }
 
-    extract = async (path) => {
-
-        await extract(path, this.header, this.file)
-    }
-
-    getAsBuffer = async () => {
-
-        return await getAsBuffer(this.header, this.file)
-    }
-
-    getAsStream = async () => {
-
-        // TO DO
-        // return await getAsBuffer(this.header, this.file)
-    }
-
-    test = async () => {
-
-        await test(this.header, this.file)
-    }
-
-    extractSync = (path) => {
-
-        extractSync(path, this.header, this.file)
-    }
-
-    getAsBufferSync = async () => {
-
-        return await getAsBufferSync(this.header, this.file)
-    }
-
-    testSync = () => {
-
-        testSync(this.header, this.file)
-    }
+    // const writer = file.createWriteStream(name)
+    // await inflater(header, pos, file, writer)
 }
+
+const getAsBuffer = async (header, file) => {
+
+    if (header.isDirectory())
+        return Buffer.alloc(0)
+
+    const locHeader = await readLocHeader(header.localOffset, file)
+    const pos = locHeader.length
+
+    return await bufferedInflater(header, pos, file)
+}
+
+const test = async (header, file) => {
+
+    if (header.isDirectory())
+        return
+
+    const locHeader = await readLocHeader(header.localOffset, file)
+    const pos = locHeader.length
+
+    if (header.deflatedSize < 1048576)
+        await bufferedInflater(header, pos, file)
+
+    // const writer = new DumpWriter()
+    // await inflater(header, pos, file, writer)
+}
+
+export {extract, test, getAsBuffer}

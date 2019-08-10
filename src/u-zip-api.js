@@ -1,5 +1,5 @@
 import File from './file'
-import Entry from './entry'
+import Entry from './entry-api'
 import {readCenDir, readCenDirSync} from './headers'
 import zipHeaderDecoder from './zip-header-decoders'
 
