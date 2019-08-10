@@ -1,64 +1,58 @@
-import {createInflateRaw, inflateRawSync} from 'zlib'
+import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
 import CRC32 from './crc32'
 import CRC32Stream from './crc32-stream'
 
-const inflater = async (header, reader, writer) => {
+const smallInflater = async (header, locLength, file) => {
+
+    const buffer = await file.read(header.localOffset + locLength, header.deflatedSize)
+    const promise = new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer)))
+    const deflated = header.isDeflated() ? await promise : buffer
+
+    if (header.checksum !== new CRC32().update(deflated).getValue())
+        throw 'bad file cheksum'
+
+    return deflated
+}
+
+const inflater = async (header, locLength, file, writer) => {
+
+    if (header.deflatedSize < 1048576) {
+
+        const buffer = await file.read(header.localOffset + locLength, header.deflatedSize)
+        const deflated = await new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer)))
+    }
 
     const crc32Stream = new CRC32Stream(new CRC32())
 
     const promise = new Promise((resolve) => {
 
-        const size = header.deflatedSize
-        let bytesCounter = 0
 
-        let inflater
 
-        if (header.isDeflated()) {
+        const reader = file.createReadStream(header.localOffset + locLength, header.localOffset + locLength + header.deflatedSize - 1)
 
-            inflater = createInflateRaw()
-            inflater.pipe(crc32Stream).pipe(writer)
+        if (header.isEmpty()) {
+
+            writer.end(Buffer.alloc(0))
         } else {
 
-            inflater = crc32Stream
-            inflater.pipe(writer)
+            if (header.isDeflated())
+                reader.pipe(createInflateRaw()).pipe(crc32Stream).pipe(writer)
+            else
+                reader.pipe(crc32Stream).pipe(writer)
         }
 
-        inflater.on('drain', () => reader.resume())
-        writer.on('finish', resolve)
-
-        reader.resume()
-
-        reader.on('data', (chunk) => {
-
-            const remainingBytes = size - bytesCounter
-
-            if (chunk.length < remainingBytes) {
-
-                if (!inflater.write(chunk, 'buffer'))
-                    reader.pause()
-
-                bytesCounter += chunk.length
-                return
-            }
-
-            inflater.end(chunk.slice(0, remainingBytes))
-
-            reader.pause()
-            reader.removeAllListeners()
-            reader.unshift(chunk.slice(remainingBytes))
-        })
+        writer.on('finish', resolve())
     })
 
     await promise
 
-    if (header.checksum !== crc32Stream.getValue())
-        throw 'bad file cheksum'
+    // if (header.checksum !== crc32Stream.getValue())
+    //    throw 'bad file cheksum'
 }
 
-const inflaterSync = (locLength, header, file) => {
+const inflaterSync = (header, locLength, file) => {
 
     const buffer = file.readBytesSyncLength(header.localOffset + locLength, header.deflatedSize)
-
     const deflated = header.isDeflated() ? inflateRawSync(buffer) : buffer
 
     if (header.checksum !== new CRC32().update(deflated).getValue())
@@ -67,4 +61,4 @@ const inflaterSync = (locLength, header, file) => {
     return deflated
 }
 
-export {inflater, inflaterSync}
+export {smallInflater, inflater, inflaterSync}

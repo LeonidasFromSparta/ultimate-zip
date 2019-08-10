@@ -1,8 +1,5 @@
-import {LOCAL_HEADER_LENGTH} from './constants'
-import {LOC_MAX} from './constants'
-import DumpWriter from './dump-writer'
-import {readLocHeader, readLocHeaderSync} from './headers'
-import {inflater, inflaterSync} from './inflater'
+import {extractSync, testSync} from './entry-sync'
+import {extract, test} from './entry-async'
 
 export default class Entry {
 
@@ -12,79 +9,23 @@ export default class Entry {
         this.file = file
     }
 
-    extract = async (outputPath) => {
+    extract = async (path) => {
 
-        const startPos = this.header.localOffset
-        const endPos = this.header.localOffset + LOCAL_HEADER_LENGTH + this.header.fileName.length + 65536 + this.header.deflatedSize - 1
-        const fileReader = this.file.createReadStream(startPos, endPos)
-
-        await this._extract(outputPath, fileReader)
-
-        fileReader.destroy()
-    }
-
-    _extract = async (outputPath, fileReader) => {
-
-        const fileName = outputPath + '/' + this.header.fileName
-        await this._readLocalHeader(fileReader)
-
-        if (this.header.isDirectory())
-            return await this.file.makeDir(fileName)
-
-        const fileWriter = this.file.createWriteStream(fileName)
-        await inflater(this.header, fileReader, fileWriter)
-    }
-
-    _extractSync = async (outputPath) => {
-
-        const fileName = outputPath + '/' + this.header.fileName
-
-        if (this.header.isDirectory())
-            return this.file.makeDirSync(fileName)
-
-        const pos = this._readLocalHeaderSync()
-        const deflated = inflaterSync(pos, this.header, this.file)
-
-        this.file.writeFileSync(fileName, deflated)
+        await extract(path, this.header, this.file)
     }
 
     test = async () => {
 
-        const start = this.header.localOffset
-        const end = this.header.localOffset + LOC_MAX - 1
-
-        const fileReader = this.file.createReadStream(start, end)
-
-        return await this._test(fileReader)
+        await test(this.header, this.file)
     }
 
-    _test = async (fileReader) => {
+    extractSync = (path) => {
 
-        await this._readLocalHeader(fileReader)
-
-        if (this.header.isDirectory())
-            return
-
-        await inflater(this.header, fileReader, new DumpWriter())
+        extractSync(path, this.header, this.file)
     }
 
     testSync = () => {
 
-        if (this.header.isDirectory())
-            return
-
-        const pos = this._readLocalHeaderSync()
-        inflaterSync(pos, this.header, this.file)
-    }
-
-    _readLocalHeader = async (fileReader) => {
-
-        await readLocHeader(fileReader)
-    }
-
-    _readLocalHeaderSync = () => {
-
-        const header = readLocHeaderSync(this.header.localOffset, this.file)
-        return header.length
+        testSync(this.header, this.file)
     }
 }

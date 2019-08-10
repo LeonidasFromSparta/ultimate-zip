@@ -20,6 +20,11 @@ CenHeader.prototype.isDeflated = function() {
     return this.method !== 0
 }
 
+CenHeader.prototype.isEmpty = function() {
+
+    return this.inflatedSize === 0
+}
+
 const LocHeader = function() {
 
     this.length = 0

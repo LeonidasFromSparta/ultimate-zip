@@ -1,4 +1,5 @@
 import fs from 'fs'
+import util from 'util'
 
 export default class File {
 
@@ -31,6 +32,15 @@ export default class File {
         return buffer
     }
 
+    read = async (pos, length) => {
+
+        if (pos < 0)
+            pos = 0
+
+        const buffer = Buffer.allocUnsafe(length)
+        return await new Promise((resolve) => fs.read(Number(this.fd), buffer, 0, length, pos, (err, bytesRead, buffer) => resolve(buffer)))
+    }
+
     createReadStreamWithHighWaterMark(start, end, highWaterMark) {
 
         return fs.createReadStream(this.path, {start, end, highWaterMark})
@@ -43,7 +53,10 @@ export default class File {
 
     createFdReadStream(start, end) {
 
-        return fs.createReadStream(null, {fd: this.fd, start, end})
+        const fd = this.fd
+        const autoClose = false
+
+        return fs.createReadStream(null, {fd, autoClose, start, end})
     }
 
     openSync = () => {
@@ -85,6 +98,11 @@ export default class File {
     createWriteStream = (fileName) => {
 
         return fs.createWriteStream(fileName)
+    }
+
+    writeFile = async (file, data) => {
+
+        await new Promise((resolve) => fs.writeFile(file, data, resolve))
     }
 
     writeFileSync = (file, data) => {

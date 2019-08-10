@@ -178,42 +178,13 @@ const cenDecode = (buffer, index) => {
 }
 
 import {LOC_HDR} from './constants'
-import {LOC_SIG} from './constants'
 import {LOC_FLE} from './constants'
 import {LOC_ELE} from './constants'
 
-const readLocHeader = async (reader) => {
+const readLocHeader = async (start, file) => {
 
-    return new Promise((resolve) => {
-
-        let extra = Buffer.alloc(0)
-
-        reader.on('data', (chunk) => {
-
-            if (extra.length !== 0)
-                extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
-            else
-                extra = chunk
-
-            if (LOC_HDR > extra.length)
-                return
-
-            const hdrLength = calculateLength(extra, locInconstantOffsets, LOC_HDR)
-
-            if (extra.length < hdrLength)
-                return
-
-            const signature = extra.readUInt32LE(0)
-            verifySignature(signature, LOC_SIG, 'loc dir sig err')
-
-            reader.pause()
-            reader.removeAllListeners()
-            reader.unshift(extra.slice(hdrLength))
-            return resolve()
-        })
-
-        reader.resume()
-    })
+    const hdrBuff = await file.read(start, LOC_HDR)
+    return locDecode(hdrBuff, 0)
 }
 
 const readLocHeaderSync = (start, file) => {

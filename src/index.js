@@ -1,80 +1,46 @@
 import UZip from './u-zip'
 
-const start = process.hrtime.bigint()
-console.log('start unzip: ' + start)
-
-// const zip = new UZip('./samples/big.zip')
-// const zip = new UZip('./samples/Lorem ipsum.zip')
-// const zip = new UZip('./samples/4g.zip')
-
+let start, end
 
 const zip = new UZip('./samples/7z-windows-normal.zip')
 
-// console.log(zip.getInfo())
+start = process.hrtime.bigint()
+console.log('START SYNC TEST: ' + start)
 
-/*
-zip._readEntries().then(async (data) => {
+// zip.testArchiveSync()
 
-    for (const e of data)
-        await e.extract('./extr')
-})
-*/
+end = process.hrtime.bigint()
+console.log('TEST SYNC TIME: ' + new Number((end - start)) / 1e+9)
 
-/*
-zip.getEntries().then(async (data) => {
 
-    await data[0].getLocalHeader()
-})
-*/
-//
+start = process.hrtime.bigint()
+console.log('START SYNC EXTRACT: ' + start)
 
-/*
-zip.extractArchive('./extr').then(() => {
+// zip.extractArchiveSync('./extr')
 
-    const end = process.hrtime.bigint()
-    console.log('unzip time: ' + new Number((end - start)) / 1e+9)
+end = process.hrtime.bigint()
+console.log('EXTRACT SYNC TIME: ' + new Number((end - start)) / 1e+9)
 
-    console.log('testo now')
-})
-*/
+;
+(async () => {
 
-/*
-zip.extractArchiveSync('./extr')
+    start = process.hrtime.bigint()
+    console.log('START AWAIT TEST: ' + start)
 
-const end = process.hrtime.bigint()
-console.log('unzip time: ' + new Number((end - start)) / 1e+9)
-*/
+    await zip.testArchive('./extr')
 
-/*
-zip.testArchive().then(() => {
+    end = process.hrtime.bigint()
+    console.log('TEST AWAIT TIME ' + new Number((end - start)) / 1e+9)
+})()
 
-    const end = process.hrtime.bigint()
-    console.log('unzip time: ' + new Number((end - start)) / 1e+9)
-})
-*/
+;
+(async () => {
 
-zip.testArchiveSync()
+    start = process.hrtime.bigint()
+    console.log('START AWAIT EXTRACT: ' + start)
 
-const end = process.hrtime.bigint()
-console.log('unzip time: ' + new Number((end - start)) / 1e+9)
-/*
-zip.testFile('node_modules/@electron/docs-parser/yarn.lock').then(() => {
+    await zip.extractArchive('./extr')
 
-    const end = process.hrtime.bigint()
-    console.log('unzip time: ' + new Number((end - start)) / 1e+9)
-})
-*/
-
-/*
-zip.extractByRegex('asd', /Eam ex.txt/).then(() => {
-
-})
-*/
-
-/*
-process.on('uncaughtException', function (exception) {
-    console.log(exception); // to see your exception details in the console
-    // if you are on production, maybe you can send the exception details to your
-    // email as well ?
-  });
-*/
+    end = process.hrtime.bigint()
+    console.log('EXTRACT AWAIT TIME ' + new Number((end - start)) / 1e+9)
+})()
