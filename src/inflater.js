@@ -2,16 +2,14 @@ import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
 import CRC32 from './crc32'
 import CRC32Stream from './crc32-stream'
 
-const bufferedInflater = async (header, locLength, file) => {
+const bufferedInflater = async (header, buffer) => {
 
-    const buffer = await file.read(header.localOffset + locLength, header.deflatedSize)
-    const promise = new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer)))
-    const deflated = header.isDeflated() ? await promise : buffer
+    const inflated = header.isDeflated() ? await new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer))) : buffer
 
-    if (header.checksum !== new CRC32().update(deflated).getValue())
+    if (header.checksum !== new CRC32().update(inflated).getValue())
         throw 'bad file cheksum'
 
-    return deflated
+    return inflated
 }
 
 const streamingInflater = async (header, locLength, file, writer) => {
@@ -50,15 +48,14 @@ const streamingInflater = async (header, locLength, file, writer) => {
     //    throw 'bad file cheksum'
 }
 
-const inflaterSync = (header, locLength, file) => {
+const inflaterSync = (header, buffer) => {
 
-    const buffer = file.readBytesSyncLength(header.localOffset + locLength, header.deflatedSize)
-    const deflated = header.isDeflated() ? inflateRawSync(buffer) : buffer
+    const inflated = header.isDeflated() ? inflateRawSync(buffer) : buffer
 
-    if (header.checksum !== new CRC32().update(deflated).getValue())
+    if (header.checksum !== new CRC32().update(inflated).getValue())
         throw 'bad file cheksum'
 
-    return deflated
+    return inflated
 }
 
 export {bufferedInflater, streamingInflater, inflaterSync}

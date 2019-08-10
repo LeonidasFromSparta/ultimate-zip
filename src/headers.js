@@ -93,7 +93,7 @@ const readCenDirSync = (start, length, file) => {
     while (length) {
 
         const draft = length < 65536 ? length : 65536
-        const chunk = file.readBytesSyncLength(start, draft)
+        const chunk = file.readSync(start, draft)
 
         length -= draft
         start += draft
@@ -189,7 +189,7 @@ const readLocHeader = async (start, file) => {
 
 const readLocHeaderSync = (start, file) => {
 
-    const hdrBuff = file.readBytesSyncLength(start, LOC_HDR)
+    const hdrBuff = file.readSync(start, LOC_HDR)
     return locDecode(hdrBuff, 0)
 }
 

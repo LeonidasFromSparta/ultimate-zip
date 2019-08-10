@@ -1,11 +1,31 @@
 import fs from 'fs'
-import util from 'util'
 
 export default class File {
 
     constructor(path) {
 
         this.path = path
+    }
+
+    open = async () => {
+
+        this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => resolve(Number(fd))))
+    }
+
+
+    openSync = () => {
+
+        this.fd = fs.openSync(this.path)
+    }
+
+    close = async () => {
+
+        await new Promise((resolve) => fs.close(this.fd, () => resolve()))
+    }
+
+    closeSync = () => {
+
+        fs.closeSync(this.fd)
     }
 
     readBytesSync(pos, end) {
@@ -21,13 +41,13 @@ export default class File {
         return buffer
     }
 
-    readBytesSyncLength(pos, length) {
+    readSync = (pos, length) => {
 
         if (pos < 0)
             pos = 0
 
-        const buffer = Buffer.allocUnsafe(length)
-        fs.readSync(Number(this.fd), buffer, 0, length, pos)
+        const buffer = Buffer.alloc(length)
+        fs.readSync(this.fd, buffer, 0, length, pos)
 
         return buffer
     }
@@ -38,7 +58,7 @@ export default class File {
             pos = 0
 
         const buffer = Buffer.allocUnsafe(length)
-        return await new Promise((resolve) => fs.read(Number(this.fd), buffer, 0, length, pos, (err, bytesRead, buffer) => resolve(buffer)))
+        return await new Promise((resolve) => fs.read(this.fd, buffer, 0, length, pos, (err, bytesRead, buffer) => resolve(buffer)))
     }
 
     createReadStreamWithHighWaterMark(start, end, highWaterMark) {
@@ -59,29 +79,9 @@ export default class File {
         return fs.createReadStream(null, {fd, autoClose, start, end})
     }
 
-    openSync = () => {
-
-        this.fd = fs.openSync(this.path)
-    }
-
-    closeSync = () => {
-
-        fs.closeSync(this.fd)
-    }
-
     getFileSize = () => {
 
         return fs.fstatSync(this.fd).size
-    }
-
-    open = async () => {
-
-        this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => resolve(fd)))
-    }
-
-    close = async () => {
-
-        await new Promise((resolve) => fs.close(this.fd, () => resolve()))
     }
 
     makeDir = (dir) => {

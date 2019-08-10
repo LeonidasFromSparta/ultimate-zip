@@ -17,7 +17,8 @@ const extract = async (path, header, file) => {
 
     if (header.deflatedSize < 1048576) {
 
-        const deflated = await bufferedInflater(header, pos, file)
+        const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
+        const deflated = await bufferedInflater(header, buffer)
         file.writeFile(name, deflated)
     }
 
@@ -33,7 +34,8 @@ const getAsBuffer = async (header, file) => {
     const locHeader = await readLocHeader(header.localOffset, file)
     const pos = locHeader.length
 
-    return await bufferedInflater(header, pos, file)
+    const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
+    return await bufferedInflater(header, buffer)
 }
 
 const test = async (header, file) => {
@@ -44,8 +46,11 @@ const test = async (header, file) => {
     const locHeader = await readLocHeader(header.localOffset, file)
     const pos = locHeader.length
 
-    if (header.deflatedSize < 1048576)
-        await bufferedInflater(header, pos, file)
+    if (header.deflatedSize < 1048576) {
+
+        const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
+        await bufferedInflater(header, buffer)
+    }
 
     // const writer = new DumpWriter()
     // await inflater(header, pos, file, writer)
