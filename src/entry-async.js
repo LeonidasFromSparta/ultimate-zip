@@ -1,6 +1,6 @@
 import DumpWriter from './dump-writer'
 import {readLocHeader} from './headers'
-import {smallInflater, inflater} from './inflater'
+import {bufferedInflater, streamingInflater} from './inflater'
 
 const extract = async (path, header, file) => {
 
@@ -17,12 +17,23 @@ const extract = async (path, header, file) => {
 
     if (header.deflatedSize < 1048576) {
 
-        const deflated = await smallInflater(header, pos, file)
+        const deflated = await bufferedInflater(header, pos, file)
         file.writeFile(name, deflated)
     }
 
     // const writer = file.createWriteStream(name)
     // await inflater(header, pos, file, writer)
+}
+
+const getAsBuffer = async (header, file) => {
+
+    if (header.isDirectory())
+        return Buffer.alloc(0)
+
+    const locHeader = await readLocHeader(header.localOffset, file)
+    const pos = locHeader.length
+
+    return await bufferedInflater(header, pos, file)
 }
 
 const test = async (header, file) => {
@@ -33,8 +44,11 @@ const test = async (header, file) => {
     const locHeader = await readLocHeader(header.localOffset, file)
     const pos = locHeader.length
 
-    const writer = new DumpWriter()
-    await inflater(header, pos, file, writer)
+    if (header.deflatedSize < 1048576)
+        await bufferedInflater(header, pos, file)
+
+    // const writer = new DumpWriter()
+    // await inflater(header, pos, file, writer)
 }
 
-export {extract, test}
+export {extract, test, getAsBuffer}

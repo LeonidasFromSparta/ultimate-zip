@@ -7,7 +7,7 @@ const zip = new UZip('./samples/7z-windows-normal.zip')
 start = process.hrtime.bigint()
 console.log('START SYNC TEST: ' + start)
 
-// zip.testArchiveSync()
+zip.testArchiveSync()
 
 end = process.hrtime.bigint()
 console.log('TEST SYNC TIME: ' + new Number((end - start)) / 1e+9)
@@ -16,7 +16,7 @@ console.log('TEST SYNC TIME: ' + new Number((end - start)) / 1e+9)
 start = process.hrtime.bigint()
 console.log('START SYNC EXTRACT: ' + start)
 
-// zip.extractArchiveSync('./extr')
+zip.extractArchiveSync('./extr')
 
 end = process.hrtime.bigint()
 console.log('EXTRACT SYNC TIME: ' + new Number((end - start)) / 1e+9)
@@ -31,10 +31,6 @@ console.log('EXTRACT SYNC TIME: ' + new Number((end - start)) / 1e+9)
 
     end = process.hrtime.bigint()
     console.log('TEST AWAIT TIME ' + new Number((end - start)) / 1e+9)
-})()
-
-;
-(async () => {
 
     start = process.hrtime.bigint()
     console.log('START AWAIT EXTRACT: ' + start)

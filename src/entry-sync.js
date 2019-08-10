@@ -18,6 +18,17 @@ const extractSync = async (path, header, file) => {
     file.writeFileSync(name, deflated)
 }
 
+const getAsBufferSync = async (header, file) => {
+
+    if (header.isDirectory())
+        return Buffer.alloc(0)
+
+    const locHeader = await readLocHeaderSync(header.localOffset, file)
+    const pos = locHeader.length
+
+    return inflaterSync(header, pos, file)
+}
+
 const testSync = (header, file) => {
 
     if (header.isDirectory())
@@ -32,4 +43,4 @@ const testSync = (header, file) => {
     inflaterSync(header, pos, file)
 }
 
-export {extractSync, testSync}
+export {extractSync, testSync, getAsBufferSync}

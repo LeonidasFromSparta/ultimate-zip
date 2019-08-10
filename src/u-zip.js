@@ -19,13 +19,11 @@ export default class UZip {
     testArchive = async () => {
 
         const entries = await this.getEntries()
-        const end = this.zipHeader.cenDirsOffset - 1
 
         await this.file.open()
-        let fileReader = this.file.createReadStream(0, end)
 
         for (let i=0; i < entries.length; i++)
-            await entries[i]._test(fileReader)
+            await entries[i].test()
 
         await this.file.close()
     }
@@ -56,16 +54,14 @@ export default class UZip {
         }
     }
 
-    extractArchive = async (outputPath) => {
+    extractArchive = async (path) => {
 
         const entries = await this.getEntries()
-        const end = this.zipHeader.cenDirsOffset
 
         await this.file.open()
-        let fileReader = this.file.createFdReadStream(0, end)
 
         for (let i=0; i < entries.length; i++)
-            await entries[i].extract(outputPath, fileReader)
+            await entries[i].extract(path)
 
         await this.file.close()
     }
@@ -112,6 +108,7 @@ export default class UZip {
         const length = this.zipHeader.cenDirsSize
 
         const entries = await readCenDir(start, length, this.file)
+
         return entries.map((obj) => {
 
             return new Entry(obj, this.file)

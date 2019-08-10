@@ -1,5 +1,5 @@
-import {extractSync, testSync} from './entry-sync'
-import {extract, test} from './entry-async'
+import {extractSync, testSync, getAsBufferSync} from './entry-sync'
+import {extract, test, getAsBuffer} from './entry-async'
 
 export default class Entry {
 
@@ -14,6 +14,17 @@ export default class Entry {
         await extract(path, this.header, this.file)
     }
 
+    getAsBuffer = async () => {
+
+        return await getAsBuffer(this.header, this.file)
+    }
+
+    getAsStream = async () => {
+
+        // TO DO
+        // return await getAsBuffer(this.header, this.file)
+    }
+
     test = async () => {
 
         await test(this.header, this.file)
@@ -22,6 +33,11 @@ export default class Entry {
     extractSync = (path) => {
 
         extractSync(path, this.header, this.file)
+    }
+
+    getAsBufferSync = async () => {
+
+        return await getAsBufferSync(this.header, this.file)
     }
 
     testSync = () => {

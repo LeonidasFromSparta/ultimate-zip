@@ -2,7 +2,7 @@ import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
 import CRC32 from './crc32'
 import CRC32Stream from './crc32-stream'
 
-const smallInflater = async (header, locLength, file) => {
+const bufferedInflater = async (header, locLength, file) => {
 
     const buffer = await file.read(header.localOffset + locLength, header.deflatedSize)
     const promise = new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer)))
@@ -14,7 +14,7 @@ const smallInflater = async (header, locLength, file) => {
     return deflated
 }
 
-const inflater = async (header, locLength, file, writer) => {
+const streamingInflater = async (header, locLength, file, writer) => {
 
     if (header.deflatedSize < 1048576) {
 
@@ -61,4 +61,4 @@ const inflaterSync = (header, locLength, file) => {
     return deflated
 }
 
-export {smallInflater, inflater, inflaterSync}
+export {bufferedInflater, streamingInflater, inflaterSync}
