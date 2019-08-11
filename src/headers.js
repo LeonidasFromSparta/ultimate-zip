@@ -20,19 +20,18 @@ const cenInconstantOffsets = [CEN_FLE, CEN_ELE, CEN_CLE]
 const locInconstantOffsets = [LOC_FLE, LOC_ELE]
 const calculateLength = (data, fields, intial) => fields.reduce((acc, pos) => acc + data.readUInt16LE(pos), intial)
 
-const makeCenDirsFromBuffer = (buffer) => {
+const readCenDir = async (start, length, file) => {
 
+    await file.open()
+
+    let buffer = await file.read(start, length)
     const headers = []
 
     while (CEN_HDR < buffer.length) {
 
         const length = calculateLength(buffer, cenInconstantOffsets, CEN_HDR)
 
-        if (buffer.length < length)
-            break
-
         const signature = buffer.readUInt32LE(0)
-
         verifySignature(signature, CEN_SIG, 'cen dir sig err')
 
         const headerBuffer = buffer.slice(0, length)
@@ -42,80 +41,34 @@ const makeCenDirsFromBuffer = (buffer) => {
         buffer = buffer.slice(length)
     }
 
-    return headers
-}
+    await file.close()
 
-const readCenDir = async (start, length, file) => {
-
-    const stream = file.createReadStream(start, start + length - 1)
-    const headers = []
-
-    let extra = Buffer.alloc(0)
-
-    stream.on('readable', () => {
-
-        while (true) {
-
-            const chunk = stream.read()
-
-            if (chunk === null)
-                break
-
-            if (extra.length !== 0)
-                extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
-            else
-                extra = chunk
-
-            const hdrs = makeCenDirsFromBuffer(extra)
-            let cutOffset = 0
-
-            for (let i=0; i < hdrs.length; i++) {
-
-                headers.push(hdrs[i])
-                cutOffset += hdrs[i].length
-            }
-
-            extra = extra.slice(cutOffset)
-        }
-    })
-
-    await new Promise((resolve) => stream.on('end', resolve))
     return headers
 }
 
 const readCenDirSync = (start, length, file) => {
 
     file.openSync()
+
+    let buffer = file.readSync(start, length)
     const headers = []
 
-    let extra = Buffer.alloc(0)
+    while (CEN_HDR < buffer.length) {
 
-    while (length) {
+        const length = calculateLength(buffer, cenInconstantOffsets, CEN_HDR)
 
-        const draft = length < 65536 ? length : 65536
-        const chunk = file.readSync(start, draft)
+        const signature = buffer.readUInt32LE(0)
+        verifySignature(signature, CEN_SIG, 'cen dir sig err')
 
-        length -= draft
-        start += draft
+        const headerBuffer = buffer.slice(0, length)
+        const header = cenDecode(headerBuffer, 0)
+        headers.push(header)
 
-        if (extra.length !== 0)
-            extra = Buffer.concat([extra, chunk], extra.length + chunk.length)
-        else
-            extra = chunk
-
-        const hdrs = makeCenDirsFromBuffer(extra)
-        let cutOffset = 0
-
-        for (let i=0; i < hdrs.length; i++) {
-
-            headers.push(hdrs[i])
-            cutOffset += hdrs[i].length
-        }
-
-        extra = extra.slice(cutOffset)
+        buffer = buffer.slice(length)
     }
 
     file.closeSync()
+
     return headers
 }
 

@@ -20,12 +20,12 @@ const extractSync = async (path, header, file) => {
     file.writeFileSync(name, deflated)
 }
 
-const getAsBufferSync = async (header, file) => {
+const getAsBufferSync = (header, file) => {
 
     if (header.isDirectory())
         throw 'Entry is a directory'
 
-    const locHeader = await readLocHeaderSync(header.localOffset, file)
+    const locHeader = readLocHeaderSync(header.localOffset, file)
     const pos = locHeader.length
 
     const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
@@ -34,10 +34,7 @@ const getAsBufferSync = async (header, file) => {
 
 const testSync = (header, file) => {
 
-    if (header.isDirectory())
-        return
-
-    if (header.isEmpty())
+    if (header.isDirectory() || header.isEmpty())
         return
 
     const locHeader = readLocHeaderSync(header.localOffset, file)
