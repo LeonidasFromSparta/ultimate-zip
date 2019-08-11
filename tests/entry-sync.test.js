@@ -11,7 +11,12 @@ afterEach(() => {
 
 describe('Testing entry-sync.js', () => {
 
-    const file = {readSync: () => undefined}
+    const file = {
+        readSync: () => undefined,
+        writeFileSync: () => undefined,
+        makeDirSync: () => 'making directories'
+    }
+
     readLocHeaderSync.mockImplementation(() => ({length: 0}))
 
     it('should assert getAsBufferSync method does throw on directory', () => {
@@ -64,5 +69,24 @@ describe('Testing entry-sync.js', () => {
 
         entrySync.testSync(header, file)
         expect(inflaterSync).toHaveBeenCalledTimes(1)
+    })
+
+    it('should assert extractSync method does make directories', () => {
+
+        const header = {
+            isDirectory: () => true
+        }
+
+        expect(entrySync.extractSync('some path', header, file)).toBe('making directories')
+    })
+
+    it('should assert extractSync method does call to writeFileSync on empty file', () => {
+
+        const header = {
+            isDirectory: () => false,
+            isEmpty: () => true
+        }
+
+        expect(entrySync.extractSync('some path', header, file)).toBe('writing a file')
     })
 })

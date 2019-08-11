@@ -1,23 +1,26 @@
 import {readLocHeaderSync} from './headers'
 import {inflaterSync} from './inflater'
 
-const extractSync = async (path, header, file) => {
+const extractSync = (path, header, file) => {
 
     const name = path + '/' + header.fileName
 
     if (header.isDirectory())
         return file.makeDirSync(name)
 
-    if (header.isEmpty())
+    if (!header.isEmpty()) {
+
+        const locHeader = readLocHeaderSync(header.localOffset, file)
+        const pos = locHeader.length
+
+        const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
+
+        const deflated = inflaterSync(header, buffer)
+        file.writeFileSync(name, deflated)
         return
+    }
 
-    const locHeader = readLocHeaderSync(header.localOffset, file)
-    const pos = locHeader.length
-
-    const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
-
-    const deflated = inflaterSync(header, buffer)
-    file.writeFileSync(name, deflated)
+    file.writeFileSync(name, Buffer.alloc(0))
 }
 
 const getAsBufferSync = (header, file) => {
