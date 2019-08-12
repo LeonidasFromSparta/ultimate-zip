@@ -1,6 +1,6 @@
 import Entry from './entry-api'
-import {readCenDirSync} from './headers'
-import zipHeaderDecoder from './zip-header-decoders'
+import {readCenDirSync} from './file-headers'
+import {discoverSync} from './zip-header-sync'
 
 const testArchiveSync = (file, entries) => {
 
@@ -64,7 +64,7 @@ const extractFile = async (filename, path) => {
 
 const getEntriesSync = (file) => {
 
-    const header = zipHeaderDecoder(file)
+    const header = discoverSync(file)
 
     const start = header.cenDirsOffset
     const length = header.cenDirsSize

@@ -1,4 +1,4 @@
-import {readLocHeaderSync} from './headers'
+import {readLocHeaderSync} from './file-headers'
 import {inflaterSync} from './inflater'
 
 const extractSync = (path, header, file) => {

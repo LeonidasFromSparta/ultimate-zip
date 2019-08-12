@@ -28,19 +28,6 @@ export default class File {
         fs.closeSync(this.fd)
     }
 
-    readBytesSync(pos, end) {
-
-        if (pos < 0)
-            pos = 0
-
-        const length = end - pos
-        const buffer = Buffer.allocUnsafe(length)
-
-        fs.readSync(Number(this.fd), buffer, 0, length, pos)
-
-        return buffer
-    }
-
     readSync = (pos, length) => {
 
         if (pos < 0)
@@ -79,7 +66,12 @@ export default class File {
         return fs.createReadStream(null, {fd, autoClose, start, end})
     }
 
-    getFileSize = () => {
+    getFileSize = async () => {
+
+        return await new Promise((resolve, reject) => fs.fstat(this.fd, (err, stat) => err ? reject(err) : resolve(stat.size)))
+    }
+
+    getFileSizeSync = () => {
 
         return fs.fstatSync(this.fd).size
     }

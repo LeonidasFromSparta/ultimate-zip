@@ -1,6 +1,6 @@
 import Entry from './entry-api'
-import {readCenDir} from './headers'
-import zipHeaderDecoder from './zip-header-decoders'
+import {readCenDir} from './file-headers'
+import {discover} from './zip-header'
 
 const testArchive = async (file, entries) => {
 
@@ -66,7 +66,7 @@ const extractFile = async (filename, path) => {
 
 const getEntries = async (file) => {
 
-    const header = zipHeaderDecoder(file)
+    const header = await discover(file)
 
     const start = header.cenDirsOffset
     const length = header.cenDirsSize

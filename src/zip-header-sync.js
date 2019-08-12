@@ -18,21 +18,21 @@ import {E64_OFF} from './constants'
 
 import {END_MAX} from './constants'
 
-import { verifySignature } from './headers'
+import { verifySignature } from './file-headers'
 
-const findOffset = (data) => {
+const findOffset = (buffer) => {
 
-    for (let offset = data.length - (END_HDR - 4); offset !== -1; offset--)
-        if (data.readUInt32LE(offset) === END_SIG)
+    for (let offset = buffer.length - (END_HDR - 4); offset !== -1; offset--)
+        if (buffer.readUInt32LE(offset) === END_SIG)
             return offset
 
     throw (`Zip32 end of central directory record signature could not be found`)
 }
 
-const zip32HeaderDecoder = (file) => {
+const zip32HeaderDecoderSync = (file) => {
 
-    const size = file.getFileSize()
-    const buffer = file.readBytesSync(size - END_MAX, size)
+    const size = file.getFileSizeSync()
+    const buffer = file.readSync(size - END_MAX, size)
 
     const offset = findOffset(buffer)
 
@@ -45,12 +45,12 @@ const zip32HeaderDecoder = (file) => {
     }
 }
 
-const zip64LocatorDecoder = (file, start) => {
+const zip64LocatorDecoderSync = (file, start) => {
 
     const startPos = start - ELO_HDR
     const endPos = start
 
-    const buffer = file.readBytesSync(startPos, endPos)
+    const buffer = file.readSync(startPos, endPos)
 
     if (buffer.readUInt32LE(ELO_SPO) === ELO_SIG) {
 
@@ -60,9 +60,9 @@ const zip64LocatorDecoder = (file, start) => {
     }
 }
 
-const zip64HeaderDecoder = (file, start) => {
+const zip64HeaderDecoderSync = (file, start) => {
 
-    const buffer = file.readBytesSync(start, start + 48)
+    const buffer = file.readSync(start, start + 48)
 
     verifySignature(buffer, E64_SPO, E64_SIG, 'Bad Zip64 header signature error')
 
@@ -73,16 +73,16 @@ const zip64HeaderDecoder = (file, start) => {
     }
 }
 
-export default (file) => {
+const discoverSync = (file) => {
 
     file.openSync()
 
-    const header32 = zip32HeaderDecoder(file)
-    const locator = zip64LocatorDecoder(file, header32.headerOffset)
+    const header32 = zip32HeaderDecoderSync(file)
+    const locator = zip64LocatorDecoderSync(file, header32.headerOffset)
 
     if (locator) {
 
-        const header64 = zip64HeaderDecoder(file, locator.zip64Offset)
+        const header64 = zip64HeaderDecoderSync(file, locator.zip64Offset)
 
         file.closeSync()
         return header64
@@ -91,3 +91,5 @@ export default (file) => {
     file.closeSync()
     return header32
 }
+
+export {discoverSync}
