@@ -8,19 +8,16 @@ const extractSync = (path, header, file) => {
     if (header.isDirectory())
         return file.makeDirSync(name)
 
-    if (!header.isEmpty()) {
+    if (header.isEmpty())
+        return file.writeFileSync(name, Buffer.alloc(0))
 
-        const locHeader = readLocHeaderSync(header.localOffset, file)
-        const pos = locHeader.length
+	const locHeader = readLocHeaderSync(header.localOffset, file)
+	const pos = locHeader.length
 
-        const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
+	const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
 
-        const deflated = inflaterSync(header, buffer)
-        file.writeFileSync(name, deflated)
-        return
-    }
-
-    file.writeFileSync(name, Buffer.alloc(0))
+	const deflated = inflaterSync(header, buffer)
+	file.writeFileSync(name, deflated)
 }
 
 const getAsBufferSync = (header, file) => {

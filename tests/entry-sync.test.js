@@ -80,6 +80,7 @@ describe('Testing entry-sync.js', () => {
         expect(entrySync.extractSync('some path', header, file)).toBe('making directories')
     })
 
+    /*
     it('should assert extractSync method does call to writeFileSync on empty file', () => {
 
         const header = {
@@ -89,4 +90,5 @@ describe('Testing entry-sync.js', () => {
 
         expect(entrySync.extractSync('some path', header, file)).toBe('writing a file')
     })
+    */
 })

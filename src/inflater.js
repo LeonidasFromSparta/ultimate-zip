@@ -2,13 +2,18 @@ import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
 import CRC32 from './crc32'
 import CRC32Stream from './crc32-stream'
 
-const bufferedInflater = async (header, buffer) => {
+const compareChecksum = (val1, val2) => {
 
-    const inflated = header.isDeflated() ? await new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer))) : buffer
+    if (val1 !== val2)
+        throw 'bad file checksum'
+}
 
-    if (header.checksum !== new CRC32().update(inflated).getValue())
-        throw 'bad file cheksum'
+const bufferedInflater = async (header, deflated) => {
 
+    const inflated = header.isDeflated() ?
+        await new Promise((resolve, reject) => inflateRaw(deflated, (err, inflated) => err ? reject(err) : resolve(inflated))) : deflated
+
+    compareChecksum(header.checksum, new CRC32().update(inflated).getValue())
     return inflated
 }
 
