@@ -1,7 +1,6 @@
 import File from './file'
-import Entry from './entry-api'
-import {readCenDir, readCenDirSync} from './headers'
-import zipHeaderDecoder from './zip-header-decoders'
+import {testArchiveSync, extractArchiveSync, getEntriesSync} from './u-zip-sync'
+import {testArchive, extractArchive, getEntries} from './u-zip'
 
 export default class UZip {
 
@@ -11,35 +10,31 @@ export default class UZip {
         this.file = file
     }
 
-    _decodeZipHeader = () => {
-
-        this.zipHeader = zipHeaderDecoder(this.file)
-    }
-
     testArchive = async () => {
 
-        const entries = await this.getEntries()
-
-        await this.file.open()
-
-        for (let i=0; i < entries.length; i++)
-            await entries[i].test()
-
-        await this.file.close()
+        await this.getEntries()
+        await testArchive(this.file, this.entries)
     }
 
     testArchiveSync = () => {
 
-        const entries = this.getEntriesSync()
-
-        this.file.openSync()
-
-        for (let i=0; i < entries.length; i++)
-            entries[i].testSync()
-
-        this.file.closeSync()
+        this.getEntriesSync()
+        testArchiveSync(this.file, this.entries)
     }
 
+    extractArchive = async (path) => {
+
+        await this.getEntries()
+        await extractArchive(this.file, this.entries, path)
+    }
+
+    extractArchiveSync = (path) => {
+
+        this.getEntriesSync()
+        extractArchiveSync(this.file, this.entries, path)
+    }
+
+    /*
     testFile = async (fileName) => {
 
         const entries = await this.getEntries()
@@ -53,31 +48,9 @@ export default class UZip {
             }
         }
     }
+    */
 
-    extractArchive = async (path) => {
-
-        const entries = await this.getEntries()
-
-        await this.file.open()
-
-        for (let i=0; i < entries.length; i++)
-            await entries[i].extract(path)
-
-        await this.file.close()
-    }
-
-    extractArchiveSync = (outputPath) => {
-
-        const entries = this.getEntriesSync()
-
-        this.file.openSync()
-
-        for (let i=0; i < entries.length; i++)
-            entries[i].extractSync(outputPath)
-
-        this.file.closeSync()
-    }
-
+    /*
     extractByRegex = async (regex, path) => {
 
         const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
@@ -101,47 +74,20 @@ export default class UZip {
 
         this.file.closeFile()
     }
-
-    _readEntries = async () => {
-
-        const start = this.zipHeader.cenDirsOffset
-        const length = this.zipHeader.cenDirsSize
-
-        const entries = await readCenDir(start, length, this.file)
-
-        return entries.map((obj) => {
-
-            return new Entry(obj, this.file)
-        })
-    }
+    */
 
     getEntries = async () => {
 
-        if (!this.zipHeader) {
-
-            this._decodeZipHeader()
-            this.entries = await this._readEntries()
-        }
+        if (!this.entries)
+            this.entries = await getEntries(this.file)
 
         return this.entries
     }
 
-    _readEntriesSync = () => {
-
-        const start = this.zipHeader.cenDirsOffset
-        const length = this.zipHeader.cenDirsSize
-
-        const entries = readCenDirSync(start, length, this.file)
-        return entries.map((obj) => new Entry(obj, this.file))
-    }
-
     getEntriesSync = () => {
 
-        if (!this.zipHeader) {
-
-            this._decodeZipHeader()
-            this.entries = this._readEntriesSync()
-        }
+        if (!this.entries)
+            this.entries = getEntriesSync(this.file)
 
         return this.entries
     }
