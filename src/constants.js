@@ -216,3 +216,6 @@ export const ZIP_64 = 64
 export const NTFS_MOD_TIME = 12
 export const NTFS_ACC_TIME = 20
 export const NTFS_CRE_TIME = 28
+
+export const CEN_INCONSTANT_OFFSET = [CEN_FLE, CEN_ELE, CEN_CLE]
+export const LOC_INCONSTANT_OFFSET = [LOC_FLE, LOC_ELE]

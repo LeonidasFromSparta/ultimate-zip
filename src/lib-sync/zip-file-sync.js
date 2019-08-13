@@ -1,5 +1,5 @@
 import Entry from '../zip-entry-api'
-import {readCenDirSync} from './file-header-sync'
+import {readCenHeadersSync} from './file-header-sync'
 import {discoverSync} from './zip-header-sync'
 
 const testArchiveSync = (file, entries) => {
@@ -69,7 +69,7 @@ const getEntriesSync = (file) => {
     const start = header.cenDirsOffset
     const length = header.cenDirsSize
 
-    const entries = readCenDirSync(start, length, file)
+    const entries = readCenHeadersSync(start, length, file)
     return entries.map((obj) => new Entry(obj, file))
 }
 

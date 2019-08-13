@@ -6,11 +6,11 @@ import {LOC_HDR} from './../constants'
 import {calculateLength, verifySignature} from './../utils'
 import {CEN_INCONSTANT_OFFSET} from './../constants'
 
-const readCenHeaders = async (start, length, file) => {
+const readCenHeadersSync = (start, length, file) => {
 
-    await file.open()
+    file.openSync()
 
-    let buffer = await file.read(start, length)
+    let buffer = file.readSync(start, length)
     const headers = []
 
     while (CEN_HDR < buffer.length) {
@@ -27,15 +27,15 @@ const readCenHeaders = async (start, length, file) => {
         buffer = buffer.slice(length)
     }
 
-    await file.close()
+    file.closeSync()
 
     return headers
 }
 
-const readLocHeader = async (start, file) => {
+const readLocHeaderSync = (start, file) => {
 
-    const hdrBuff = await file.read(start, LOC_HDR)
+    const hdrBuff = file.readSync(start, LOC_HDR)
     return locDecoder(hdrBuff, 0)
 }
 
-export {readCenHeaders, readLocHeader}
+export {readCenHeadersSync, readLocHeaderSync}
