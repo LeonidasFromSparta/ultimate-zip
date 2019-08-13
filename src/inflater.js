@@ -20,6 +20,15 @@ const bufferedInflater = async (header, deflated) => {
 /*
 const streamingInflater = async (header, locLength, file, writer) => {
 
+    import {Writable} from 'stream'
+
+export default class DumpWriter extends Writable {
+
+    _write = (chunk, encoding, callback) => callback()
+
+    _writev = (chunks, callback) => callback()
+}
+
     if (header.deflatedSize < 1048576) {
 
         const buffer = await file.read(header.localOffset + locLength, header.deflatedSize)
