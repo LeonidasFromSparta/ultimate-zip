@@ -1,25 +1,15 @@
-import Entry from './entry-api'
-import {readCenDirSync} from './file-headers'
-import {discoverSync} from './zip-header-sync'
+import Entry from '../zip-entry-api'
+import {readCenDir} from './file-headers-async'
+import {discover} from './zip-header-async'
 
-const testArchiveSync = (file, entries) => {
+const testArchive = async (file, entries) => {
 
-    file.openSync()
-
-    for (let i=0; i < entries.length; i++)
-        entries[i].testSync()
-
-    file.closeSync()
-}
-
-const extractArchiveSync = (file, entries, path) => {
-
-    file.openSync()
+    await file.open()
 
     for (let i=0; i < entries.length; i++)
-        entries[i].extractSync(path)
+        await entries[i].test()
 
-    file.closeSync()
+    await file.close()
 }
 
 /*
@@ -36,7 +26,19 @@ const testFile = async (fileName) => {
         }
     }
 }
+*/
 
+const extractArchive = async (file, entries, path) => {
+
+    await file.open()
+
+    for (let i=0; i < entries.length; i++)
+        await entries[i].extract(path)
+
+    await file.close()
+}
+
+/*
 const extractByRegex = async (regex, path) => {
 
     const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
@@ -62,15 +64,16 @@ const extractFile = async (filename, path) => {
 }
 */
 
-const getEntriesSync = (file) => {
+const getEntries = async (file) => {
 
-    const header = discoverSync(file)
+    const header = await discover(file)
 
     const start = header.cenDirsOffset
     const length = header.cenDirsSize
 
-    const entries = readCenDirSync(start, length, file)
-    return entries.map((obj) => new Entry(obj, file))
+    const entries = await readCenDir(start, length, file)
+
+    return entries.map((obj) => new Entry(obj, this.file))
 }
 
-export {testArchiveSync, extractArchiveSync, getEntriesSync}
+export {testArchive, extractArchive, getEntries}

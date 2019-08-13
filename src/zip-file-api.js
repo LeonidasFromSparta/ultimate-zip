@@ -1,6 +1,6 @@
 import File from './file'
-import {testArchiveSync, extractArchiveSync, getEntriesSync} from './u-zip-sync'
-import {testArchive, extractArchive, getEntries} from './u-zip'
+import {testArchiveSync, extractArchiveSync, getEntriesSync} from './sync/zip-file-sync'
+import {testArchive, extractArchive, getEntries} from './async/zip-file-async'
 
 export default class UZip {
 

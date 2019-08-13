@@ -1,24 +1,24 @@
-import {END_SIG} from './constants'
-import {END_CDC} from './constants'
-import {END_OFF} from './constants'
-import {END_ZCL} from './constants'
-import {END_CDS} from './constants'
-import {END_HDR} from './constants'
+import {END_SIG} from '../constants'
+import {END_CDC} from '../constants'
+import {END_OFF} from '../constants'
+import {END_ZCL} from '../constants'
+import {END_CDS} from '../constants'
+import {END_HDR} from '../constants'
 
-import {ELO_SIG} from './constants'
-import {ELO_SPO} from './constants'
-import {ELO_OFF} from './constants'
-import {ELO_HDR} from './constants'
+import {ELO_SIG} from '../constants'
+import {ELO_SPO} from '../constants'
+import {ELO_OFF} from '../constants'
+import {ELO_HDR} from '../constants'
 
-import {E64_SIG} from './constants'
-import {E64_SPO} from './constants'
-import {E64_CDN} from './constants'
-import {E64_CDS} from './constants'
-import {E64_OFF} from './constants'
+import {E64_SIG} from '../constants'
+import {E64_SPO} from '../constants'
+import {E64_CDN} from '../constants'
+import {E64_CDS} from '../constants'
+import {E64_OFF} from '../constants'
 
-import {END_MAX} from './constants'
+import {END_MAX} from '../constants'
 
-import { verifySignature } from './file-headers'
+import { verifySignature } from './file-header-sync'
 
 const findOffset = (buffer) => {
 

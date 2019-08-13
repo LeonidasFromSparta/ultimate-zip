@@ -1,14 +1,14 @@
-import {CEN_HDR} from './constants'
-import {CEN_SIG} from './constants'
-import {CEN_MTD} from './constants'
-import {CEN_CRC} from './constants'
-import {CEN_SIC} from './constants'
-import {CEN_SIU} from './constants'
-import {CEN_FLE} from './constants'
-import {CEN_ELE} from './constants'
-import {CEN_CLE} from './constants'
-import {CEN_ATX} from './constants'
-import {CEN_OFF} from './constants'
+import {CEN_HDR} from '../constants'
+import {CEN_SIG} from '../constants'
+import {CEN_MTD} from '../constants'
+import {CEN_CRC} from '../constants'
+import {CEN_SIC} from '../constants'
+import {CEN_SIU} from '../constants'
+import {CEN_FLE} from '../constants'
+import {CEN_ELE} from '../constants'
+import {CEN_CLE} from '../constants'
+import {CEN_ATX} from '../constants'
+import {CEN_OFF} from '../constants'
 
 const verifySignature = (expected, observed, message) => {
 
@@ -72,7 +72,7 @@ const readCenDirSync = (start, length, file) => {
     return headers
 }
 
-import {CenHeader} from './cen-header'
+import {CenHeader} from '../cen-header'
 
 const cenDecode = (buffer, index) => {
 
@@ -130,9 +130,9 @@ const cenDecode = (buffer, index) => {
     return header
 }
 
-import {LOC_HDR} from './constants'
-import {LOC_FLE} from './constants'
-import {LOC_ELE} from './constants'
+import {LOC_HDR} from '../constants'
+import {LOC_FLE} from '../constants'
+import {LOC_ELE} from '../constants'
 
 const readLocHeader = async (start, file) => {
 
@@ -146,7 +146,7 @@ const readLocHeaderSync = (start, file) => {
     return locDecode(hdrBuff, 0)
 }
 
-import {LocHeader} from './cen-header'
+import {LocHeader} from '../cen-header'
 
 const locDecode = (buffer, index) => {
 

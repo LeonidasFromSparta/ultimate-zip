@@ -12,7 +12,6 @@ export default class File {
         this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => resolve(Number(fd))))
     }
 
-
     openSync = () => {
 
         this.fd = fs.openSync(this.path)
