@@ -1,6 +1,6 @@
 import Entry from '../zip-entry-api'
-import {readCenDir} from './file-headers-async'
-import {discover} from './zip-header-async'
+import {readCenDir} from './file-headers'
+import {discover} from './zip-header'
 
 const testArchive = async (file, entries) => {
 

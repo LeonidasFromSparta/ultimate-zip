@@ -18,7 +18,7 @@ import {E64_OFF} from '../constants'
 
 import {END_MAX} from '../constants'
 
-import { verifySignature } from './file-headers-async'
+import { verifySignature } from './file-headers'
 
 const findOffset = (buffer) => {
 

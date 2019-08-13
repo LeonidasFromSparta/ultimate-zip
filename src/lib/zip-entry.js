@@ -1,5 +1,5 @@
 import DumpWriter from '../dump-writer'
-import {readLocHeader} from './file-headers-async'
+import {readLocHeader} from './file-headers'
 import {bufferedInflater, streamingInflater} from '../inflater'
 
 const extract = async (path, header, file) => {
