@@ -1,6 +1,7 @@
 import DumpWriter from '../dump-writer'
-import {readLocHeader} from './file-headers'
+import {readLocHeader} from './../utils'
 import {bufferedInflater, streamingInflater} from '../inflater'
+import {LOC_HDR} from './../constants'
 
 const extract = async (path, header, file) => {
 
@@ -9,7 +10,8 @@ const extract = async (path, header, file) => {
     if (header.isDirectory())
         return await file.makeDir(name)
 
-    const locHeader = await readLocHeader(header.localOffset, file)
+    const hdrBuff = await file.read(header.localOffset, LOC_HDR)
+    const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
     if (header.isEmpty())
@@ -31,7 +33,8 @@ const getAsBuffer = async (header, file) => {
     if (header.isDirectory())
         return Buffer.alloc(0)
 
-    const locHeader = await readLocHeader(header.localOffset, file)
+    const hdrBuff = await file.read(header.localOffset, LOC_HDR)
+    const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
     const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
@@ -43,7 +46,8 @@ const test = async (header, file) => {
     if (header.isDirectory())
         return
 
-    const locHeader = await readLocHeader(header.localOffset, file)
+    const hdrBuff = await file.read(header.localOffset, LOC_HDR)
+    const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
     if (header.deflatedSize < 1048576) {

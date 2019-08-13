@@ -65,20 +65,12 @@ const zip64HeaderDecoderSync = (file, start) => {
 
 const discoverSync = (file) => {
 
-    file.openSync()
-
     const header32 = zip32HeaderDecoderSync(file)
     const locator = zip64LocatorDecoderSync(file, header32.headerOffset)
 
-    if (locator) {
+    if (locator)
+        return zip64HeaderDecoderSync(file, locator.zip64Offset)
 
-        const header64 = zip64HeaderDecoderSync(file, locator.zip64Offset)
-
-        file.closeSync()
-        return header64
-    }
-
-    file.closeSync()
     return header32
 }
 

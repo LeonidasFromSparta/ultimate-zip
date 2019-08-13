@@ -65,20 +65,12 @@ const zip64HeaderDecoder = async (file, start) => {
 
 const discover = async (file) => {
 
-    await file.open()
-
     const header32 = await zip32HeaderDecoder(file)
     const locator = await zip64LocatorDecoder(file, header32.headerOffset)
 
-    if (locator) {
+    if (locator)
+        return await zip64HeaderDecoder(file, locator.zip64Offset)
 
-        const header64 = await zip64HeaderDecoder(file, locator.zip64Offset)
-
-        await file.close()
-        return header64
-    }
-
-    await file.close()
     return header32
 }
 
