@@ -3,7 +3,7 @@ import {CEN_HDR} from './../constants'
 import {CEN_SIG} from './../constants'
 import {locDecoder} from './../decoders'
 import {LOC_HDR} from './../constants'
-import {calculateLength, verifySignature} from './../utils'
+import {calculateHeaderLength, verifySignature} from './../utils'
 import {CEN_INCONSTANT_OFFSET} from './../constants'
 
 const readCenHeadersSync = (start, length, file) => {
@@ -15,7 +15,7 @@ const readCenHeadersSync = (start, length, file) => {
 
     while (CEN_HDR < buffer.length) {
 
-        const length = calculateLength(buffer, CEN_INCONSTANT_OFFSET, CEN_HDR)
+        const length = calculateHeaderLength(buffer, CEN_INCONSTANT_OFFSET, CEN_HDR)
 
         const signature = buffer.readUInt32LE(0)
         verifySignature(signature, CEN_SIG, 'cen dir sig err')

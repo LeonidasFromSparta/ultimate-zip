@@ -1,4 +1,3 @@
-import {END_SIG} from '../constants'
 import {END_CDC} from '../constants'
 import {END_OFF} from '../constants'
 import {END_ZCL} from '../constants'
@@ -18,23 +17,14 @@ import {E64_OFF} from '../constants'
 
 import {END_MAX} from '../constants'
 
-import { verifySignature } from './file-headers'
-
-const findOffset = (buffer) => {
-
-    for (let offset = buffer.length - (END_HDR - 4); offset !== -1; offset--)
-        if (buffer.readUInt32LE(offset) === END_SIG)
-            return offset
-
-    throw (`Zip32 end of central directory record signature could not be found`)
-}
+import {verifySignature, findZip32Offset} from './../utils'
 
 const zip32HeaderDecoder = async (file) => {
 
     const size = await file.getFileSize()
     const buffer = await file.read(size - END_MAX, size)
 
-    const offset = findOffset(buffer)
+    const offset = findZip32Offset(buffer)
 
     return {
         cenDirsCount: buffer.readUInt16LE(offset + END_CDC),
