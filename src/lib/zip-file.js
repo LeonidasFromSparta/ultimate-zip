@@ -1,6 +1,6 @@
 import Entry from './../zip-entry-api'
 import {readCenHeaders} from './../utils'
-import {discover} from './zip-header'
+import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from './../decoders'
 
 const testArchive = async (file, entries) => {
 
@@ -64,10 +64,32 @@ const extractFile = async (filename, path) => {
 }
 */
 
+import {END_MAX} from '../constants'
+import {ELO_HDR} from '../constants'
+
+const getZipHeader = async (file) => {
+
+    const size = await file.getFileSize()
+    const zip32Buffer = await file.read(size - END_MAX, END_MAX)
+    const header32 = zip32HeaderDecoder(zip32Buffer, size)
+
+    const startPos = header32.headerOffset - ELO_HDR
+    const locatorBuffer = await file.read(startPos, ELO_HDR)
+    const locator = zip64LocatorDecoder(locatorBuffer)
+
+    if (locator) {
+
+        const buffer = await file.read(locator.zip64Offset, 48)
+        return zip64HeaderDecoder(buffer)
+    }
+
+    return header32
+}
+
 const getEntries = async (file) => {
 
     await file.open()
-    const header = await discover(file)
+    const header = await getZipHeader(file)
 
     const start = header.cenDirsOffset
     const length = header.cenDirsSize

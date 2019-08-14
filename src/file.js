@@ -5,6 +5,7 @@ export default class File {
     constructor(path) {
 
         this.path = path
+        this.fd = null
     }
 
     open = async () => {
@@ -45,11 +46,6 @@ export default class File {
 
         const buffer = Buffer.allocUnsafe(length)
         return await new Promise((resolve) => fs.read(this.fd, buffer, 0, length, pos, (err, bytesRead, buffer) => resolve(buffer)))
-    }
-
-    createReadStreamWithHighWaterMark(start, end, highWaterMark) {
-
-        return fs.createReadStream(this.path, {start, end, highWaterMark})
     }
 
     createReadStream(start, end) {

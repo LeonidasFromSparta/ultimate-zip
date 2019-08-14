@@ -1,4 +1,4 @@
-import {extractSync, testSync, getAsBufferSync} from './lib-sync/zip-entry-sync'
+import {extractSync, testSync, getAsBufferSync} from './lib/zip-entry-sync'
 import {extract, test, getAsBuffer} from './lib/zip-entry'
 
 export default class Entry {
@@ -11,18 +11,18 @@ export default class Entry {
 
     extract = (path, callback) => {
 
-        if (callback)
-            return extract(path, this.header, this.file).then(callback).catch((err) => callback(err))
+        if (!callback)
+            return extract(path, this.header, this.file)
 
-        return extract(path, this.header, this.file)
+        extract(path, this.header, this.file).then(callback).catch((err) => callback(err))
     }
 
     getAsBuffer = (callback) => {
 
-        if (callback)
-            return getAsBuffer(this.header, this.file).then((data) => callback(undefined, data)).catch((err) => callback(err))
+        if (!callback)
+            return getAsBuffer(this.header, this.file)
 
-        return getAsBuffer(this.header, this.file)
+        getAsBuffer(this.header, this.file).then((data) => callback(undefined, data)).catch((err) => callback(err))
     }
 
     getAsStream = async () => {
@@ -31,9 +31,12 @@ export default class Entry {
         // return await getAsBuffer(this.header, this.file)
     }
 
-    test = async () => {
+    test = (callback) => {
 
-        await test(this.header, this.file)
+        if (!callback)
+            return test(this.header, this.file)
+
+        test(this.header, this.file).then((data) => callback(undefined, data)).catch((err) => callback(err))
     }
 
     extractSync = (path) => {

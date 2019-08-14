@@ -1,6 +1,5 @@
 import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
-import CRC32 from './crc32'
-import CRC32Stream from './crc32-stream'
+import {CRC32, CRC32Stream} from './crc32'
 
 const compareChecksum = (val1, val2) => {
 

@@ -1,4 +1,3 @@
-import DumpWriter from '../dump-writer'
 import {readLocHeader} from './../utils'
 import {bufferedInflater, streamingInflater} from '../inflater'
 import {LOC_HDR} from './../constants'
