@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import CRC32 from './../src/crc32'
+import {CRC32} from './../src/crc32'
 
 describe('Testing crc32.js', () => {
 

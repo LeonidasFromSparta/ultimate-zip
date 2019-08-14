@@ -1,15 +1,15 @@
-import * as entrySync from '../src/entry-sync'
-import {readLocHeaderSync} from '../src/headers'
+import * as entrySync from '../src/lib/zip-entry-sync'
+import {readLocHeader} from '../src/utils'
 import {inflaterSync} from '../src/inflater'
 
-jest.mock('../src/inflater')
-jest.mock('../src/headers')
+jest.mock('./../src/inflater')
+jest.mock('./../src/utils')
 
 afterEach(() => {
     inflaterSync.mockClear()
 })
 
-describe('Testing entry-sync.js', () => {
+describe('Testing zip-entry-sync.js', () => {
 
     const file = {
         readSync: () => undefined,
@@ -17,7 +17,7 @@ describe('Testing entry-sync.js', () => {
         makeDirSync: () => 'making directories'
     }
 
-    readLocHeaderSync.mockImplementation(() => ({length: 0}))
+    readLocHeader.mockImplementation(() => ({length: 0}))
 
     it('should assert getAsBufferSync method does throw on directory', () => {
 

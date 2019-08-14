@@ -1,5 +1,5 @@
 import {deflateRawSync} from 'zlib'
-import * as inflater from '../src/inflater'
+import * as inflater from './../src/inflater'
 
 describe('Testing inflater.js #1 __private__.compareChecksum method', () => {
 

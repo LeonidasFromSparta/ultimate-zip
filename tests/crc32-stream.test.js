@@ -1,6 +1,5 @@
 import {expect} from 'chai'
-import CRC32 from '../src/crc32'
-import CRC32Stream from '../src/crc32-stream'
+import {CRC32, CRC32Stream} from './../src/crc32'
 import {Readable} from 'stream'
 
 describe('Testing crc32-stream.js', () => {
