@@ -1,4 +1,3 @@
-import {expect} from 'chai'
 import {CRC32, CRC32Stream} from './../src/crc32'
 import {Readable} from 'stream'
 
@@ -20,6 +19,6 @@ describe('Testing crc32-stream.js', () => {
 
         const prom = await new Promise((resolve) => reader.pipe(crc32Stream).on('finish', () => resolve(crc32Stream.getValue())))
 
-        expect(prom).to.be.equal(0x94699776)
+        expect(prom).toBe(0x94699776)
     })
 })
