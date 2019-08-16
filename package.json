@@ -10,7 +10,7 @@
         "test": "jest",
         "coverage": "jest --coverage"
     },
-    "keywords": [],
+    "keywords": ["archive", "zip", "unzip", "compress", "extract", "deflate", "inflate"],
     "author": "",
     "license": "ISC",
     "dependencies": {},
@@ -26,6 +26,6 @@
         "jest": "^24.9.0"
     },
     "engines": {
-        "node": ">=8"
+        "node": ">=12"
     }
 }
