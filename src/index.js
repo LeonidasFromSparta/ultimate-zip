@@ -17,7 +17,7 @@ start = process.hrtime.bigint()
 console.log('START SYNC EXTRACT: ' + start)
 
 zip = new UZip(zipName)
-//zip.extractArchiveSync('./extr')
+zip.extractArchiveSync('./extr')
 
 end = process.hrtime.bigint()
 console.log('EXTRACT SYNC TIME: ' + new Number((end - start)) / 1e+9)
@@ -28,7 +28,7 @@ console.log('EXTRACT SYNC TIME: ' + new Number((end - start)) / 1e+9)
     start = process.hrtime.bigint()
     console.log('START AWAIT TEST: ' + start)
 
-    //zip = new UZip(zipName)
+    zip = new UZip(zipName)
     await zip.testArchive('./extr')
 
     end = process.hrtime.bigint()
@@ -37,7 +37,7 @@ console.log('EXTRACT SYNC TIME: ' + new Number((end - start)) / 1e+9)
     start = process.hrtime.bigint()
     console.log('START AWAIT EXTRACT: ' + start)
 
-    //zip = new UZip(zipName)
+    zip = new UZip(zipName)
     await zip.extractArchive('./extr')
 
     end = process.hrtime.bigint()

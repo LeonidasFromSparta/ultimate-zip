@@ -1,4 +1,5 @@
-import fs from 'fs'
+import {openSync, closeSync, fstatSync, readSync, existsSync, mkdirSync, writeFileSync, createWriteStream} from 'fs'
+import {open, close, fstat, read, mkdir, stat, writeFile} from './promisifed-fs'
 
 export default class File {
 
@@ -10,90 +11,91 @@ export default class File {
 
     open = async () => {
 
-        this.fd = await new Promise((resolve) => fs.open(this.path, (err, fd) => resolve(Number(fd))))
+        if (this.fd !== null)
+            throw new Error('file already opened')
+
+        this.fd = await open(this.path)
     }
 
     openSync = () => {
 
-        this.fd = fs.openSync(this.path)
+        if (this.fd !== null)
+            throw new Error('file already opened')
+
+        this.fd = openSync(this.path)
     }
 
     close = async () => {
 
-        await new Promise((resolve) => fs.close(this.fd, () => resolve()))
+        if (this.fd === null)
+            throw new Error('no fd to close')
+
+        await close(this.fd)
+        this.fd = null
     }
 
     closeSync = () => {
 
-        fs.closeSync(this.fd)
+        if (this.fd === null)
+            throw new Error('no fd to close')
+
+        closeSync(this.fd)
+        this.fd = null
     }
 
     readSync = (pos, length) => {
 
-        if (pos < 0)
-            pos = 0
-
         const buffer = Buffer.alloc(length)
-        fs.readSync(this.fd, buffer, 0, length, pos)
+        readSync(this.fd, buffer, 0, length, pos)
 
         return buffer
     }
 
     read = async (pos, length) => {
 
-        if (pos < 0)
-            pos = 0
-
         const buffer = Buffer.allocUnsafe(length)
-        return await new Promise((resolve) => fs.read(this.fd, buffer, 0, length, pos, (err, bytesRead, buffer) => resolve(buffer)))
-    }
-
-    createReadStream(start, end) {
-
-        return fs.createReadStream(this.path, {start, end})
-    }
-
-    createFdReadStream(start, end) {
-
-        const fd = this.fd
-        const autoClose = false
-
-        return fs.createReadStream(null, {fd, autoClose, start, end})
+        return (await read(this.fd, buffer, 0, length, pos)).buffer
     }
 
     getFileSize = async () => {
 
-        return await new Promise((resolve, reject) => fs.fstat(this.fd, (err, stat) => err ? reject(err) : resolve(stat.size)))
+        return (await fstat(this.fd)).size
     }
 
     getFileSizeSync = () => {
 
-        return fs.fstatSync(this.fd).size
+        return fstatSync(this.fd).size
     }
 
-    makeDir = (dir) => {
+    makeDir = async (dir) => {
 
-        return new Promise((resolve) => fs.mkdir(dir, resolve))
+        try {
+
+            await stat(dir)
+        } catch (ex) {
+
+            await mkdir(dir)
+        }
     }
 
     makeDirSync = (dir) => {
 
-        if (!fs.existsSync(dir))
-            fs.mkdirSync(dir)
+        if (!existsSync(dir))
+            mkdirSync(dir)
     }
 
     createWriteStream = (fileName) => {
 
-        return fs.createWriteStream(fileName)
+        return createWriteStream(fileName)
     }
 
     writeFile = async (file, data) => {
 
-        await new Promise((resolve) => fs.writeFile(file, data, resolve))
+        await writeFile(file, data)
     }
 
     writeFileSync = (file, data) => {
 
-        fs.writeFileSync(file, data)
+        writeFileSync(file, data)
     }
 }

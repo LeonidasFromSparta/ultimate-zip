@@ -4,10 +4,9 @@ import {testArchive, extractArchive, getEntries} from './lib/zip-file'
 
 export default class UZip {
 
-    constructor(path, file = new File(path)) {
+    constructor(path) {
 
-        debugger
-        this.file = file
+        this.file = new File(path)
     }
 
     testArchive = async () => {
