@@ -323,5 +323,6 @@ for (const entry of entries) {
 
 ## License
 ___
-MIT License © Leonid Weinberg<br/>
+MIT License<br/>
+Copyright (c) 2019 Leonid Weinberg<br/>
 See the [LICENSE](LICENSE) file for details
