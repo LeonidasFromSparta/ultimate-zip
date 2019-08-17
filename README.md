@@ -1,28 +1,36 @@
 # Ultimate Zip
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip)
 ___
 **Ultimate Zip is a pure JavaScript implementation of a ZIP file with friendly APIs for [NodeJS](https://nodejs.org).**
 
-:point_right: Fast extraction times and low memory footprint<br/>
-:point_right: Works in async and sync modes<br/>
-:point_right: Supports NodeJS 6+<br/>
+:point_right: **Fast extraction times and low memory footprint**<br/>
+:point_right: **Works in async and sync modes**<br/>
+:point_right: **Supports NodeJS 6+**<br/>
 
-## Table of contents
+## Table of Contents
  * [Ultimate Zip](#-ultimate-zip)
- * [Table of contents](#-table-of-contents)
- * [Getting started](#-getting-started)
+ * [Table of Contents](#-table-of-contents)
+ * [Project Status](#project-status)
+ * [Getting Started](#-getting-started)
    * [Installation](#-installation)
    * [Basic Usage](#-basic-usage)
  * [Testing](#-tests)
    * [Setup](#-setup)
-   * [Running tests](#-running-tests)
-   * [Code coverage](#-code-coverage)
- * [Code examples](#-code-examples)
+   * [Running Tests](#-running-tests)
+   * [Code Coverage](#-code-coverage)
+ * [Code Examples](#-code-examples)
    * [Async API](#-async-api)
    * [Sync API](#-sync-api)
  * [Dependencies](#-dependecies)
  * [License](#-license)
+
+## Project Status
+___
+It is a work in progress.
+**To-dos:**
+- add compression support
+- add more unit tests
 
 ## Getting Started
 ___
@@ -58,7 +66,7 @@ Install with [NPM](https://www.npmjs.com)
 ```
 $ npm install
 ```
-### Running tests
+### Running Tests
 Run all tests
 ```
 $ npm test
@@ -71,12 +79,12 @@ Run only integration tests
 ```
 $ npm run integration
 ```
-### Code coverage
+### Code Coverage
 Generate code coverage report
 ```
 $ npm run coverage
 ```
-## Code examples
+## Code Examples
 ___
 ### Async API
 **ECMA 5** (callbacks)
@@ -307,7 +315,6 @@ for (const entry of entries) {
 }
 ```
 ## Dependencies
-___
  none
 #### devDependencies
  - **[babel](https://babeljs.io)**
