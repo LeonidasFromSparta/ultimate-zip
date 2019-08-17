@@ -9,26 +9,20 @@ export default class UZip {
         this.file = new File(path)
     }
 
-    testArchive = (callback) => {
+    testArchive = () => {
 
-        if (!callback)
-            return this.getEntries().then((entries) => testArchive(this.file, entries))
-
-        this.getEntries().then((entries) => testArchive(this.file, entries)).then(callback).catch((err) => callback(err))
+        return this.getEntries().then((entries) => testArchive(this.file, entries))
     }
 
     testArchiveSync = () => {
 
-        this.getEntriesSync()
-        testArchiveSync(this.file, this.entries)
+        const entries = this.getEntriesSync()
+        testArchiveSync(this.file, entries)
     }
 
-    extractArchive = (path, callback) => {
+    extractArchive = (path) => {
 
-        if (!callback)
-            return this.getEntries().then((entries) => extractArchive(this.file, entries, path))
-
-        this.getEntries().then((entries) => extractArchive(this.file, entries, path).then(callback).catch((err) => callback(err)))
+        return this.getEntries().then((entries) => extractArchive(this.file, entries, path))
     }
 
     extractArchiveSync = (path) => {
@@ -36,48 +30,6 @@ export default class UZip {
         this.getEntriesSync()
         extractArchiveSync(this.file, this.entries, path)
     }
-
-    /*
-    testFile = async (fileName) => {
-
-        const entries = await this.getEntries()
-
-        for (let i=0; i < entries.length; i++) {
-
-            if (entries[i].header.getFileName() === fileName) {
-
-                await entries[i]._test()
-                break
-            }
-        }
-    }
-    */
-
-    /*
-    extractByRegex = async (regex, path) => {
-
-        const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
-
-        this.file.openFile()
-
-        for (let i=0; i < entries.length; i++)
-            await entries[i].extract(path)
-
-        this.file.closeFile()
-    }
-
-    extractFile = async (filename, path) => {
-
-        const entries = (await this.getEntries()).filter((obj) => obj.getFilename() === filename)
-
-        this.file.openFile()
-
-        for (let i=0; i < entries.length; i++)
-            await entries[i].extract(path)
-
-        this.file.closeFile()
-    }
-    */
 
     getEntries = () => {
 
@@ -87,34 +39,8 @@ export default class UZip {
         return getEntries(this.file).then((entries) => {
 
             this.entries = entries
-            return Promise.resolve(entries)
+            return entries
         })
-
-        /*
-        if (this.entries) {
-
-            if (!callback)
-                return this.entries
-            else
-                callback(undefined, this.entries)
-        } else {
-
-            if (!callback) {
-
-                return getEntries(this.file).then((entries) => {
-
-                    this.entries = entries
-                    return Promise.resolve(entries)
-                })
-            }
-
-            getEntries(this.file).then((entries) => {
-
-                this.entries = entries
-                callback(undefined, entries)
-            }).catch((err) => callback(err))
-        }
-        */
     }
 
     getEntriesSync = () => {

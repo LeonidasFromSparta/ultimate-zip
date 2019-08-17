@@ -1,6 +1,7 @@
 import UZip from 'u-zip'
 import {delSync, EXTRACT_PATH, ASSETS_PATH} from './integration.utils'
 
+/*
 beforeAll(() => {
     delSync(EXTRACT_PATH + '/callback')
 })
@@ -158,7 +159,7 @@ describe('Integration testing callback APIs', () => {
     })
 
     it('should assert callback getEntries', async () => {
-/*
+
         await new Promise((resolve, reject) => {
 
             const uzip = new UZip(ASSETS_PATH + '/win-7z-store.zip')
@@ -230,6 +231,6 @@ describe('Integration testing callback APIs', () => {
                 resolve(entries)
             })
         })
-        */
     })
 })
+*/
