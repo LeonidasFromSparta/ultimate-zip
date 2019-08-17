@@ -9,9 +9,10 @@ export default class UZip {
         this.file = new File(path)
     }
 
-    testArchive = () => {
+    testArchive = async () => {
 
-        return this.getEntries().then((entries) => testArchive(this.file, entries))
+        await this.getEntries()
+        await testArchive(this.file, this.entries)
     }
 
     testArchiveSync = () => {
@@ -20,9 +21,10 @@ export default class UZip {
         testArchiveSync(this.file, entries)
     }
 
-    extractArchive = (path) => {
+    extractArchive = async (path) => {
 
-        return this.getEntries().then((entries) => extractArchive(this.file, entries, path))
+        await this.getEntries()
+        await extractArchive(this.file, this.entries, path)
     }
 
     extractArchiveSync = (path) => {
@@ -31,16 +33,13 @@ export default class UZip {
         extractArchiveSync(this.file, this.entries, path)
     }
 
-    getEntries = () => {
+    getEntries = async () => {
 
         if (this.entries)
             return this.entries
 
-        return getEntries(this.file).then((entries) => {
-
-            this.entries = entries
-            return entries
-        })
+        this.entries = await getEntries(this.file)
+        return this.entries
     }
 
     getEntriesSync = () => {
