@@ -31,6 +31,7 @@ It is a work in progress.<br/>
 **To-dos:**
 - add compression support
 - add more unit tests
+- add linting to jest testing
 
 ## Getting Started
 ___
