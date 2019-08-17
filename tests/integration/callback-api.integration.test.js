@@ -1,13 +1,17 @@
 import UZip from 'u-zip'
 import {delSync, EXTRACT_PATH, ASSETS_PATH} from './integration.utils'
 
-/*
 beforeAll(() => {
     delSync(EXTRACT_PATH + '/callback')
 })
 
 describe('Integration testing callback APIs', () => {
 
+    it('should assert callback extractArchive', async () => {
+
+    })
+
+/*
     it('should assert callback extractArchive', async () => {
 
         await new Promise((resolve, reject) => {
@@ -232,5 +236,5 @@ describe('Integration testing callback APIs', () => {
             })
         })
     })
-})
 */
+})
