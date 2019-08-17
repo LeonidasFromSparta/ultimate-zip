@@ -89,25 +89,25 @@ ___
 ### Async API
 **ECMA 5** (callbacks)
 ```javascript
-const UZip = require('something')
+var UZip = require('something')
 
 // create instance
-const uzip = new UZip('/home/fancy.zip')
+var uzip = new UZip('/home/fancy.zip')
 
 // extract archive
-uzip.testArchive('/home/extracted', function (err) {
+uzip.testArchive('/home/extracted', function(err) {
     if (!err)
         console.log('Success!')
 )
 
 // test archive
-uzip.testArchive('/home/extracted', function (err) {
+uzip.testArchive('/home/extracted', function(err) {
     if (!err)
         console.log('Success!')
 )
 
 // get zip entries
-uzip.getEntries(function (err, entries) {
+uzip.getEntries(function(err, entries) {
 
     if (!err)
         console.log('Success getting entries!')
@@ -142,7 +142,7 @@ uzip.getEntries(function (err, entries) {
 ```
 **ECMA 6** (promises)
 ```javascript
-import UZip from 'something'
+const UZip = require('something')
 
 // create instance
 const uzip = new UZip('/home/fancy.zip')
@@ -200,7 +200,7 @@ uzip.getEntries().then((entries) => {
 ```
 **ECMA 8** (async/await)
 ```javascript
-import UZip from 'something'
+const UZip = require('something')
 
 // create instance
 const uzip = new UZip('/home/fancy.zip')
@@ -260,11 +260,7 @@ for (const entry of entries) {
 ```
 ### Sync API
 ```javascript
-// if ECMA 5
 const UZip = require('something')
-
-// if ECMA 6 and up
-import UZip from 'something'
 
 // create instance
 const uzip = new UZip('/home/fancy.zip')
