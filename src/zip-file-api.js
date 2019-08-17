@@ -94,7 +94,7 @@ export default class UZip {
                 return getEntries(this.file).then((entries) => {
 
                     this.entries = entries
-                    return entries
+                    return Promise.resolve(entries)
                 })
             }
 

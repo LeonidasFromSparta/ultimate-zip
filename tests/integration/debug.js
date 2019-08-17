@@ -3,5 +3,7 @@ import UZip from './../../src/u-zip'
 (async () => {
 
     debugger
-    await new UZip('./tests/integration/assets/win-7z-store.zip').extractArchive('./tests/integration/assets/extracted/extractArchive/win-7z-store')
+    // await new UZip('./samples/7z-windows-normal.zip').extractArchive('./extr')
+    await new UZip('./samples/7z-windows-normal.zip').getEntries()
+    console.log('keke doine')
 })()
