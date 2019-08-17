@@ -1,6 +1,8 @@
 import {openSync, closeSync, fstatSync, readSync, existsSync, mkdirSync, writeFileSync, createWriteStream} from 'fs'
 import {open, close, fstat, read, mkdir, stat, writeFile} from './promisifed-fs'
 
+const READ_FLAG = 'r'
+
 export default class File {
 
     constructor(path) {
@@ -14,7 +16,7 @@ export default class File {
         if (this.fd !== null)
             throw new Error('file already opened')
 
-        this.fd = await open(this.path)
+        this.fd = await open(this.path, READ_FLAG)
     }
 
     openSync = () => {
@@ -22,7 +24,7 @@ export default class File {
         if (this.fd !== null)
             throw new Error('file already opened')
 
-        this.fd = openSync(this.path)
+        this.fd = openSync(this.path, READ_FLAG)
     }
 
     close = async () => {

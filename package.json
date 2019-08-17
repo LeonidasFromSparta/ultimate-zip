@@ -12,7 +12,15 @@
         "integration": "jest -t integration",
         "coverage": "jest --coverage"
     },
-    "keywords": ["archive", "zip", "unzip", "compress", "extract", "deflate", "inflate"],
+    "keywords": [
+        "archive",
+        "zip",
+        "unzip",
+        "compress",
+        "extract",
+        "deflate",
+        "inflate"
+    ],
     "author": "",
     "license": "ISC",
     "dependencies": {},
