@@ -19,6 +19,10 @@ const delSync = (path) => {
     }
 }
 
+beforeEach(() => {
+    delSync('./tests/integration/assets/extracted')
+})
+
 afterEach(() => {
     delSync('./tests/integration/assets/extracted')
 })

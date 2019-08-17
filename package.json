@@ -2,6 +2,7 @@
     "name": "ultimate-zip",
     "version": "1.0.0",
     "description": "Unzip and zip with ease!",
+    "main": "uzip.js",
     "scripts": {
         "lint": "eslint src",
         "compile": "babel src -d build",

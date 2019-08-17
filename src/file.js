@@ -1,5 +1,5 @@
 import {openSync, closeSync, fstatSync, readSync, existsSync, mkdirSync, writeFileSync, createWriteStream} from 'fs'
-import {open, close, fstat, read, mkdir, stat, writeFile} from './promisifed-fs'
+import {open, close, fstat, stat, read, mkdir, writeFile} from './promisifed-fs'
 import path from 'path'
 
 const READ_FLAG = 'r'
