@@ -78,6 +78,7 @@ Generate code coverage report
 $ npm run coverage
 ```
 ## Code examples
+___
 ### Async API
 **ECMA 5** (callbacks)
 ```javascript
@@ -307,6 +308,7 @@ for (const entry of entries) {
 }
 ```
 ## Dependencies
+___
  none
 #### devDependencies
  - **[babel](https://babeljs.io)**
