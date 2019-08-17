@@ -1,4 +1,5 @@
 module.exports = {
 
-    modulePaths: ['<rootDir>/src/']
+    modulePaths: ['<rootDir>/src/'],
+    collectCoverage: true
 }

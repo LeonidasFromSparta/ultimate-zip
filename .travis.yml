@@ -1,13 +1,10 @@
-language: node_js
+language:
+  node_js
+install:
+  - npm install -g codecov
+script:
+  - codecov
 os:
   - linux
-  - osx
-  - windows
 node_js:
-  - 12
-  - 11
-  - 10
-  - 9
-  - 8
-  - 7
-  - 6
+  - node
