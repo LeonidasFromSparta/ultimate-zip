@@ -18,4 +18,7 @@ const delSync = (path) => {
     }
 }
 
-export default delSync
+const ASSETS_PATH = './tests/integration/assets'
+const EXTRACT_PATH = './tests/integration/assets/extracted'
+
+export {delSync, ASSETS_PATH, EXTRACT_PATH}

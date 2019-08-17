@@ -12,6 +12,6 @@ module.exports = {
         'semi': [2, 'never'],
         'no-console': 'off',
         'no-debugger': 'off',
-        'max-len': [2, 80, 4]
+        'max-len': [2, 120, 4]
     }
 }
