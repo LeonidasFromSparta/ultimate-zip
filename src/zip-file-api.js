@@ -86,7 +86,7 @@ export default class UZip {
             if (!callback)
                 return this.entries
             else
-                callback(this.entries)
+                callback(undefined, this.entries)
         } else {
 
             if (!callback) {
