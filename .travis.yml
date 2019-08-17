@@ -3,7 +3,6 @@ language:
 os:
   - linux
 node_js:
-  - node
   - 12
   - 11
   - 10
