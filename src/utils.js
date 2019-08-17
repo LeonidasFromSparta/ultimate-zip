@@ -14,6 +14,8 @@ const calculateHeaderLength = (data, fields, intial) => fields.reduce((acc, pos)
 
 const readCenHeaders = (buffer) => {
 
+    console.log('buff ' + buffer.length)
+
     const headers = []
     let i = 1
 
