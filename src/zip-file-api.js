@@ -9,10 +9,12 @@ export default class UZip {
         this.file = new File(path)
     }
 
-    testArchive = async () => {
+    testArchive = (callback) => {
 
-        await this.getEntries()
-        await testArchive(this.file, this.entries)
+        if (!callback)
+            return this.getEntries().then((entries) => testArchive(this.file, entries))
+
+        this.getEntries().then((entries) => testArchive(this.file, entries)).then(callback).catch((err) => callback(err))
     }
 
     testArchiveSync = () => {
@@ -21,10 +23,12 @@ export default class UZip {
         testArchiveSync(this.file, this.entries)
     }
 
-    extractArchive = async (path) => {
+    extractArchive = (path, callback) => {
 
-        await this.getEntries()
-        await extractArchive(this.file, this.entries, path)
+        if (!callback)
+            return this.getEntries().then((entries) => extractArchive(this.file, entries, path))
+
+        this.getEntries().then((entries) => extractArchive(this.file, entries, path).then(callback).catch((err) => callback(err)))
     }
 
     extractArchiveSync = (path) => {
@@ -75,12 +79,31 @@ export default class UZip {
     }
     */
 
-    getEntries = async () => {
+    getEntries = (callback) => {
 
-        if (!this.entries)
-            this.entries = await getEntries(this.file)
+        if (this.entries) {
 
-        return this.entries
+            if (!callback)
+                return this.entries
+            else
+                callback(this.entries)
+        } else {
+
+            if (!callback) {
+
+                return getEntries(this.file).then((entries) => {
+
+                    this.entries = entries
+                    return entries
+                })
+            }
+
+            getEntries(this.file).then((entries) => {
+
+                this.entries = entries
+                callback(undefined, entries)
+            }).catch((err) => callback(err))
+        }
     }
 
     getEntriesSync = () => {
