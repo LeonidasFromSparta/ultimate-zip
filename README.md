@@ -1,91 +1,318 @@
 # Ultimate Zip
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-[![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip)
+___
+**Ultimate Zip is a pure JavaScript implementation of a ZIP file with friendly APIs for [NodeJS](https://nodejs.org).**
 
-Pure and yet friendly JavaScript ZIP file implementation for [NodeJS](https://nodejs.org).<br/>
-Allows you to extract zip files in sync or async modes.
+  - **Fast extraction times and low memory footprint**
+  - **Supports both async and sync modes**
+  - **Supports NodeJS 6 and up**
+  - **Well tested**
+
+## Table of contents
+ * [Ultimate Zip](#-ultimate-zip)
+ * [Table of contents](#-table-of-contents)
+ * [Getting started](#-getting-started)
+   * [Installation](#-installation)
+   * [Basic Usage](#-basic-usage)
+ * [Testing](#-tests)
+   * [Setup](#-setup)
+   * [Running tests](#-running-tests)
+   * [Code coverage](#-code-coverage)
+ * [Code examples](#-code-examples)
+   * [Async API](#-async-api)
+   * [Sync API](#-sync-api)
+ * [Dependencies](#-dependecies)
+ * [License](#-license)
 
 ## Getting Started
+___
+### Installation
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-## Why use?
-
-- Fast (compared to other similar JS implementation)
-- Low memory consumption
-- Can be used in asynchroneous mode (streaming for large files) as well as in sync mode or mixed.
-
-```
-Give examples
-```
-
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-<br/>Using [npm](https://npm.org):
-
-
+Install ultimate-zip with [NPM](https://www.npmjs.com)
 ```
 $ npm install ultimate-zip
 ```
+### Basic Usage
+In your favorite editor..
+```javascript
+import UZip from 'something'
 
-End with an example of getting some data out of the system or using it for a little demo
+// create instance
+const uzip = new UZip('/home/fancy.zip')
 
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
+// extract archive
+uzip.extractArchive('/home/extracted').then(() => {
+    console.log('Success!')
+}).catch((err) => {
+    console.log('Error!')
+})
 ```
-Give an example
+## Testing
+___
+### Setup
+Clone the repository
 ```
-
-### And coding style tests
-
-Explain what these tests test and why
-
+$ git clone https://github.com/steelgrave/ultimate-zip.git
 ```
-Give an example
+Install with [NPM](https://www.npmjs.com)
 ```
+$ npm install
+```
+### Running tests
+Run all tests
+```
+$ npm test
+```
+Run only unit tests
+```
+$ npm run unit
+```
+Run only integration tests
+```
+$ npm run integration
+```
+### Code coverage
+Generate code coverage report
+```
+$ npm run coverage
+```
+## Code examples
+### Async API
+**ECMA 5** (callbacks)
+```javascript
+const UZip = require('something')
 
-## Deployment
+// create instance
+const uzip = new UZip('/home/fancy.zip')
 
-Add additional notes about how to deploy this on a live system
+// extract archive
+uzip.testArchive('/home/extracted', function (err) {
+    if (!err)
+        console.log('Success!')
+)
 
-## Built With
+// test archive
+uzip.testArchive('/home/extracted', function (err) {
+    if (!err)
+        console.log('Success!')
+)
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+// get zip entries
+uzip.getEntries(function (err, entries) {
 
-## Contributing
+    if (!err)
+        console.log('Success getting entries!')
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+    // iterate zip file entries
+    for (const entry of entries) {
 
-## Versioning
+        // extract entry to disk
+        entry.extract('/home/extracted_file', function(err) {
+            if (!err)
+                console.log('Success!')
+        )
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+        // extract entry to buffer
+        entry.getAsBuffer('/home/extracted_file', function(err, buffer) {
+            if (!err)
+                console.log('Success!')
+        )
 
-## Authors
+        // get extracted entry as a stream
+        entry.getAsStream('/home/extracted_file', function(err, stream) {
+            if (!err)
+                console.log('Success!')
+        )
+        // test entry
+        entry.test(function(err) {
+            if (!err)
+                console.log('entry is OK!')
+        )
+    }
+)
+```
+**ECMA 6** (promises)
+```javascript
+import UZip from 'something'
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+// create instance
+const uzip = new UZip('/home/fancy.zip')
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+// extract archive
+uzip.testArchive('/home/extracted').then(() => {
+    console.log('Success!')
+}).catch((err) => {
+    console.log('Error!')
+})
+
+// test archive
+uzip.testArchive('/home/extracted').then(() => {
+    console.log('Success!')
+}).catch((err) => {
+    console.log('Error!')
+})
+
+// get zip entries
+uzip.getEntries().then((entries) => {
+
+    for (const entry of entries) {
+
+        // extract entry to disk
+        entry.extract('/home/extracted_file').then(() => {
+            console.log('success extracting!')
+        ).catch((err) => {
+            console.log('error extracting!')
+        )
+
+        // extract entry to buffer
+        entry.getAsBuffer().then((buffer) => {
+            console.log(buffer.toString('utf8'))
+        ).catch((err) => {
+            console.log('error extracting!')
+        )
+
+        // get extracted entry as a stream
+        entry.getAsStream().then((stream) => {
+            stream.pipe(console.log)
+        ).catch((err) => {
+            console.log('error extracting!')
+        )
+
+        // test entry
+        entry.test().then(() => {
+            console.log('Entry is OK!!')
+        ).catch((err) => {
+            console.log('failed testing entry!')
+        )
+    }
+}).catch((err) => {
+    console.log('error reading zip file entries!')
+})
+```
+**ECMA 8** (async/await)
+```javascript
+import UZip from 'something'
+
+// create instance
+const uzip = new UZip('/home/fancy.zip')
+
+// extract archive
+try {
+    await uzip.extractArchive('/home/extracted')
+    console.log('archive extracted!')
+} catch (err) {
+    console.log('error extracting archive!')
+}
+
+// test archive
+try {
+    await uzip.testArchive()
+    console.log('archive is ok!')
+} catch (err) {
+    console.log('error testing archive!')
+}
+
+// get zip entries
+const entries = await uzip.getEntries()
+for (const entry of entries) {
+
+    // extract entry to disk
+    try {
+        await entry.extract('/home/extracted_file')
+        console.log('success extracting!')
+    } catch (err) {
+        console.log('error extracting!')
+    }
+
+    // extract entry to buffer
+    try {
+        const buffer = await entry.getAsBuffer()
+        console.log(buffer.toString('utf8'))
+    } catch (err) {
+        console.log('error extracting!')
+    }
+
+    // get extracted entry as a stream
+    try {
+        const stream = entry.getAsStream()
+        stream.pipe(console.log)
+    } catch (err) {
+        console.log('error extracting!')
+    }
+
+    // test entry
+    try {
+        await entry.test()
+        console.log('Entry is OK!!')
+    } catch (err) {
+        console.log('failed testing entry!')
+    }
+}
+```
+### Sync API
+```javascript
+// if ECMA 5
+const UZip = require('something')
+
+// if ECMA 6 and up
+import UZip from 'something'
+
+// create instance
+const uzip = new UZip('/home/fancy.zip')
+
+// extract archive
+try {
+    uzip.extractArchiveSync('/home/extracted')
+    console.log('archive extracted!')
+} catch (err) {
+    console.log('error extracting archive!')
+}
+
+// test archive
+try {
+    uzip.testArchiveSync()
+    console.log('archive is ok!')
+} catch (err) {
+    console.log('error testing archive!')
+}
+
+// get zip entries
+const entries = uzip.getEntriesSync()
+for (const entry of entries) {
+
+    // extract entry to disk
+    try {
+        entry.extractSync('/home/extracted_file')
+        console.log('success extracting!')
+    } catch (err) {
+        console.log('error extracting!')
+    }
+
+    // extract entry to buffer
+    try {
+        const buffer = entry.getAsBufferSync()
+        console.log(buffer.toString('utf8'))
+    } catch (err) {
+        console.log('error extracting!')
+    }
+
+    // test entry
+    try {
+        entry.testSync()
+        console.log('Entry is OK!!')
+    } catch (err) {
+        console.log('failed testing entry!')
+    }
+}
+```
+## Dependencies
+ none
+#### devDependencies
+ - **[babel](https://babeljs.io)**
+ - **[eslint](https://eslint.org)**
+ - **[jest](https://jestjs.io)**
 
 ## License
-
+___
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
