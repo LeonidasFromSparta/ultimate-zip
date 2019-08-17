@@ -75,31 +75,3 @@ describe('Integration testing #6', () => {
     })
 })
 
-describe('Integration testing #7', () => {
-
-    it('should assert sync extract', () => {
-
-        // new UZip('./tests/integration/assets/1/1.zip').extractArchiveSync('./tests/integration/assets/extracted/1')
-        new UZip('./tests/integration/assets/1/2.zip').extractArchiveSync('./tests/integration/assets/extracted/2')
-        new UZip('./tests/integration/assets/1/3.zip').extractArchiveSync('./tests/integration/assets/extracted/3')
-        new UZip('./tests/integration/assets/1/4.zip').extractArchiveSync('./tests/integration/assets/extracted/4')
-        new UZip('./tests/integration/assets/1/5.zip').extractArchiveSync('./tests/integration/assets/extracted/5')
-        // new UZip('./tests/integration/assets/1/6.zip').extractArchiveSync('./tests/integration/assets/extracted/6')
-        new UZip('./tests/integration/assets/1/7.zip').extractArchiveSync('./tests/integration/assets/extracted/7')
-        new UZip('./tests/integration/assets/1/8.zip').extractArchiveSync('./tests/integration/assets/extracted/8')
-        new UZip('./tests/integration/assets/1/9.zip').extractArchiveSync('./tests/integration/assets/extracted/9')
-        // new UZip('./tests/integration/assets/1/10.zip').extractArchiveSync('./tests/integration/assets/extracted/10')
-        // new UZip('./tests/integration/assets/1/11.zip').extractArchiveSync('./tests/integration/assets/extracted/11')
-        // new UZip('./tests/integration/assets/1/12.zip').extractArchiveSync('./tests/integration/assets/extracted/12')
-    })
-})
-
-describe('Integration testing #7', () => {
-
-    it('should assert sync extract', () => {
-
-        const uzip = require('')
-        new UZip('./tests/integration/assets/1/2.zip').extractArchiveSync('./tests/integration/assets/extracted/2')
-
-    })
-})
