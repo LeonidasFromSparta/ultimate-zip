@@ -79,8 +79,18 @@ export default class UZip {
     }
     */
 
-    getEntries = (callback) => {
+    getEntries = () => {
 
+        if (this.entries)
+            return this.entries
+
+        return getEntries(this.file).then((entries) => {
+
+            this.entries = entries
+            return Promise.resolve(entries)
+        })
+
+        /*
         if (this.entries) {
 
             if (!callback)
@@ -104,6 +114,7 @@ export default class UZip {
                 callback(undefined, entries)
             }).catch((err) => callback(err))
         }
+        */
     }
 
     getEntriesSync = () => {
