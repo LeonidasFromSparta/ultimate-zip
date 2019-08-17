@@ -70,7 +70,10 @@ import {ELO_HDR} from '../constants'
 const getZipHeader = async (file) => {
 
     const size = await file.getFileSize()
-    const zip32Buffer = await file.read(size - END_MAX, END_MAX)
+
+    const h32Pos = (size - END_MAX) < 0 ? 0 : size - END_MAX
+
+    const zip32Buffer = await file.read(h32Pos, END_MAX)
     const header32 = zip32HeaderDecoder(zip32Buffer, size)
 
     const startPos = header32.headerOffset - ELO_HDR

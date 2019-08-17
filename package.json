@@ -6,7 +6,7 @@
     "scripts": {
         "lint": "eslint src",
         "compile": "babel src -d build",
-        "debug": "babel-node --inspect=9001 src/index.js",
+        "debug": "babel-node --inspect=9001 tests/integration/debug.js",
         "start": "npm run lint && npm run compile && node build/index.js",
         "test": "jest",
         "unit": "jest -t unit",

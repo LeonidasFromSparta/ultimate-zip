@@ -1,18 +1,80 @@
 import {open, close, fstat, stat, read, mkdir, writeFile} from 'fs'
 
-const promisifiedOpen = (path, flag) => new Promise((resolve, reject) => open(path, flag, (err, fd) => err ? reject(err) : resolve(fd)))
+const promisifiedOpen = (path, flag) => {
+    return new Promise((resolve, reject) => {
 
-const promisifiedClose = (fd) => new Promise((resolve, reject) => close(fd, (err) => err ? reject(err) : resolve()))
+        open(path, flag, (err, fd) => {
 
-const promisifiedFstat = (file) => new Promise((resolve, reject) => fstat(file, (err, fstat) => err ? reject(err) : resolve(fstat)))
+            err ? reject(err) : resolve(fd)
+        })
+    })
+}
 
-const promisifiedStat = (fd) => new Promise((resolve, reject) => stat(fd, (err, stat) => err ? reject(err) : resolve(stat)))
+const promisifiedClose = (fd) => {
 
-const promisifiedRead = (fd, buffer, offset, length, pos) => new Promise((resolve, reject) => read(this.fd, buffer, 0, length, pos, (err, bytesRead, buffer) => err ? reject(err) : resolve(buffer)))
+    return new Promise((resolve, reject) => {
 
-const promisifiedMkdir = (dir) => new Promise((resolve, reject) => mkdir(dir, (err) => err ? reject(err) : resolve()))
+        close(fd, (err) => {
 
-const promisifiedWriteFile = (file, data) => new Promise((resolve, reject) => writeFile(file, data, (err) => err ? reject(err) : resolve()))
+            err ? reject(err) : resolve()
+        })
+    })
+}
+
+const promisifiedFstat = (file) => {
+
+    return new Promise((resolve, reject) => {
+
+        fstat(file, (err, fstat) => {
+
+            err ? reject(err) : resolve(fstat)
+        })
+    })
+}
+
+const promisifiedStat = (fd) => {
+
+    return new Promise((resolve, reject) => {
+
+        stat(fd, (err, stat) => {
+
+            err ? reject(err) : resolve(stat)
+        })
+    })
+}
+
+const promisifiedRead = (fd, buffer, offset, length, pos) => {
+
+    return new Promise((resolve, reject) => {
+
+        read(fd, buffer, 0, length, pos, (err, bytesRead, buffer) => {
+
+            err ? reject(err) : resolve(buffer)
+        })
+    })
+}
+
+const promisifiedMkdir = (dir) => {
+
+    return new Promise((resolve, reject) => {
+
+        mkdir(dir, (err) => {
+
+            err ? reject(err) : resolve()
+        })
+    })
+}
+
+const promisifiedWriteFile = (file, data) => {
+
+    return new Promise((resolve, reject) => {
+
+        writeFile(file, data, (err) => {
+
+            err ? reject(err) : resolve()
+        })
+    })
+}
 
 export {
     promisifiedOpen as open,

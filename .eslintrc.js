@@ -11,6 +11,7 @@ module.exports = {
     rules: {
         'semi': [2, 'never'],
         'no-console': 'off',
-        'no-debugger': 'off'
+        'no-debugger': 'off',
+        'max-len': [2, 80, 4]
     }
 }

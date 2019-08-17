@@ -78,7 +78,8 @@ export default class File {
     read = async (pos, length) => {
 
         const buffer = Buffer.allocUnsafe(length)
-        return (await read(this.fd, buffer, 0, length, pos)).buffer
+        const data = await read(this.fd, buffer, 0, length, pos)
+        return data
     }
 
     getFileSize = async () => {
