@@ -1,6 +1,6 @@
 # Ultimate Zip
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip)
+[![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip)
 ___
 **Ultimate Zip is a pure JavaScript implementation of a ZIP file with friendly APIs for [NodeJS](https://nodejs.org).**
 
@@ -27,7 +27,7 @@ ___
 
 ## Project Status
 ___
-It is a work in progress.
+It is a work in progress.<br/>
 **To-dos:**
 - add compression support
 - add more unit tests
@@ -323,4 +323,5 @@ for (const entry of entries) {
 
 ## License
 ___
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+MIT License © Leonid Weinberg<br/>
+See the [LICENSE](LICENSE) file for details
