@@ -9,21 +9,21 @@ ___
 :point_right: **Supports NodeJS 6+**<br/>
 
 ## Table of Contents
- * [Ultimate Zip](#-ultimate-zip)
- * [Table of Contents](#-table-of-contents)
+ * [Ultimate Zip](#ultimate-zip)
+ * [Table of Contents](#table-of-contents)
  * [Project Status](#project-status)
- * [Getting Started](#-getting-started)
-   * [Installation](#-installation)
-   * [Basic Usage](#-basic-usage)
- * [Testing](#-tests)
-   * [Setup](#-setup)
-   * [Running Tests](#-running-tests)
-   * [Code Coverage](#-code-coverage)
- * [Code Examples](#-code-examples)
-   * [Async API](#-async-api)
-   * [Sync API](#-sync-api)
- * [Dependencies](#-dependecies)
- * [License](#-license)
+ * [Getting Started](#getting-started)
+   * [Installation](#installation)
+   * [Basic Usage](#basic-usage)
+ * [Testing](#testing)
+   * [Setup](#setup)
+   * [Running Tests](#running-tests)
+   * [Code Coverage](#code-coverage)
+ * [Code Examples](#code-examples)
+   * [Async API](#async-api)
+   * [Sync API](#sync-api)
+ * [Dependencies](#dependecies)
+ * [License](#license)
 
 ## Project Status
 ___
