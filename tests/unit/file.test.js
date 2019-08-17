@@ -1,9 +1,9 @@
-import {open, close} from './../src/promisifed-fs'
+import {open, close} from 'promisifed-fs'
 import {openSync, closeSync} from 'fs'
-import File from './../src/file'
+import File from 'file'
 
 jest.mock('fs')
-jest.mock('./../src/promisifed-fs')
+jest.mock('promisifed-fs')
 
 afterEach(() => {
     open.mockClear()
@@ -12,7 +12,7 @@ afterEach(() => {
     closeSync.mockClear()
 })
 
-describe('Testing file.js', () => {
+describe('Unit testing file.js', () => {
 
     it('should assert open method', async () => {
 

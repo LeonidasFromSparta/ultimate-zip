@@ -81,7 +81,7 @@ export default class File {
     makeDirSync = (dir) => {
 
         if (!existsSync(dir))
-            mkdirSync(dir)
+            mkdirSync(dir, {recursive: true})
     }
 
     createWriteStream = (fileName) => {

@@ -1,15 +1,15 @@
-import * as entrySync from '../src/lib/zip-entry-sync'
-import {readLocHeader} from '../src/utils'
-import {inflaterSync} from '../src/inflater'
+import * as entrySync from 'lib/zip-entry-sync'
+import {readLocHeader} from 'utils'
+import {inflaterSync} from 'inflater'
 
-jest.mock('./../src/inflater')
-jest.mock('./../src/utils')
+jest.mock('inflater')
+jest.mock('utils')
 
 afterEach(() => {
     inflaterSync.mockClear()
 })
 
-describe('Testing zip-entry-sync.js', () => {
+describe('Unit testing zip-entry-sync.js', () => {
 
     const file = {
         readSync: () => undefined,

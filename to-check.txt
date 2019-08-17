@@ -1,7 +1,0 @@
-
-
-    SYNC
-    - display extracted data on place via entries with utf8 (sync) on demand
-    - display extracted data on place via global with utf8 (sync) on demand
-    - extract expecific data via global
-    - extract expecific data via entry

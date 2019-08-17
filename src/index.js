@@ -1,5 +1,7 @@
 import UZip from './u-zip'
 
+new UZip('C:/Users/leonw/Desktop/ultimate-zip/tests/integration/assets/win-7z-store.zip').extractArchiveSync('./integration_2')
+
 const zipName = './samples/7z-windows-normal.zip'
 let start, end
 let zip
@@ -16,7 +18,8 @@ console.log('TEST SYNC TIME: ' + new Number((end - start)) / 1e+9)
 start = process.hrtime.bigint()
 console.log('START SYNC EXTRACT: ' + start)
 
-zip = new UZip(zipName)
+// zip = new UZip(zipName)
+zip = new UZip('C:/Users/leonw/Desktop/ultimate-zip/tests/integration/assets/ultra.zip')
 zip.extractArchiveSync('./extr')
 
 end = process.hrtime.bigint()

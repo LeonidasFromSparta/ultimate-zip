@@ -1,7 +1,7 @@
 import {deflateRawSync} from 'zlib'
-import * as inflater from './../src/inflater'
+import * as inflater from 'inflater'
 
-describe('Testing inflater.js #1 __private__.compareChecksum method', () => {
+describe('Unit testing inflater.js #1 __private__.compareChecksum method', () => {
 
     it('should assert compareChecksum method does throw Bad Checksum Err', () => {
 
@@ -14,7 +14,7 @@ describe('Testing inflater.js #1 __private__.compareChecksum method', () => {
     })
 })
 
-describe('Testing inflater.js #2 bufferedInflater method', () => {
+describe('Unit testing inflater.js #2 bufferedInflater method', () => {
 
     beforeEach(() => {
         jest.restoreAllMocks()
@@ -47,7 +47,7 @@ describe('Testing inflater.js #2 bufferedInflater method', () => {
     })
 })
 
-describe('Testing inflater.js #3 inflaterSync method', () => {
+describe('Unit testing inflater.js #3 inflaterSync method', () => {
 
     beforeEach(() => {
         jest.restoreAllMocks()

@@ -1,7 +1,7 @@
-import {CRC32, CRC32Stream} from './../src/crc32'
+import {CRC32, CRC32Stream} from 'crc32'
 import {Readable} from 'stream'
 
-describe('Testing crc32-stream.js', () => {
+describe('Unit testing crc32-stream.js', () => {
 
     it('should assert crc32-stream', async () => {
 
