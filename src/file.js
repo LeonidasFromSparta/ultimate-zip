@@ -1,7 +1,29 @@
 import {openSync, closeSync, fstatSync, readSync, existsSync, mkdirSync, writeFileSync, createWriteStream} from 'fs'
 import {open, close, fstat, read, mkdir, stat, writeFile} from './promisifed-fs'
+import path from 'path'
 
 const READ_FLAG = 'r'
+
+const mkDirRecursive = async (dir) => {
+
+    try {
+
+        await stat(dir)
+    } catch (ex) {
+
+        await mkDirRecursive(path.join(dir, '..'))
+        await mkdir(dir)
+    }
+}
+
+const mkDirRecursiveSync = (dir) => {
+
+    if (!existsSync(dir)) {
+
+        mkDirRecursiveSync(path.join(dir, '..'))
+        mkdirSync(dir)
+    }
+}
 
 export default class File {
 
@@ -71,19 +93,12 @@ export default class File {
 
     makeDir = async (dir) => {
 
-        try {
-
-            await stat(dir)
-        } catch (ex) {
-
-            await mkdir(dir)
-        }
+        await mkDirRecursive(dir)
     }
 
     makeDirSync = (dir) => {
 
-        if (!existsSync(dir))
-            mkdirSync(dir, {recursive: true})
+        mkDirRecursiveSync(dir)
     }
 
     createWriteStream = (fileName) => {
