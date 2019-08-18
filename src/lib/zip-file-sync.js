@@ -4,14 +4,22 @@ import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from '../de
 
 const testArchiveSync = (file, entries) => {
 
+    file.openSync()
+
     for (let i=0; i < entries.length; i++)
         entries[i].testSync()
+
+    file.closeSync()
 }
 
 const extractArchiveSync = (file, entries, path) => {
 
+    file.openSync()
+
     for (let i=0; i < entries.length; i++)
         entries[i].extractSync(path)
+
+    file.closeSync()
 }
 
 /*
@@ -81,6 +89,7 @@ const getZipHeader = (file) => {
 
 const getEntriesSync = (file) => {
 
+    file.openSync()
     const header = getZipHeader(file)
 
     const start = header.cenDirsOffset
@@ -88,6 +97,7 @@ const getEntriesSync = (file) => {
 
     const buffer = file.readSync(start, length)
     const entries = readCenHeaders(buffer)
+    file.closeSync()
 
     return entries.map((obj) => new Entry(obj, file))
 }

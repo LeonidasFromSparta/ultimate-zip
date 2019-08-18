@@ -1,6 +1,6 @@
 import File from './file'
-import {testArchiveSync, extractArchiveSync, getEntriesSync as _getEntriesSync} from './lib/zip-file-sync'
-import {testArchive, extractArchive, getEntries as _getEntries} from './lib/zip-file'
+import {testArchiveSync, extractArchiveSync, getEntriesSync} from './lib/zip-file-sync'
+import {testArchive, extractArchive, getEntries} from './lib/zip-file'
 
 export default class UZip {
 
@@ -11,72 +11,41 @@ export default class UZip {
 
     testArchive = async () => {
 
-        await this.file.open()
-
-        if (!this.entries)
-            this.entries = await _getEntries(this.file)
-
+        await this.getEntries()
         await testArchive(this.file, this.entries)
-
-        await this.file.close()
     }
 
     testArchiveSync = () => {
 
-        this.file.openSync()
-
-        if (!this.entries)
-            this.entries = _getEntriesSync(this.file)
-
-        testArchiveSync(this.file, this.entries)
-
-        this.file.closeSync()
+        const entries = this.getEntriesSync()
+        testArchiveSync(this.file, entries)
     }
 
     extractArchive = async (path) => {
 
-        await this.file.open()
-
-        if (!this.entries)
-            this.entries = await _getEntries(this.file)
-
+        await this.getEntries()
         await extractArchive(this.file, this.entries, path)
-
-        await this.file.close()
     }
 
     extractArchiveSync = (path) => {
 
-        this.file.openSync()
-
-        if (!this.entries)
-            this.entries = _getEntriesSync(this.file)
-
+        this.getEntriesSync()
         extractArchiveSync(this.file, this.entries, path)
-
-        this.file.closeSync()
     }
 
     getEntries = async () => {
 
-        await this.file.open()
+        if (this.entries)
+            return this.entries
 
-        if (!this.entries)
-            this.entries = await _getEntries(this.file)
-
-        await this.file.close()
-
+        this.entries = await getEntries(this.file)
         return this.entries
     }
 
     getEntriesSync = () => {
 
-        this.file.openSync()
-
         if (!this.entries)
-            this.entries = _getEntriesSync(this.file)
-
-        this.file.closeSync()
+            this.entries = getEntriesSync(this.file)
 
         return this.entries
     }
