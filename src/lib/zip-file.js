@@ -4,12 +4,8 @@ import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from './../
 
 const testArchive = async (file, entries) => {
 
-    await file.open()
-
     for (let i=0; i < entries.length; i++)
         await entries[i].test()
-
-    await file.close()
 }
 
 /*
@@ -30,12 +26,8 @@ const testFile = async (fileName) => {
 
 const extractArchive = async (file, entries, path) => {
 
-    await file.open()
-
     for (let i=0; i < entries.length; i++)
         await entries[i].extract(path)
-
-    await file.close()
 }
 
 /*
@@ -93,7 +85,7 @@ const getEntries = async (file) => {
 
     console.log('file name ' + file.path)
 
-    await file.open()
+
     const header = await getZipHeader(file)
 
     const start = header.cenDirsOffset
@@ -110,7 +102,6 @@ const getEntries = async (file) => {
 
     const entries = readCenHeaders(buffer)
 
-    await file.close()
 
     return entries.map((obj) => new Entry(obj, file))
 }
