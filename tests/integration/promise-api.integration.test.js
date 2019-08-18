@@ -9,11 +9,6 @@ describe('Integration testing promise APIs', () => {
 
     it('should assert promise extractArchive API', async () => {
 
-    })
-
-    /*
-    it('should assert promise extractArchive API', async () => {
-
         await new UZip(ASSETS_PATH + '/win-7z-store.zip')
             .extractArchive(EXTRACT_PATH + '/promise/win-7z-store')
 
@@ -74,5 +69,4 @@ describe('Integration testing promise APIs', () => {
         await new UZip(ASSETS_PATH + '/win-7z-ultra.zip')
             .getEntries()
     })
-    */
 })
