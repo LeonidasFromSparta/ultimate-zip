@@ -44,6 +44,7 @@ $ npm install ultimate-zip
 ### Basic Usage
 In your favorite editor..
 ```javascript
+// async mode
 import UZip from 'something'
 
 // create instance
@@ -55,6 +56,21 @@ uzip.extractArchive('/home/extracted').then(() => {
 }).catch((err) => {
     console.log('Error!')
 })
+```
+```javascript
+// sync mode
+const UZip = require('something')
+
+// create instance
+const uzip = new UZip('/home/fancy.zip')
+
+// extract archive
+try {
+    uzip.extractArchiveSync('/home/extracted')
+    console.log('archive extracted!')
+} catch (err) {
+    console.log('error extracting archive!')
+}
 ```
 ## Testing
 ___
