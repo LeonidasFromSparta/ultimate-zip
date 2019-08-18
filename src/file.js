@@ -35,10 +35,19 @@ export default class File {
 
     open = async () => {
 
+        /*
         if (this.fd !== null)
             throw new Error('file already opened')
 
         this.fd = await open(this.path, READ_FLAG)
+        */
+
+        if (this.fd !== null)
+            throw new Error('file already opened')
+
+        this.fd = openSync(this.path, READ_FLAG)
+
+        console.log('FD!! ' + this.fd)
     }
 
     openSync = () => {
@@ -47,14 +56,24 @@ export default class File {
             throw new Error('file already opened')
 
         this.fd = openSync(this.path, READ_FLAG)
+
+        console.log('FD!! ' + this.fd)
     }
 
     close = async () => {
 
+        /*
         if (this.fd === null)
             throw new Error('no fd to close')
 
         await close(this.fd)
+        this.fd = null
+        */
+
+        if (this.fd === null)
+            throw new Error('no fd to close')
+
+        closeSync(this.fd)
         this.fd = null
     }
 

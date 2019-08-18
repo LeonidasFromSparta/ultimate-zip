@@ -14,18 +14,11 @@ const calculateHeaderLength = (data, fields, intial) => fields.reduce((acc, pos)
 
 const readCenHeaders = (buffer) => {
 
-    console.log('buff ' + buffer.length)
-
     const headers = []
-    let i = 1
 
     while (CEN_HDR < buffer.length) {
 
-        console.log('reading header ' + i++)
-
         const length = calculateHeaderLength(buffer, CEN_INCONSTANT_OFFSET, CEN_HDR)
-
-        console.log('header length ' + length)
 
         const signature = buffer.readUInt32LE(0)
         verifySignature(signature, CEN_SIG, 'cen dir sig err')
