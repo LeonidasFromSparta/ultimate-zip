@@ -33,11 +33,11 @@ ___
 ## About
 Fast and lightweight JavaScript Zip file library.<br/>
 Works both async or sync modes with clean and beautiful APIs.<br/>
-Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.<br/>
-Comprehensive tests, unit and integration, as a part of the project philosophy.<br/>
+Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.
+Comprehensive tests, unit and integration, as a part of the project philosophy.
 ### Motivation
-As a NodeJS web services and tools developer, I'm often working with Zip files.<br/>
-However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,<br/>
+As a NodeJS web services and tools developer, I'm often working with Zip files.
+However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,
 I decided to create one myself!
 ### Philosophy
 - Easy, friendly APIs
@@ -48,8 +48,8 @@ ___
 ## Project Status
 Active development
 ### Versions
-This project is using [semver](https://semver.org) convention<br/><br/>
-No major versions released yet
+No major versions released yet<br/><br/>
+This project is using [semver](https://semver.org) convention
 ### Limitation
  - Multiple volumes Zip file is not supported
  - Ecnrypted Zip file is not suported
