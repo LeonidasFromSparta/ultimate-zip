@@ -2,50 +2,52 @@
 
 [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/919188fe12a04fe1a7e1457d9f5f7cb5)](https://www.codacy.com/app/steelgrave/ultimate-zip?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=steelgrave/ultimate-zip&amp;utm_campaign=Badge_Grade) ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/steelgrave/ultimate-zip)
 ___
-**Ultimate Zip is a pure JavaScript implementation of a ZIP Archive with friendly APIs for [NodeJS](https://nodejs.org).**
+#### Ultimate Zip is a pure JavaScript implementation of a ZIP Archive with friendly APIs for [NodeJS](https://nodejs.org).
 
-:point_right: ***Fast extraction times and low memory footprint***<br/>
-:point_right: ***Works in async and sync modes***<br/>
-:point_right: ***Supports NodeJS 6 and UP***<br/>
-:point_right: ***Actively maintained***<br/>
+:point_right: _Fast extraction times and low memory footprint_<br/>
+:point_right: _Works in async and sync modes_<br/>
+:point_right: _Supports NodeJS 6 and UP_<br/>
+:point_right: _Actively maintained_<br/>
 
 ## Table of Contents
- * [Ultimate Zip](#ultimate-zip)
- * [Table of Contents](#table-of-contents)
- * [About](#about)
-   * [Motivation](#motivation)
-   * [Philosophy](#philosophy)
- * [Project Status](#project-status)
-   * [Versions](#versions)
-   * [Limitations](#limitations)
-   * [To Do](#to-do)
- * [Getting Started](#getting-started)
-   * [Installation](#installation)
-   * [Basic Usage](#basic-usage)
-   * [Dependencies](#dependencies)
- * [Testing](#testing)
-   * [Setup](#setup)
-   * [Running Tests](#running-tests)
-   * [Code Coverage](#code-coverage)
- * [Code Examples](#code-examples)
-   * [Async API](#async-api)
-   * [Sync API](#sync-api)
- * [License](#license)
+* [Ultimate Zip](#ultimate-zip)
+* [Table of Contents](#table-of-contents)
+* [About](#about)
+    * [Authors](#author)
+    * [Motivation](#motivation)
+    * [Philosophy](#philosophy)
+* [Project Status](#project-status)
+    * [Versions](#versions)
+    * [Limitations](#limitations)
+    * [To Do](#to-do)
+* [Getting Started](#getting-started)
+    * [Installation](#installation)
+    * [Basic Usage](#basic-usage)
+    * [Dependencies](#dependencies)
+* [Testing](#testing)
+    * [Setup](#setup)
+    * [Running Tests](#running-tests)
+    * [Code Coverage](#code-coverage)
+* [Code Examples](#code-examples)
+    * [Async API](#async-api)
+    * [Sync API](#sync-api)
+* [License](#license)
 ___
 ## About
 Fast and lightweight JavaScript Zip Archive library.<br/>
 Works both async or sync modes with clean and beautiful APIs while keeping memory footprint at low.
 Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.
 Comprehensive tests, unit and integration, as a part of the project philosophy.
+### Authors
+**Leonid Weinberg** (leonwbrg@gmail.com)
 ### Motivation
 As a NodeJS web services and tools developer, I'm often working with Zip Archives.
 However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,
 I decided to create one myself!
 ### Philosophy
-- Friendly APIs
-- Well tested
-- Broad supportability
-- Lightweight & small code base
+  - Friendly APIs
+  - Well tested
+  - Lightweight & small code base
 ___
 ## Project Status
 Active development
