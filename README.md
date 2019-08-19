@@ -4,9 +4,9 @@
 ___
 **Ultimate Zip is a pure JavaScript implementation of a ZIP file with friendly APIs for [NodeJS](https://nodejs.org).**
 
-:point_right: **Fast extraction times and low memory footprint**<br/>
-:point_right: **Works in async and sync modes**<br/>
-:point_right: **Supports NodeJS 6+**<br/>
+:point_right: ***Fast extraction times and low memory footprint***<br/>
+:point_right: ***Works in async and sync modes***<br/>
+:point_right: ***Supports NodeJS 6 and UP***<br/>
 :point_right: ***Actively maintained***<br/>
 
 ## Table of Contents
