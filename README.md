@@ -96,10 +96,6 @@ try {
 ```
 ## Dependencies
 none
-#### devDependencies
- - **[babel](https://babeljs.io)**
- - **[eslint](https://eslint.org)**
- - **[jest](https://jestjs.io)**
 ## Testing
 ___
 ### Setup
