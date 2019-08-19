@@ -20,6 +20,7 @@ ___
  * [Getting Started](#getting-started)
    * [Installation](#installation)
    * [Basic Usage](#basic-usage)
+   * [Dependencies](#dependecies)
  * [Testing](#testing)
    * [Setup](#setup)
    * [Running Tests](#running-tests)
@@ -27,7 +28,6 @@ ___
  * [Code Examples](#code-examples)
    * [Async API](#async-api)
    * [Sync API](#sync-api)
- * [Dependencies](#dependecies)
  * [License](#license)
 
 ## About
@@ -94,6 +94,12 @@ try {
     console.log('error extracting archive!')
 }
 ```
+## Dependencies
+none
+#### devDependencies
+ - **[babel](https://babeljs.io)**
+ - **[eslint](https://eslint.org)**
+ - **[jest](https://jestjs.io)**
 ## Testing
 ___
 ### Setup
@@ -349,13 +355,6 @@ for (const entry of entries) {
     }
 }
 ```
-## Dependencies
- none
-#### devDependencies
- - **[babel](https://babeljs.io)**
- - **[eslint](https://eslint.org)**
- - **[jest](https://jestjs.io)**
-
 ## License
 ___
 MIT License<br/>
