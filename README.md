@@ -1,5 +1,6 @@
 # Ultimate Zip
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9767355fcb4541acba78cc5a6b2a407e)](https://app.codacy.com/app/steelgrave/ultimate-zip?utm_source=github.com&utm_medium=referral&utm_content=steelgrave/ultimate-zip&utm_campaign=Badge_Grade_Dashboard)
 [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip)
 ___
 **Ultimate Zip is a pure JavaScript implementation of a ZIP file with friendly APIs for [NodeJS](https://nodejs.org).**
