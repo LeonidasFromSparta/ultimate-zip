@@ -24,15 +24,26 @@ ___
    * [Sync API](#sync-api)
  * [Dependencies](#dependecies)
  * [License](#license)
-
-## Project Status
+## About
+Fast and lightweight JavaScript Zip library that can work both async or sync modes for NodeJS with clean and beautiful APIs.<br/>
+Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.<br/>
+Comprehensive tests, unit and integration, as a part of this project philosophy.<br/>
+### Motivation
+Developing NodeJS backend web services and tools, I often work with Zip files,<br/>
+however I had a hard time finding any established, well maintaned and well tested JavaScript Zip library, with easy usage.<br/>
+So, I decided to create one myself!
+### Philosophy
+- Easy usage, friendly APIs
+- Well tested
+- Broad supportability
+- Lightweight & small code base
 ___
+## Project Status
 It is a work in progress.<br/>
 **To-dos:**
 - add compression support
 - add more unit tests
 - add linting to jest testing
-
 ## Getting Started
 ___
 ### Installation
