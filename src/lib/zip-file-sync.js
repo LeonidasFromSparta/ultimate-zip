@@ -90,13 +90,14 @@ const getZipHeader = (file) => {
 const getEntriesSync = (file) => {
 
     file.openSync()
-    const header = getZipHeader(file)
 
+    const header = getZipHeader(file)
     const start = header.cenDirsOffset
     const length = header.cenDirsSize
 
     const buffer = file.readSync(start, length)
     const entries = readCenHeaders(buffer)
+
     file.closeSync()
 
     return entries.map((obj) => new Entry(obj, file))

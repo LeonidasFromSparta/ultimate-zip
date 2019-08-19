@@ -27,7 +27,7 @@ const cenDecoder = (buffer, index) => {
     header.fileName = buffer.toString('utf8', index + CEN_HDR, index + CEN_HDR + nameLen)
     header.length = CEN_HDR + nameLen + extraLen + commentLen
 
-    const extraBuf = Buffer.allocUnsafe(extraLen)
+    const extraBuf = Buffer.alloc(extraLen)
     buffer.copy(extraBuf, 0, index + CEN_HDR + nameLen, index + CEN_HDR + nameLen + extraLen)
 
     for (let offset=0; offset < extraBuf.length; offset++) {

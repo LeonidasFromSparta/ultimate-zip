@@ -77,7 +77,7 @@ export default class File {
 
     read = async (pos, length) => {
 
-        const buffer = Buffer.allocUnsafe(length)
+        const buffer = Buffer.alloc(length)
         const data = await read(this.fd, buffer, 0, length, pos)
         return data
     }
