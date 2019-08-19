@@ -91,27 +91,16 @@ const getZipHeader = async (file) => {
 
 const getEntries = async (file) => {
 
-    console.log('file name ' + file.path)
-
     await file.open()
+
     const header = await getZipHeader(file)
-
     const start = header.cenDirsOffset
-
-    console.log(start)
-
     const length = header.cenDirsSize
 
-    console.log(length)
-
     const buffer = await file.read(start, length)
-
-    console.log(buffer.length)
-
     const entries = readCenHeaders(buffer)
 
     await file.close()
-
     return entries.map((obj) => new Entry(obj, file))
 }
 
