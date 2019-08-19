@@ -96,7 +96,7 @@ try {
 }
 ```
 Explore additional APIs in the [Code Examples section](#code-examples)
-## Dependencies
+### Dependencies
 none
 ___
 ## Testing
