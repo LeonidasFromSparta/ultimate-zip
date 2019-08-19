@@ -45,9 +45,9 @@ As a NodeJS web services and tools developer, I'm often working with Zip Archive
 However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,
 I decided to create one myself!
 ### Philosophy
-  - Friendly APIs
-  - Well tested
-  - Lightweight & small code base
+  * Friendly APIs
+  * Well tested
+  * Lightweight & small code base
 ___
 ## Project Status
 Active development
@@ -55,8 +55,8 @@ Active development
 No major versions released yet<br/><br/>
 _This project is using [SemVer](https://semver.org) convention_
 ### Limitations
-1. Multiple volumes Zip Archive is not supported
-2. Ecnrypted Zip Archive is not suported
+ 1. Multiple volumes Zip Archive is not supported
+ 2. Ecnrypted Zip Archive is not suported
 ### To Do
 Unit and integration tests
 ___
