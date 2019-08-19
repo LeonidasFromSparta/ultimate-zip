@@ -13,24 +13,24 @@ ___
 * [Ultimate Zip](#ultimate-zip)
 * [Table of Contents](#table-of-contents)
 * [About](#about)
-    * [Authors](#author)
-    * [Motivation](#motivation)
-    * [Philosophy](#philosophy)
+  * [Authors](#author)
+  * [Motivation](#motivation)
+  * [Philosophy](#philosophy)
 * [Project Status](#project-status)
-    * [Versions](#versions)
-    * [Limitations](#limitations)
-    * [To Do](#to-do)
+  * [Versions](#versions)
+  * [Limitations](#limitations)
+  * [To Do](#to-do)
 * [Getting Started](#getting-started)
-    * [Installation](#installation)
-    * [Basic Usage](#basic-usage)
-    * [Dependencies](#dependencies)
+  * [Installation](#installation)
+  * [Basic Usage](#basic-usage)
+  * [Dependencies](#dependencies)
 * [Testing](#testing)
-    * [Setup](#setup)
-    * [Running Tests](#running-tests)
-    * [Code Coverage](#code-coverage)
+  * [Setup](#setup)
+  * [Running Tests](#running-tests)
+  * [Code Coverage](#code-coverage)
 * [Code Examples](#code-examples)
-    * [Async API](#async-api)
-    * [Sync API](#sync-api)
+  * [Async API](#async-api)
+  * [Sync API](#sync-api)
 * [License](#license)
 ___
 # About
@@ -45,9 +45,9 @@ As a NodeJS web services and tools developer, I'm often working with Zip Archive
 However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,
 I decided to create one myself!
 ### Philosophy
-  * Friendly APIs
-  * Well tested
-  * Lightweight & small code base
+* Friendly APIs
+* Well tested
+* Lightweight & small code base
 ___
 # Project Status
 Active development
