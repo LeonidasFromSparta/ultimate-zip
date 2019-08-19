@@ -2,7 +2,7 @@
 
 [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip)
 ___
-**Ultimate Zip is a pure JavaScript implementation of a ZIP file with friendly APIs for [NodeJS](https://nodejs.org).**
+**Ultimate Zip is a pure JavaScript implementation of a ZIP Archive with friendly APIs for [NodeJS](https://nodejs.org).**
 
 :point_right: ***Fast extraction times and low memory footprint***<br/>
 :point_right: ***Works in async and sync modes***<br/>
@@ -22,7 +22,7 @@ ___
  * [Getting Started](#getting-started)
    * [Installation](#installation)
    * [Basic Usage](#basic-usage)
-   * [Dependencies](#dependecies)
+   * [Dependencies](#dependencies)
  * [Testing](#testing)
    * [Setup](#setup)
    * [Running Tests](#running-tests)
@@ -31,14 +31,14 @@ ___
    * [Async API](#async-api)
    * [Sync API](#sync-api)
  * [License](#license)
-
+___
 ## About
 Fast and lightweight JavaScript Zip Archive library.<br/>
 Works both async or sync modes with clean and beautiful APIs while keeping memory footprint at low.
 Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.
 Comprehensive tests, unit and integration, as a part of the project philosophy.
 ### Motivation
-As a NodeJS web services and tools developer, I'm often working with Zip files.
+As a NodeJS web services and tools developer, I'm often working with Zip Archives.
 However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,
 I decided to create one myself!
 ### Philosophy
@@ -52,21 +52,20 @@ Active development
 ### Versions
 No major versions released yet<br/><br/>
 _This project is using [SemVer](https://semver.org) convention_
-### Limitation
-1. Multiple volumes Zip file is not supported
-2. Ecnrypted Zip file is not suported
+### Limitations
+1. Multiple volumes Zip Archive is not supported
+2. Ecnrypted Zip Archive is not suported
 ### To Do
 Unit and integration tests
-## Getting Started
 ___
+## Getting Started
 ### Installation
-
 Install ultimate-zip with [NPM](https://www.npmjs.com)
 ```
 $ npm install ultimate-zip
 ```
 ### Basic Usage
-In your favorite editor..
+In your favorite editor
 ```javascript
 // async mode
 import UZip from 'something'
@@ -96,10 +95,11 @@ try {
     console.log('error extracting archive!')
 }
 ```
+Explore additional APIs in the [Code Examples section](#code-examples)
 ## Dependencies
 none
-## Testing
 ___
+## Testing
 ### Setup
 Clone the repository
 ```
@@ -127,8 +127,8 @@ Generate code coverage report
 ```
 $ npm run coverage
 ```
-## Code Examples
 ___
+## Code Examples
 ### Async API
 **ECMA 5** (callbacks)
 ```javascript
@@ -353,8 +353,8 @@ for (const entry of entries) {
     }
 }
 ```
-## License
 ___
+## License
 MIT License<br/>
 Copyright (c) 2019 Leonid Weinberg<br/>
 See the [LICENSE](LICENSE) file for details
