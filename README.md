@@ -1,6 +1,6 @@
 # Ultimate Zip
 
-[![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/919188fe12a04fe1a7e1457d9f5f7cb5)](https://www.codacy.com/app/steelgrave/ultimate-zip?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=steelgrave/ultimate-zip&amp;utm_campaign=Badge_Grade) ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/steelgrave/ultimate-zip)
+[![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip) ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/steelgrave/ultimate-zip)
 ___
 #### Ultimate Zip is a pure JavaScript implementation of a ZIP Archive with friendly APIs for [NodeJS](https://nodejs.org)
 
@@ -11,28 +11,26 @@ ___
 
 ## Table of Contents
 * [Ultimate Zip](#ultimate-zip)
-
 * [Table of Contents](#table-of-contents)
 * [About](#about)
-  * [Authors](#author)
-  * [Motivation](#motivation)
-  * [Philosophy](#philosophy)
-
+    * [Authors](#author)
+    * [Motivation](#motivation)
+    * [Philosophy](#philosophy)
 * [Project Status](#project-status)
     * [Versions](#versions)
-  * [Limitations](#limitations)
-  * [To Do](#to-do)
+    * [Limitations](#limitations)
+    * [To Do](#to-do)
 * [Getting Started](#getting-started)
-  * [Installation](#installation)
-  * [Basic Usage](#basic-usage)
-  * [Dependencies](#dependencies)
+    * [Installation](#installation)
+    * [Basic Usage](#basic-usage)
+    * [Dependencies](#dependencies)
 * [Testing](#testing)
-  * [Setup](#setup)
-  * [Running Tests](#running-tests)
-  * [Code Coverage](#code-coverage)
+    * [Setup](#setup)
+    * [Running Tests](#running-tests)
+    * [Code Coverage](#code-coverage)
 * [Code Examples](#code-examples)
-  * [Async API](#async-api)
-  * [Sync API](#sync-api)
+    * [Async API](#async-api)
+    * [Sync API](#sync-api)
 * [License](#license)
 ___
 ## About
