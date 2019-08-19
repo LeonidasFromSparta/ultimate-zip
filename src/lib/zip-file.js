@@ -101,7 +101,6 @@ const getEntries = async (file) => {
     const entries = readCenHeaders(buffer)
 
     await file.close()
-
     return entries.map((obj) => new Entry(obj, file))
 }
 
