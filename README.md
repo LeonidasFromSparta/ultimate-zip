@@ -2,7 +2,7 @@
 
 [![travis ci](https://travis-ci.org/steelgrave/ultimate-zip.svg?branch=master)](https://shields.io/) [![codecov](https://codecov.io/gh/steelgrave/ultimate-zip/branch/master/graph/badge.svg)](https://codecov.io/gh/steelgrave/ultimate-zip) ![David](https://img.shields.io/david/dev/steelgrave/ultimate-zip) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/919188fe12a04fe1a7e1457d9f5f7cb5)](https://www.codacy.com/app/steelgrave/ultimate-zip?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=steelgrave/ultimate-zip&amp;utm_campaign=Badge_Grade) ![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability-percentage/steelgrave/ultimate-zip)
 ___
-#### Ultimate Zip is a pure JavaScript implementation of a ZIP Archive with friendly APIs for [NodeJS](https://nodejs.org).
+#### Ultimate Zip is a pure JavaScript implementation of a ZIP Archive with friendly APIs for [NodeJS](https://nodejs.org)
 
 :point_right: _Fast extraction times and low memory footprint_<br/>
 :point_right: _Works in async and sync modes_<br/>
@@ -11,13 +11,15 @@ ___
 
 ## Table of Contents
 * [Ultimate Zip](#ultimate-zip)
+
 * [Table of Contents](#table-of-contents)
 * [About](#about)
   * [Authors](#author)
   * [Motivation](#motivation)
   * [Philosophy](#philosophy)
+
 * [Project Status](#project-status)
-  * [Versions](#versions)
+    * [Versions](#versions)
   * [Limitations](#limitations)
   * [To Do](#to-do)
 * [Getting Started](#getting-started)
@@ -33,7 +35,7 @@ ___
   * [Sync API](#sync-api)
 * [License](#license)
 ___
-# About
+## About
 Fast and lightweight JavaScript Zip Archive library.<br/>
 Works both async or sync modes with clean and beautiful APIs while keeping memory footprint at low.
 Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.
@@ -49,7 +51,7 @@ I decided to create one myself!
 * Well tested
 * Lightweight & small code base
 ___
-# Project Status
+## Project Status
 Active development
 ### Versions
 No major versions released yet<br/><br/>
@@ -60,7 +62,7 @@ _This project is using [SemVer](https://semver.org) convention_
 ### To Do
 Unit and integration tests
 ___
-# Getting Started
+## Getting Started
 ### Installation
 Install ultimate-zip with [NPM](https://www.npmjs.com)
 ```
@@ -101,7 +103,7 @@ Explore additional APIs in the [Code Examples section](#code-examples)
 ### Dependencies
 none
 ___
-# Testing
+## Testing
 ### Setup
 Clone the repository
 ```
@@ -130,7 +132,7 @@ Generate code coverage report
 $ npm run coverage
 ```
 ___
-# Code Examples
+## Code Examples
 ### Async API
 **ECMA 5** (callbacks)
 ```javascript
