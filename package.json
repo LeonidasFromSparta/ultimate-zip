@@ -8,7 +8,7 @@
         "compile": "babel src -d build",
         "debug": "babel-node --inspect=9001 tests/integration/debug.js",
         "start": "npm run lint && npm run compile && node build/index.js",
-        "test": "jest",
+        "test": "jest -t integration",
         "unit": "jest -t unit",
         "integration": "jest -t integration",
         "coverage": "jest --coverage"
@@ -34,7 +34,7 @@
         "babel-eslint": "^10.0.2",
         "eslint": "^5.5.0",
         "eslint-plugin-babel": "^5.3.0",
-        "jest": "^24.9.0"
+        "jest": "^24.1.0"
     },
     "engines": {
         "node": ">=6"
