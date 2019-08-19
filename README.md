@@ -32,7 +32,7 @@ ___
 
 ## About
 Fast and lightweight JavaScript Zip file library.<br/>
-Works both async or sync modes with clean and beautiful APIs.<br/>
+Works both async or sync modes with clean and beautiful APIs.
 Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.
 Comprehensive tests, unit and integration, as a part of the project philosophy.
 ### Motivation
