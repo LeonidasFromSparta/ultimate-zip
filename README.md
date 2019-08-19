@@ -7,11 +7,16 @@ ___
 :point_right: **Fast extraction times and low memory footprint**<br/>
 :point_right: **Works in async and sync modes**<br/>
 :point_right: **Supports NodeJS 6+**<br/>
+:point_right: ***Actively maintained***<br/>
 
 ## Table of Contents
  * [Ultimate Zip](#ultimate-zip)
  * [Table of Contents](#table-of-contents)
+ * [About](#about)
  * [Project Status](#project-status)
+   * [Versions](#versions)
+   * [Limitations](#limitations)
+   * [To Do](#to-do)
  * [Getting Started](#getting-started)
    * [Installation](#installation)
    * [Basic Usage](#basic-usage)
@@ -24,26 +29,32 @@ ___
    * [Sync API](#sync-api)
  * [Dependencies](#dependecies)
  * [License](#license)
+
 ## About
-Fast and lightweight JavaScript Zip library that can work both async or sync modes for NodeJS with clean and beautiful APIs.<br/>
+Fast and lightweight JavaScript Zip file library.<br/>
+Works both async or sync modes with clean and beautiful APIs.<br/>
 Written in pure JavaScript (ECMA 9 standart), transpiled with babel and backed by NodeJS zlib module without any external dependecies.<br/>
-Comprehensive tests, unit and integration, as a part of this project philosophy.<br/>
+Comprehensive tests, unit and integration, as a part of the project philosophy.<br/>
 ### Motivation
-Developing NodeJS backend web services and tools, I often work with Zip files,<br/>
-however I had a hard time finding any established, well maintaned and well tested JavaScript Zip library, with easy usage.<br/>
-So, I decided to create one myself!
+As a NodeJS web services and tools developer, I'm often working with Zip files.<br/>
+However after having a hard time finding any established, well maintaned and well tested JavaScript Zip library with simple usage,<br/>
+I decided to create one myself!
 ### Philosophy
-- Easy usage, friendly APIs
+- Easy, friendly APIs
 - Well tested
 - Broad supportability
 - Lightweight & small code base
 ___
 ## Project Status
-It is a work in progress.<br/>
-**To-dos:**
-- add compression support
-- add more unit tests
-- add linting to jest testing
+Active development
+### Versions
+This project is using [semver](https://semver.org) convention<br/><br/>
+No major versions released yet
+### Limitation
+ - Multiple volumes Zip file is not supported
+ - Ecnrypted Zip file is not suported
+### To Do
+- More unit and integration tests
 ## Getting Started
 ___
 ### Installation
