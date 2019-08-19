@@ -1,11 +1,9 @@
 import UZip from 'u-zip'
 import { delSync, EXTRACT_PATH, ASSETS_PATH } from './integration.utils'
 
-beforeAll(() => {
-    delSync(EXTRACT_PATH + '/promise')
-})
-
 test('should assert promise extractArchive API', async () => {
+
+    delSync(EXTRACT_PATH + '/promise')
 
     await new UZip(ASSETS_PATH + '/win-7z-store.zip')
         .extractArchive(EXTRACT_PATH + '/promise/win-7z-store')
@@ -60,6 +58,8 @@ test('should assert promise extractArchive API', async () => {
 
     await new UZip(ASSETS_PATH + '/win-7z-ultra.zip')
         .getEntries()
+
+    return expect(Promise.resolve(true)).resolves.toBe(true)
 })
 
 test('should assert promise testArchive API', async () => {
