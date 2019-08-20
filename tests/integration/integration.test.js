@@ -1,7 +1,26 @@
 import UZip from 'u-zip'
-import fs from 'fs'
-import {ASSETS_PATH, EXTRACT_PATH, delSync} from './integration.utils'
-import { exportAllDeclaration } from '@babel/types';
+import {existsSync, lstatSync, rmdirSync, unlinkSync, readdirSync} from 'fs'
+
+const delSync = (path) => {
+
+    if (existsSync(path)) {
+
+        readdirSync(path).forEach((file) => {
+
+            const curPath = path + '/' + file
+
+            if (lstatSync(curPath).isDirectory())
+                delSync(curPath)
+            else
+                unlinkSync(curPath)
+        })
+
+        rmdirSync(path)
+    }
+}
+
+const ASSETS_PATH = './tests/integration/assets'
+const EXTRACT_PATH = './tests/integration/assets/tmp'
 
 beforeAll(() => {
     delSync(EXTRACT_PATH + '/zip/sync')
@@ -15,7 +34,7 @@ beforeAll(() => {
 
 test('integration test should assert inflate algorithms', async () => {
 
-    const files = fs.readdirSync(ASSETS_PATH + '/algorithms')
+    const files = readdirSync(ASSETS_PATH + '/algorithms')
 
     for (const file of files)
         new UZip(ASSETS_PATH + '/algorithms' + '/' + file).testArchiveSync()
@@ -182,7 +201,7 @@ test('integration test should error on bad local header signature', () => {
 
 test('integration test should error on bad local header signature', () => {
 
-    const files = fs.readdirSync(ASSETS_PATH + '/bad cen sig')
+    const files = readdirSync(ASSETS_PATH + '/bad cen sig')
 
     for (const file of files)
         expect(() => new UZip(ASSETS_PATH + '/bad cen sig' + '/' + file).testArchiveSync()).toThrow()

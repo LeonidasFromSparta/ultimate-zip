@@ -1,5 +1,4 @@
 import path from 'path'
-import {Readable} from 'stream'
 import {readLocHeader} from './../utils'
 import {bufferedInflater, streamingInflater} from '../inflater'
 import {LOC_HDR} from './../constants'
