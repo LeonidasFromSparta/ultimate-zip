@@ -136,7 +136,7 @@ test('integration test should assert get as buffer entry - callback api', async 
 
     await new Promise((resolve, reject) => {
 
-        entries[4].getAsBuffer((err, buffer) => err ? reject(err) : resolve(buffer))
+        entries[10].getAsBuffer((err, buffer) => err ? reject(err) : resolve(buffer))
     })
 })
 
