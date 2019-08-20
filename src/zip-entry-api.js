@@ -1,5 +1,6 @@
 import {extractSync, testSync, getAsBufferSync} from './lib/zip-entry-sync'
-import {extract, test, getAsBuffer} from './lib/zip-entry'
+import {extract, test, getAsBuffer, getAsStream} from './lib/zip-entry'
+import File from './file'
 
 export default class Entry {
 
@@ -21,18 +22,26 @@ export default class Entry {
 
     getAsBuffer = (callback) => {
 
-        if (!callback || typeof callback !== 'function')
-            return getAsBuffer(this.header, this.file)
+        const file = new File(this.file.path)
 
-        getAsBuffer(this.header, this.file)
+        if (!callback || typeof callback !== 'function')
+            return getAsBuffer(this.header, file)
+
+        getAsBuffer(this.header, file)
         .then((content) => callback(undefined, content))
         .catch((err) => callback(err))
     }
 
-    getAsStream = async () => {
+    getAsStream = (callback) => {
 
-        // TO DO
-        // return await getAsBuffer(this.header, this.file)
+        const file = new File(this.file.path)
+
+        if (!callback || typeof callback !== 'function')
+            return getAsStream(this.header, file)
+
+        getAsStream(this.header, file)
+        .then((stream) => callback(undefined, stream))
+        .catch((err) => callback(err))
     }
 
     test = (callback) => {

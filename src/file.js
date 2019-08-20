@@ -80,17 +80,22 @@ export default class File {
 
     readSync = (pos, length) => {
 
+        if (this.fd === null)
+            throw new Error('fd not opened')
+
         const buffer = Buffer.alloc(length)
         readSync(this.fd, buffer, 0, length, pos)
 
         return buffer
     }
 
-    read = async (pos, length) => {
+    read = (pos, length) => {
+
+        if (this.fd === null)
+            throw new Error('fd not opened')
 
         const buffer = Buffer.alloc(length)
-        const data = await read(this.fd, buffer, 0, length, pos)
-        return data
+        return read(this.fd, buffer, 0, length, pos)
     }
 
     getFileSize = async () => {
@@ -128,7 +133,10 @@ export default class File {
         writeFileSync(file, data)
     }
 
-    createReadStream = (start, length) => {
+    getCloseableReadStream = (start, length) => {
+
+        if (this.fd === null)
+            throw new Error('fd not opened')
 
         return createReadStream(undefined, {fd: this.fd, start, end: start + length - 1})
     }

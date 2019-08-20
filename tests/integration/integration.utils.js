@@ -19,6 +19,6 @@ const delSync = (path) => {
 }
 
 const ASSETS_PATH = './tests/integration/assets'
-const EXTRACT_PATH = './tests/integration/assets/extracted'
+const EXTRACT_PATH = './tests/integration/assets/tmp'
 
 export {delSync, ASSETS_PATH, EXTRACT_PATH}

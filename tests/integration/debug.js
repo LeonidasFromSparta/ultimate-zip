@@ -1,50 +1,24 @@
 import UZip from './../../src/u-zip'
 
 const ASSETS_PATH = './tests/integration/assets'
-const EXTRACT_PATH = './tests/integration/assets/extracted'
+const EXTRACT_PATH = './tests/integration/assets/tmp'
 
 ;
 (async () => {
 
     debugger
-    const keke = [
+    const entries = await new Promise((resolve, reject) => {
 
-    new UZip(ASSETS_PATH + '/win-7z-store.zip')
-    .extractArchive(EXTRACT_PATH + '/promise/win-7z-store'),
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+            .getEntries((err, entries) => err ? reject(err) : resolve(entries))
+    })
 
-    new UZip(ASSETS_PATH + '/win-7z-fast.zip')
-        .extractArchive(EXTRACT_PATH + '/promise/win-7z-fast'),
+    await new Promise((resolve, reject) => {
 
-    new UZip(ASSETS_PATH + '/win-7z-fastest.zip')
-        .extractArchive(EXTRACT_PATH + '/promise/win-7z-fastest'),
-
-    new UZip(ASSETS_PATH + '/win-7z-normal.zip')
-        .extractArchive(EXTRACT_PATH + '/promise/win-7z-normal'),
-
-    new UZip(ASSETS_PATH + '/win-7z-maximum.zip')
-        .extractArchive(EXTRACT_PATH + '/promise/win-7z-maximum'),
-
-    new UZip(ASSETS_PATH + '/win-7z-ultra.zip')
-        .extractArchive(EXTRACT_PATH + '/promise/win-7z-ultra'),
-
-    new UZip(ASSETS_PATH + '/win-7z-store.zip')
-        .testArchive(),
-
-    new UZip(ASSETS_PATH + '/win-7z-fast.zip')
-        .testArchive(),
-
-    new UZip(ASSETS_PATH + '/win-7z-fastest.zip')
-        .testArchive(),
-
-    new UZip(ASSETS_PATH + '/win-7z-normal.zip')
-        .testArchive(),
-
-    new UZip(ASSETS_PATH + '/win-7z-maximum.zip')
-        .testArchive(),
-
-    new UZip(ASSETS_PATH + '/win-7z-ultra.zip')
-        .testArchive()
-    ]
-
-    await Promise.all(keke)
+        entries[10].getAsStream((err, stream) => err ? reject(err) : resolve(stream))
+    })
+    debugger
+    debugger
+    debugger
+    debugger
 })()
