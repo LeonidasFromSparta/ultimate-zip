@@ -6,57 +6,67 @@ const extract = async (path, header, file) => {
 
     const name = path + '/' + header.fileName
 
-    if (header.isDirectory())
-        return await file.makeDir(name)
+    if (header.isDirectory()) {
 
-    const hdrBuff = await file.read(header.localOffset, LOC_HDR)
-    const locHeader = readLocHeader(hdrBuff)
-    const pos = locHeader.length
-
-    if (header.isEmpty())
+        await file.makeDir(name)
         return
-
-    if (header.deflatedSize < 1048576) {
-
-        const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
-        const deflated = await bufferedInflater(header, buffer)
-        file.writeFile(name, deflated)
     }
 
-    // const writer = file.createWriteStream(name)
-    // await inflater(header, pos, file, writer)
-}
+    if (header.isEmpty()) {
 
-const getAsBuffer = async (header, file) => {
-
-    if (header.isDirectory())
-        return Buffer.alloc(0)
+        await file.writeFile(name, Buffer.alloc(0))
+        return
+    }
 
     const hdrBuff = await file.read(header.localOffset, LOC_HDR)
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
     const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
-    return await bufferedInflater(header, buffer)
+    const deflated = await bufferedInflater(header, buffer)
+    await file.writeFile(name, deflated)
+}
+
+const getAsBuffer = async (header, file) => {
+
+    if (header.isDirectory())
+        throw new Error('zip entry ' + this.header.fileName + ' is a directory')
+
+    if (header.isEmpty())
+        return Buffer.alloc(0)
+
+    const hdrBuff = await file.read(header.localOffset, LOC_HDR)
+    const locHeader = readLocHeader(hdrBuff)
+    const pos = locHeader.length
+
+    const content = await file.read(header.localOffset + pos, header.deflatedSize)
+    return bufferedInflater(header, content)
+}
+
+const getAsStream = async (header, file) => {
+
+    if (header.isDirectory())
+        throw new Error('zip entry ' + this.header.fileName + ' is a directory')
+
+    const hdrBuff = await file.read(header.localOffset, LOC_HDR)
+    const locHeader = readLocHeader(hdrBuff)
+    const pos = locHeader.length
+
+    const content = await file.getReadStream(header.localOffset + pos, header.deflatedSize)
+    return streamingInflater(header, content)
 }
 
 const test = async (header, file) => {
 
-    if (header.isDirectory())
+    if (header.isDirectory() || header.isEmpty())
         return
 
     const hdrBuff = await file.read(header.localOffset, LOC_HDR)
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
-    if (header.deflatedSize < 1048576) {
-
-        const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
-        await bufferedInflater(header, buffer)
-    }
-
-    // const writer = new DumpWriter()
-    // await inflater(header, pos, file, writer)
+    const content = await file.read(header.localOffset + pos, header.deflatedSize)
+    await bufferedInflater(header, content)
 }
 
-export {extract, test, getAsBuffer}
+export {extract, test, getAsBuffer, getAsStream}

@@ -1,4 +1,15 @@
-import {openSync, closeSync, fstatSync, readSync, existsSync, mkdirSync, writeFileSync, createWriteStream} from 'fs'
+import {
+    openSync,
+    closeSync,
+    fstatSync,
+    readSync,
+    existsSync,
+    mkdirSync,
+    writeFileSync,
+    createReadStream,
+    createWriteStream
+} from 'fs'
+
 import {open, close, fstat, stat, read, mkdir, writeFile} from './promisifed-fs'
 import path from 'path'
 
@@ -115,5 +126,10 @@ export default class File {
     writeFileSync = (file, data) => {
 
         writeFileSync(file, data)
+    }
+
+    createReadStream = (start, length) => {
+
+        return createReadStream(undefined, {fd: this.fd, start, end: start + length - 1})
     }
 }

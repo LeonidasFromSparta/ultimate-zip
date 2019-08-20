@@ -1,4 +1,5 @@
 import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
+import {Writable} from 'stream'
 import {CRC32, CRC32Stream} from './crc32'
 
 const compareChecksum = (val1, val2) => {
@@ -16,52 +17,15 @@ const bufferedInflater = async (header, deflated) => {
     return inflated
 }
 
-/*
-const streamingInflater = async (header, locLength, file, writer) => {
-
-    import {Writable} from 'stream'
-
-export default class DumpWriter extends Writable {
-
-    _write = (chunk, encoding, callback) => callback()
-
-    _writev = (chunks, callback) => callback()
-}
-
-    if (header.deflatedSize < 1048576) {
-
-        const buffer = await file.read(header.localOffset + locLength, header.deflatedSize)
-        const deflated = await new Promise((resolve) => inflateRaw(buffer, (err, buffer) => resolve(buffer)))
-    }
+const streamingInflater = async (header, reader) => {
 
     const crc32Stream = new CRC32Stream(new CRC32())
+    const inflater = createInflateRaw()
 
-    const promise = new Promise((resolve) => {
+    reader.on('end', () => __private__.compareChecksum(header.checksum, crc32Stream.getValue()))
 
-
-
-        const reader = file.createReadStream(header.localOffset + locLength, header.localOffset + locLength + header.deflatedSize - 1)
-
-        if (header.isEmpty()) {
-
-            writer.end(Buffer.alloc(0))
-        } else {
-
-            if (header.isDeflated())
-                reader.pipe(createInflateRaw()).pipe(crc32Stream).pipe(writer)
-            else
-                reader.pipe(crc32Stream).pipe(writer)
-        }
-
-        writer.on('finish', resolve())
-    })
-
-    await promise
-
-    // if (header.checksum !== crc32Stream.getValue())
-    //    throw 'bad file cheksum'
+    return header.isDeflated() ? reader.pipe(inflater) : reader
 }
-*/
 
 const inflaterSync = (header, buffer) => {
 
@@ -74,4 +38,4 @@ const __private__ = {
     compareChecksum
 }
 
-export {bufferedInflater, inflaterSync, __private__}
+export {bufferedInflater, inflaterSync, streamingInflater, __private__}
