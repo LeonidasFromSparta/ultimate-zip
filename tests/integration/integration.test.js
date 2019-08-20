@@ -1,6 +1,7 @@
 import UZip from 'u-zip'
 import fs from 'fs'
 import {ASSETS_PATH, EXTRACT_PATH, delSync} from './integration.utils'
+import { exportAllDeclaration } from '@babel/types';
 
 beforeAll(() => {
     delSync(EXTRACT_PATH + '/zip/sync')
@@ -102,8 +103,8 @@ test('integration test should assert get as buffer entry - sync api', () => {
 
 test('integration test should assert get as buffer entry - promise api', async () => {
 
-    (await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-        .getEntries())[4].getAsBuffer()
+    const entries = await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').getEntries()
+    await entries[4].getAsBuffer()
 })
 
 test('integration test should assert get as buffer entry - callback api', async () => {
@@ -163,4 +164,26 @@ test('integration test should assert get as stream entry - callback api', async 
 
         entries[10].getAsStream((err, stream) => err ? reject(err) : resolve(stream))
     })
+})
+
+/**
+ * ERROR TESTS
+ */
+
+/*
+test('integration test should error on bad local header signature', () => {
+
+    const files = fs.readdirSync(ASSETS_PATH + '/bad loc sig')
+
+    for (const file of files)
+        expect(() => new UZip(ASSETS_PATH + '/bad loc sig' + '/' + file).testArchiveSync()).toThrow()
+})
+*/
+
+test('integration test should error on bad local header signature', () => {
+
+    const files = fs.readdirSync(ASSETS_PATH + '/bad cen sig')
+
+    for (const file of files)
+        expect(() => new UZip(ASSETS_PATH + '/bad cen sig' + '/' + file).testArchiveSync()).toThrow()
 })
