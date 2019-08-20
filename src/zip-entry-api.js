@@ -11,18 +11,22 @@ export default class Entry {
 
     extract = (path, callback) => {
 
-        if (!callback)
+        if (!callback || typeof callback !== 'function')
             return extract(path, this.header, this.file)
 
-        extract(path, this.header, this.file).then(callback).catch((err) => callback(err))
+        extract(path, this.header, this.file)
+        .then(callback)
+        .catch((err) => callback(err))
     }
 
     getAsBuffer = (callback) => {
 
-        if (!callback)
+        if (!callback || typeof callback !== 'function')
             return getAsBuffer(this.header, this.file)
 
-        getAsBuffer(this.header, this.file).then((data) => callback(undefined, data)).catch((err) => callback(err))
+        getAsBuffer(this.header, this.file)
+        .then((content) => callback(undefined, content))
+        .catch((err) => callback(err))
     }
 
     getAsStream = async () => {
@@ -33,10 +37,12 @@ export default class Entry {
 
     test = (callback) => {
 
-        if (!callback)
+        if (!callback || typeof callback !== 'function')
             return test(this.header, this.file)
 
-        test(this.header, this.file).then((data) => callback(undefined, data)).catch((err) => callback(err))
+        test(this.header, this.file)
+        .then((data) => callback(undefined, data))
+        .catch((err) => callback(err))
     }
 
     extractSync = (path) => {

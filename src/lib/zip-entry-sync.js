@@ -16,9 +16,11 @@ const extractSync = (path, header, file) => {
 	const locHeader = readLocHeader(hdrBuff)
 	const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
 	const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
+    const checksum = header.checksum
 
-	const deflated = inflaterSync(header, buffer)
+	const deflated = inflaterSync(isDeflated, buffer, checksum)
 	file.writeFileSync(name, deflated)
 }
 
@@ -31,8 +33,11 @@ const getAsBufferSync = (header, file) => {
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
     const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
-    return inflaterSync(header, buffer)
+    const checksum = header.checksum
+
+    return inflaterSync(isDeflated, buffer, checksum)
 }
 
 const testSync = (header, file) => {
@@ -44,8 +49,11 @@ const testSync = (header, file) => {
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
     const buffer = file.readSync(header.localOffset + pos, header.deflatedSize)
-    inflaterSync(header, buffer)
+    const checksum = header.checksum
+
+    inflaterSync(isDeflated, buffer, checksum)
 }
 
 export {extractSync, testSync, getAsBufferSync}

@@ -1,41 +1,40 @@
-import {createInflateRaw, inflateRawSync, inflateRaw} from 'zlib'
-import {Writable} from 'stream'
+import {createInflateRaw, inflateRawSync} from 'zlib'
+import {inflateRaw} from './promisified-zlib'
 import {CRC32, CRC32Stream} from './crc32'
 
 const compareChecksum = (val1, val2) => {
 
     if (val1 !== val2)
-        throw 'Bad Checksum Err'
+        throw 'bad checksum'
 }
 
-const bufferedInflater = async (header, deflated) => {
+const inflaterSync = (isDeflated, deflated, checksum) => {
 
-    const inflated = header.isDeflated() ?
-        await new Promise((resolve, reject) => inflateRaw(deflated, (err, inflated) => err ? reject(err) : resolve(inflated))) : deflated
-
-    __private__.compareChecksum(header.checksum, new CRC32().update(inflated).getValue())
+    const inflated = isDeflated ? inflateRawSync(deflated) : deflated
+    compareChecksum(checksum, new CRC32().update(inflated).getValue())
     return inflated
 }
 
-const streamingInflater = async (header, reader) => {
+const bufferedInflater = async (isDeflated, deflated, checksum) => {
 
-    const crc32Stream = new CRC32Stream(new CRC32())
+    const inflated = isDeflated ? await inflateRaw(deflated) : deflated
+    compareChecksum(checksum, new CRC32().update(inflated).getValue())
+    return inflated
+}
+
+const streamingInflater = async (isDeflated, deflated, checksum) => {
+
+    const crc32Stream = new CRC32Stream()
     const inflater = createInflateRaw()
 
-    reader.on('end', () => __private__.compareChecksum(header.checksum, crc32Stream.getValue()))
+    crc32Stream.on('finish', () => compareChecksum(checksum, crc32Stream.getValue()))
 
-    return header.isDeflated() ? reader.pipe(inflater) : reader
+    if (isDeflated)
+        deflated.pipe(inflater).pipe(crc32Stream)
+    else
+        deflated.pipe(crc32Stream)
+
+    return crc32Stream
 }
 
-const inflaterSync = (header, buffer) => {
-
-    const inflated = header.isDeflated() ? inflateRawSync(buffer) : buffer
-    __private__.compareChecksum(header.checksum, new CRC32().update(inflated).getValue())
-    return inflated
-}
-
-const __private__ = {
-    compareChecksum
-}
-
-export {bufferedInflater, inflaterSync, streamingInflater, __private__}
+export {inflaterSync, bufferedInflater, streamingInflater}

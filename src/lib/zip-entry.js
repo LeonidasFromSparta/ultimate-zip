@@ -22,8 +22,11 @@ const extract = async (path, header, file) => {
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
     const buffer = await file.read(header.localOffset + pos, header.deflatedSize)
-    const deflated = await bufferedInflater(header, buffer)
+    const checksum = header.checksum
+
+    const deflated = await bufferedInflater(isDeflated, buffer, checksum)
     await file.writeFile(name, deflated)
 }
 
@@ -39,21 +42,27 @@ const getAsBuffer = async (header, file) => {
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
     const content = await file.read(header.localOffset + pos, header.deflatedSize)
-    return bufferedInflater(header, content)
+    const checksum = header.checksum
+
+    return bufferedInflater(isDeflated, content, checksum)
 }
 
 const getAsStream = async (header, file) => {
 
     if (header.isDirectory())
-        throw new Error('zip entry ' + this.header.fileName + ' is a directory')
+        throw new Error('zip entry ' + header.fileName + ' is a directory')
 
     const hdrBuff = await file.read(header.localOffset, LOC_HDR)
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
     const content = await file.getReadStream(header.localOffset + pos, header.deflatedSize)
-    return streamingInflater(header, content)
+    const checksum = header.checksum
+
+    return streamingInflater(isDeflated, content, checksum)
 }
 
 const test = async (header, file) => {
@@ -65,8 +74,11 @@ const test = async (header, file) => {
     const locHeader = readLocHeader(hdrBuff)
     const pos = locHeader.length
 
+    const isDeflated = header.isDeflated()
     const content = await file.read(header.localOffset + pos, header.deflatedSize)
-    await bufferedInflater(header, content)
+    const checksum = header.checksum
+
+    await bufferedInflater(isDeflated, content, checksum)
 }
 
 export {extract, test, getAsBuffer, getAsStream}
