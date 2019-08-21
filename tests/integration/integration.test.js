@@ -1,35 +1,19 @@
 import UZip from 'u-zip'
-import {existsSync, lstatSync, rmdirSync, unlinkSync, readdirSync} from 'fs'
-
-const delSync = (path) => {
-
-    if (existsSync(path)) {
-
-        readdirSync(path).forEach((file) => {
-
-            const curPath = path + '/' + file
-
-            if (lstatSync(curPath).isDirectory())
-                delSync(curPath)
-            else
-                unlinkSync(curPath)
-        })
-
-        rmdirSync(path)
-    }
-}
+import {readdirSync} from 'fs'
+import rimraf from 'rimraf'
 
 const ASSETS_PATH = './tests/integration/assets'
 const EXTRACT_PATH = './tests/integration/assets/tmp'
 
 beforeAll(() => {
-    delSync(EXTRACT_PATH + '/zip/sync')
-    delSync(EXTRACT_PATH + '/zip/promise')
-    delSync(EXTRACT_PATH + '/zip/callback')
 
-    delSync(EXTRACT_PATH + '/entry/sync')
-    delSync(EXTRACT_PATH + '/entry/promise')
-    delSync(EXTRACT_PATH + '/entry/callback')
+   rimraf.sync(EXTRACT_PATH + '/zip/sync')
+   rimraf.sync(EXTRACT_PATH + '/zip/promise')
+   rimraf.sync(EXTRACT_PATH + '/zip/callback')
+
+   rimraf.sync(EXTRACT_PATH + '/entry/sync')
+   rimraf.sync(EXTRACT_PATH + '/entry/promise')
+   rimraf.sync(EXTRACT_PATH + '/entry/callback')
 })
 
 test('integration test should assert inflate algorithms', async () => {
@@ -199,10 +183,19 @@ test('integration test should error on bad local header signature', () => {
 })
 */
 
-test('integration test should error on bad local header signature', () => {
+test('integration test should error on bad central header signature', () => {
 
     const files = readdirSync(ASSETS_PATH + '/bad cen sig')
 
     for (const file of files)
         expect(() => new UZip(ASSETS_PATH + '/bad cen sig' + '/' + file).testArchiveSync()).toThrow()
+})
+
+test('integration testing arch with comment - will error on bad zip32 header signature', () => {
+
+    const path = ASSETS_PATH + '/no comment arch - bad zip32 sig'
+    const files = readdirSync(path)
+
+    for (const file of files)
+        expect(() => new UZip(path + '/' + file).testArchiveSync()).toThrow()
 })
