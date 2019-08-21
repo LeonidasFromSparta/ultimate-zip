@@ -1,6 +1,6 @@
-import Entry from './../zip-entry-api'
-import {readCenHeaders} from './../utils'
-import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from './../decoders'
+import Entry from '../zip-entry-api'
+import {readCenHeaders} from '../utils'
+import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from '../decoders'
 
 const testArchive = async (file, entries) => {
 

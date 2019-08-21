@@ -1,4 +1,4 @@
-import UZip from './../../src/u-zip'
+import UZip from './../../src/index'
 
 const ASSETS_PATH = './tests/integration/assets'
 const EXTRACT_PATH = './tests/integration/assets/tmp'
@@ -7,16 +7,15 @@ const EXTRACT_PATH = './tests/integration/assets/tmp'
 (async () => {
 
     debugger
-    const entries = await new Promise((resolve, reject) => {
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-            .getEntries((err, entries) => err ? reject(err) : resolve(entries))
-    })
+    await new Promise((resolve) =>
+        new UZip(badChecksumZipPath).testArchive((err) => {
 
-    await new Promise((resolve, reject) => {
-
-        entries[10].getAsStream((err, stream) => err ? reject(err) : resolve(stream))
-    })
+            debugger
+            expect(err).toBeInstanceOf(Error)
+            resolve()
+        }))
     debugger
     debugger
     debugger

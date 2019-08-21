@@ -3,6 +3,4 @@ coverage
 samples
 build
 bundle
-extr
-tests/integration/assets/1
-tests/integration/assets/extracted
+tests/integration/assets/tmp
