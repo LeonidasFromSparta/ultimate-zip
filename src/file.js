@@ -1,38 +1,23 @@
-import {
-    openSync,
-    closeSync,
-    fstatSync,
-    readSync,
-    existsSync,
-    mkdirSync,
-    writeFileSync,
-    createReadStream,
-    createWriteStream
-} from 'fs'
-
-import {open, close, fstat, stat, read, mkdir, writeFile} from './promisifed-fs'
 import path from 'path'
+import {sync, promise, stream} from './fs-compat'
 
 const READ_FLAG = 'r'
 
 const mkDirRecursive = async (dir) => {
 
-    try {
-
-        await stat(dir)
-    } catch (ex) {
+    if (!await promise.exists(dir)) {
 
         await mkDirRecursive(path.join(dir, '..'))
-        await mkdir(dir)
+        await promise.mkdir(dir)
     }
 }
 
 const mkDirRecursiveSync = (dir) => {
 
-    if (!existsSync(dir)) {
+    if (!sync.existsSync(dir)) {
 
         mkDirRecursiveSync(path.join(dir, '..'))
-        mkdirSync(dir)
+        sync.mkdirSync(dir)
     }
 }
 
@@ -49,7 +34,7 @@ export default class File {
         if (this.fd !== null)
             throw new Error('file already opened')
 
-        this.fd = await open(this.path, READ_FLAG)
+        this.fd = await promise.open(this.path, READ_FLAG)
     }
 
     openSync = () => {
@@ -57,7 +42,7 @@ export default class File {
         if (this.fd !== null)
             throw new Error('file already opened')
 
-        this.fd = openSync(this.path, READ_FLAG)
+        this.fd = sync.openSync(this.path, READ_FLAG)
     }
 
     close = async () => {
@@ -65,7 +50,7 @@ export default class File {
         if (this.fd === null)
             throw new Error('no fd to close')
 
-        await close(this.fd)
+        await promise.close(this.fd)
         this.fd = null
     }
 
@@ -74,36 +59,32 @@ export default class File {
         if (this.fd === null)
             throw new Error('no fd to close')
 
-        closeSync(this.fd)
+        sync.closeSync(this.fd)
         this.fd = null
     }
 
-    readSync = (pos, length) => {
-
-        if (this.fd === null)
-            throw new Error('fd not opened')
-
-        const buffer = Buffer.alloc(length)
-        readSync(this.fd, buffer, 0, length, pos)
-
-        return buffer
-    }
-
-    read = async (pos, length) => {
+    read = async (pos, len) => {
 
         if (this.fd === null)
             new Error('fd not opened')
 
-        const buffer = Buffer.alloc(length)
-        return await read(this.fd, buffer, 0, length, pos)
+        return await promise.read(this.fd, pos, len)
+    }
+
+    readSync = (pos, len) => {
+
+        if (this.fd === null)
+            throw new Error('fd not opened')
+
+        return sync.readSync(this.fd, pos, len)
     }
 
     getFileSizeSync = () => {
 
         if (this.fd === null)
             throw new Error('fd not opened')
-        
-        const fdStat = fstatSync(this.fd)
+
+        const fdStat = sync.fstatSync(this.fd)
         return fdStat.size
     }
 
@@ -112,7 +93,7 @@ export default class File {
         if (this.fd === null)
             new Error('fd not opened')
 
-        const fdStat = await fstat(this.fd)
+        const fdStat = await promise.fstat(this.fd)
         return fdStat.size
     }
 
@@ -126,26 +107,26 @@ export default class File {
         mkDirRecursiveSync(dir)
     }
 
-    createWriteStream = (fileName) => {
+    createWriteStream = (name) => {
 
-        return createWriteStream(fileName)
+        return stream.createWriteStream(name)
     }
 
-    writeFile = async (file, data) => {
+    writeFile = async (name, data) => {
 
-        await writeFile(file, data)
+        await promise.writeFile(name, data)
     }
 
-    writeFileSync = (file, data) => {
+    writeFileSync = (name, data) => {
 
-        writeFileSync(file, data)
+        sync.writeFileSync(name, data)
     }
 
-    getCloseableReadStream = (start, length) => {
+    getCloseableReadStream = (start, len) => {
 
         if (this.fd === null)
             throw new Error('fd not opened')
 
-        return createReadStream(undefined, {fd: this.fd, start, end: start + length - 1})
+        return stream.createReadStream(this.fd, start, len)
     }
 }
