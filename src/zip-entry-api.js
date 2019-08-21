@@ -12,11 +12,11 @@ export default class Entry {
 
     extract = (path, callback) => {
 
-        if (!callback || typeof callback !== 'function')
+        if (typeof callback !== 'function')
             return extract(path, this.header, this.file)
 
         extract(path, this.header, this.file)
-        .then(callback)
+        .then(() => callback(null))
         .catch((err) => callback(err))
     }
 
@@ -24,33 +24,33 @@ export default class Entry {
 
         const file = new File(this.file.path)
 
-        if (!callback || typeof callback !== 'function')
+        if (typeof callback !== 'function')
             return getAsBuffer(this.header, file)
 
         getAsBuffer(this.header, file)
-        .then((content) => callback(undefined, content))
-        .catch((err) => callback(err))
+        .then((data) => callback(null, data))
+        .catch((err) => callback(err, null))
     }
 
     getAsStream = (callback) => {
 
         const file = new File(this.file.path)
 
-        if (!callback || typeof callback !== 'function')
+        if (typeof callback !== 'function')
             return getAsStream(this.header, file)
 
         getAsStream(this.header, file)
-        .then((stream) => callback(undefined, stream))
-        .catch((err) => callback(err))
+        .then((stream) => callback(null, stream))
+        .catch((err) => callback(err, null))
     }
 
     test = (callback) => {
 
-        if (!callback || typeof callback !== 'function')
+        if (typeof callback !== 'function')
             return test(this.header, this.file)
 
         test(this.header, this.file)
-        .then((data) => callback(undefined, data))
+        .then(() => callback(null))
         .catch((err) => callback(err))
     }
 
@@ -61,7 +61,8 @@ export default class Entry {
 
     getAsBufferSync = () => {
 
-        return getAsBufferSync(this.header, this.file)
+        const file = new File(this.file.path)
+        return getAsBufferSync(this.header, file)
     }
 
     testSync = () => {

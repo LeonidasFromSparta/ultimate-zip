@@ -7,15 +7,8 @@ const EXTRACT_PATH = './tests/integration/assets/tmp'
 (async () => {
 
     debugger
-    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
-
-    await new Promise((resolve) =>
-        new UZip(badChecksumZipPath).testArchive((err) => {
-
-            debugger
-            expect(err).toBeInstanceOf(Error)
-            resolve()
-        }))
+    const data = new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        .getEntriesSync()[4].getAsBufferSync()
     debugger
     debugger
     debugger
