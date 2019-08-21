@@ -1,9 +1,8 @@
-.vscode
 node_modules
 coverage
 samples
 build
+bundle
 extr
 tests/integration/assets/1
 tests/integration/assets/extracted
-tests/integration/my.integration.test.js
