@@ -36,7 +36,7 @@ const table = [
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
 ]
 
-class CRC32 {
+export class CRC32 {
 
     _crc = -1
 
@@ -51,7 +51,7 @@ class CRC32 {
     getValue = () => (this._crc ^ (-1)) >>> 0
 }
 
-class CRC32Stream extends Transform {
+export class CRC32Stream extends Transform {
 
     _crc32 = new CRC32()
 
@@ -64,5 +64,3 @@ class CRC32Stream extends Transform {
 
     getValue = () => this._crc32.getValue()
 }
-
-export {CRC32, CRC32Stream}

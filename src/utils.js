@@ -7,7 +7,7 @@ import {locDecoder} from './decoders'
 const verifySignature = (expected, observed, message) => {
 
     if (expected !== observed)
-        throw (message)
+        throw new Error(message)
 }
 
 const calculateHeaderLength = (data, fields, intial) => fields.reduce((acc, pos) => acc + data.readUInt16LE(pos), intial)

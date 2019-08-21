@@ -7,6 +7,7 @@ export default class UZip {
     constructor(path) {
 
         this.file = new File(path)
+        this.entries = null
     }
 
     testArchive = (callback) => {
@@ -41,21 +42,21 @@ export default class UZip {
 
         if (typeof callback !== 'function') {
 
-            if (!this.entries)
+            if (this.entries === null)
                 return getEntries(this.file).then((entries) => (this.entries = entries) && entries)
 
             return this.entries
         }
 
-        if (this.entries)
-            callback(null, this.entries)
-        else
+        if (this.entries === null)
             getEntries(this.file).then((entries) => (this.entries = entries) && callback(null, entries)).catch((err) => callback(err, null))
+        else
+            callback(null, this.entries)
     }
 
     getEntriesSync = () => {
 
-        if (!this.entries)
+        if (this.entries === null)
             this.entries = getEntriesSync(this.file)
 
         return this.entries

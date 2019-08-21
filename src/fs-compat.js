@@ -42,8 +42,8 @@ export const sync = {
     openSync: fs.openSync,
     closeSync: fs.closeSync,
     fstatSync: fs.fstatSync,
-    readSync,
     existsSync: fs.existsSync,
+    readSync,
     mkdirSync: fs.mkdirSync,
     writeFileSync: fs.writeFile
 }
