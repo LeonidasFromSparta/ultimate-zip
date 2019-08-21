@@ -1,4 +1,5 @@
-import UZip from 'u-zip'
+import UZip from 'index'
+import File from 'file'
 import {readdirSync} from 'fs'
 import rimraf from 'rimraf'
 
@@ -155,6 +156,7 @@ test('integration test should assert get as stream entry - promise api', async (
     const entries = await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').getEntries()
     await entries[10].getAsStream()
 })
+
 test('integration test should assert get as stream entry - callback api', async () => {
 
     const entries = await new Promise((resolve, reject) => {
@@ -198,4 +200,139 @@ test('integration testing arch with comment - will error on bad zip32 header sig
 
     for (const file of files)
         expect(() => new UZip(path + '/' + file).testArchiveSync()).toThrow()
+})
+
+test('integration testing bad checksum err', () => {
+
+    const path = ASSETS_PATH + '/bad checksum'
+    const files = readdirSync(path)
+
+    for (const file of files)
+        expect(() => new UZip(path + '/' + file).testArchiveSync()).toThrow()
+})
+
+
+
+
+
+
+
+test('integration testing file system errors - open same file twice', async () => {
+
+    const path = ASSETS_PATH + '/testing file.txt'
+    const file1 = new File(path)
+
+    file1.openSync()
+    expect(() => file1.openSync()).toThrow()
+
+    const file2 = new File(path)
+
+    await file2.open()
+    await expect(file2.open()).rejects.toThrow()
+})
+
+test('integration testing file system errors - close no file', async () => {
+
+    const path = ASSETS_PATH + '/testing file.txt'
+    const file1 = new File(path)
+
+    expect(() => file1.closeSync()).toThrow()
+
+    const file2 = new File(path)
+
+    await expect(file2.close()).rejects.toThrow()
+})
+
+test('integration testing file system errors - access no file', async () => {
+
+    const path = ASSETS_PATH + '/testing file.txt'
+    const file = new File(path)
+
+    expect(() => file.readSync()).toThrow()
+    await expect(file.read()).rejects.toThrow()
+
+    expect(() => file.readSync()).toThrow()
+    await expect(file.read()).rejects.toThrow()
+
+    expect(() => file.getFileSizeSync()).toThrow()
+    await expect(file.getFileSize()).rejects.toThrow()
+})
+
+test('integration extract archive callback api checksum error', () => {
+
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
+    new UZip(badChecksumZipPath)
+            .extractArchive(EXTRACT_PATH + '/bad checksum/callback',
+            (err) => expect(err).toBeInstanceOf(Error))
+})
+
+test('integration extratc archive promise api checksum error', async () => {
+
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
+    await expect(new UZip(badChecksumZipPath)
+        .extractArchive(EXTRACT_PATH + '/bad checksum/callback')).rejects.toThrow()
+})
+
+test('integration archive apis checksum error', async () => {
+
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
+    expect(() => new UZip(badChecksumZipPath)
+        .extractArchiveSync(EXTRACT_PATH + '/bad checksum/callback')).toThrow()
+})
+
+test('integration test archive callback api checksum error', () => {
+
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
+    new UZip(badChecksumZipPath)
+            .testArchive((err) => expect(err).toBeInstanceOf(Error))
+})
+
+test('integration test archive promise api checksum error', async () => {
+
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
+    await expect(new UZip(badChecksumZipPath).extractArchive()).rejects.toThrow()
+})
+
+test('integration test archive sync api checksum error', async () => {
+
+    const badChecksumZipPath = ASSETS_PATH + '/bad checksum/bad checksum.zip'
+    expect(() => new UZip(badChecksumZipPath).extractArchiveSync()).toThrow()
+})
+
+
+
+
+
+
+
+
+
+test('integration get entries cached callback api', () => {
+
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
+
+    uzip.testArchive((err) =>
+        uzip.getEntries((err, entries) =>
+            expect(entries.length).not.toBe(0)))
+})
+
+test('integration get entries cached promise api', async () => {
+
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
+
+    await uzip.testArchive()
+    const entries = await uzip.getEntries()
+    await expect(entries.length).not.toBe(0)
+})
+
+test('integration test archive sync api checksum error', () => {
+
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
+
+    uzip.testArchiveSync()
+    const entries = uzip.getEntriesSync()
+    expect(entries.length).not.toBe(0)
 })

@@ -89,23 +89,31 @@ export default class File {
         return buffer
     }
 
-    read = (pos, length) => {
+    read = async (pos, length) => {
 
         if (this.fd === null)
-            throw new Error('fd not opened')
+            new Error('fd not opened')
 
         const buffer = Buffer.alloc(length)
-        return read(this.fd, buffer, 0, length, pos)
-    }
-
-    getFileSize = async () => {
-
-        return (await fstat(this.fd)).size
+        return await read(this.fd, buffer, 0, length, pos)
     }
 
     getFileSizeSync = () => {
 
-        return fstatSync(this.fd).size
+        if (this.fd === null)
+            throw new Error('fd not opened')
+        
+        const fdStat = fstatSync(this.fd)
+        return fdStat.size
+    }
+
+    getFileSize = async () => {
+
+        if (this.fd === null)
+            new Error('fd not opened')
+
+        const fdStat = await fstat(this.fd)
+        return fdStat.size
     }
 
     makeDir = async (dir) => {

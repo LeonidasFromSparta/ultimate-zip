@@ -5,7 +5,7 @@ import {CRC32, CRC32Stream} from './crc32'
 const compareChecksum = (val1, val2) => {
 
     if (val1 !== val2)
-        throw 'bad checksum'
+        throw new Error('bad checksum')
 }
 
 const inflaterSync = (isDeflated, deflated, checksum) => {
