@@ -32,7 +32,7 @@ export default class File {
     open = async () => {
 
         if (this.fd !== null)
-            throw new Error('file already opened')
+            throw new Error('fd exists')
 
         this.fd = await promise.open(this.path, READ_FLAG)
     }
@@ -40,7 +40,7 @@ export default class File {
     openSync = () => {
 
         if (this.fd !== null)
-            throw new Error('file already opened')
+            throw new Error('fd exists')
 
         this.fd = sync.openSync(this.path, READ_FLAG)
     }
@@ -66,7 +66,7 @@ export default class File {
     read = async (pos, len) => {
 
         if (this.fd === null)
-            new Error('fd not opened')
+            throw new Error('no fd to read')
 
         return await promise.read(this.fd, pos, len)
     }
@@ -74,7 +74,7 @@ export default class File {
     readSync = (pos, len) => {
 
         if (this.fd === null)
-            throw new Error('fd not opened')
+            throw new Error('no fd to read')
 
         return sync.readSync(this.fd, pos, len)
     }
@@ -82,7 +82,7 @@ export default class File {
     getFileSizeSync = () => {
 
         if (this.fd === null)
-            throw new Error('fd not opened')
+            throw new Error('no fd to access')
 
         const fdStat = sync.fstatSync(this.fd)
         return fdStat.size
@@ -91,7 +91,7 @@ export default class File {
     getFileSize = async () => {
 
         if (this.fd === null)
-            new Error('fd not opened')
+            new Error('no fd to access')
 
         const fdStat = await promise.fstat(this.fd)
         return fdStat.size
@@ -125,7 +125,7 @@ export default class File {
     getCloseableReadStream = (start, len) => {
 
         if (this.fd === null)
-            throw new Error('fd not opened')
+            throw new Error('no fd to stream')
 
         return stream.createReadStream(this.fd, start, len)
     }
