@@ -2,7 +2,7 @@ import Entry from '../zip-entry-api'
 import {readCenHeaders} from '../utils'
 import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from '../decoders'
 
-const testArchiveSync = (file, entries) => {
+export const testArchiveSync = (file, entries) => {
 
     file.openSync()
 
@@ -12,7 +12,7 @@ const testArchiveSync = (file, entries) => {
     file.closeSync()
 }
 
-const extractArchiveSync = (file, entries, path) => {
+export const extractArchiveSync = (file, entries, path) => {
 
     file.openSync()
 
@@ -22,45 +22,20 @@ const extractArchiveSync = (file, entries, path) => {
     file.closeSync()
 }
 
-/*
-const testFile = async (fileName) => {
+export const extractByRegexSync = (file, entries, path, regex) => {
 
-    const entries = await this.getEntries()
+    if (!regex instanceof RegExp)
+        throw new Error(regex + ' is not a regex')
+
+    file.openSync()
 
     for (let i=0; i < entries.length; i++) {
-
-        if (entries[i].header.getFileName() === fileName) {
-
-            await entries[i]._test()
-            break
-        }
+        if (regex.test(entries[i].fileName))
+            entries[i].extract(path)
     }
+
+    file.closeSync()
 }
-
-const extractByRegex = async (regex, path) => {
-
-    const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
-
-    this.file.openFile()
-
-    for (let i=0; i < entries.length; i++)
-        await entries[i].extract(path)
-
-    this.file.closeFile()
-}
-
-const extractFile = async (filename, path) => {
-
-    const entries = (await this.getEntries()).filter((obj) => obj.getFilename() === filename)
-
-    this.file.openFile()
-
-    for (let i=0; i < entries.length; i++)
-        await entries[i].extract(path)
-
-    this.file.closeFile()
-}
-*/
 
 import {END_MAX} from '../constants'
 import {ELO_HDR} from '../constants'
@@ -87,7 +62,7 @@ const getZipHeader = (file) => {
     return header32
 }
 
-const getEntriesSync = (file) => {
+export const getEntriesSync = (file) => {
 
     file.openSync()
 
@@ -102,5 +77,3 @@ const getEntriesSync = (file) => {
 
     return entries.map((obj) => new Entry(obj, file))
 }
-
-export {testArchiveSync, extractArchiveSync, getEntriesSync}

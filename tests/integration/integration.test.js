@@ -332,3 +332,33 @@ test('integration get entries cached sync api', () => {
     const entries = uzip.getEntriesSync()
     expect(entries.length).not.toBe(0)
 })
+
+
+test('integration extract by regex callback api', async () => {
+
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
+
+    const promise = new Promise((resolve, reject) =>
+        uzip.extractByRegex(EXTRACT_PATH + '/regex/callback', /.*new.*/, (err) =>
+            err ? reject(err) : resolve('ok'))) 
+
+    await expect(promise).resolves.toBe('ok')
+})
+
+test('integration extract by regex promise api', async () => {
+
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
+
+    const promise = uzip.extractByRegex(EXTRACT_PATH + '/regex/promise', /.*new.*/)
+    await expect(promise).resolves.not.toThrow()
+})
+
+test('integration extract by regex sync api', async () => {
+
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
+
+    expect(() => uzip.extractByRegexSync(EXTRACT_PATH + '/regex/promise', /.*new.*/)).not.toThrow()
+})

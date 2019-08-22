@@ -1,6 +1,6 @@
 import File from './file'
-import {testArchiveSync, extractArchiveSync, getEntriesSync} from './lib/zip-arch-sync'
-import {testArchive, extractArchive, getEntries} from './lib/zip-arch'
+import {testArchiveSync, extractArchiveSync, extractByRegexSync, getEntriesSync} from './lib/zip-arch-sync'
+import {testArchive, extractArchive, extractByRegex, getEntries} from './lib/zip-arch'
 
 export default class UZip {
 
@@ -36,6 +36,20 @@ export default class UZip {
 
         this.getEntriesSync()
         extractArchiveSync(this.file, this.entries, path)
+    }
+
+    extractByRegex = (path, regex, callback) => {
+
+        if (typeof callback !== 'function')
+            return this.getEntries().then(() => extractByRegex(this.file, this.entries, path, regex))
+
+        this.getEntries().then(() => extractByRegex(this.file, this.entries, path, regex)).then(() => callback(null)).catch((err) => callback(err))
+    }
+
+    extractByRegexSync = (path, regex) => {
+
+        this.getEntriesSync()
+        extractByRegexSync(this.file, this.entries, path, regex)
     }
 
     getEntries = (callback) => {

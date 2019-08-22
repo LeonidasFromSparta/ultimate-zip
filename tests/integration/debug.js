@@ -9,13 +9,14 @@ import {readdirSync} from 'fs'
 (async () => {
 
     debugger
-    // const data = new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const uzip = new UZip(zipPath)
 
-    const files = readdirSync(ASSETS_PATH + '/algorithms')
+    const promise = new Promise((resolve, reject) =>
+        uzip.extractByRegex(EXTRACT_PATH + '/regex/callback', /.*new.*/, (err) =>
+            err ? reject(err) : resolve('ok'))) 
 
-    for (const file of files)
-        new UZip(ASSETS_PATH + '/algorithms' + '/' + file).testArchiveSync()
-
+    await promise
     debugger
     debugger
     debugger
