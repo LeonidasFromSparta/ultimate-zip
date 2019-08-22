@@ -8,15 +8,9 @@ import {readdirSync} from 'fs'
 ;
 (async () => {
 
-    debugger
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
-    const uzip = new UZip(zipPath)
 
-    const promise = new Promise((resolve, reject) =>
-        uzip.extractByRegex(EXTRACT_PATH + '/regex/callback', /.*new.*/, (err) =>
-            err ? reject(err) : resolve('ok'))) 
-
-    await promise
+    const keke = new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
+        .getEntriesSync()
     debugger
     debugger
     debugger

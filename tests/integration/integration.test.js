@@ -31,137 +31,137 @@ test('integration test should assert inflate algorithms', async () => {
 
 test('integration test should assert extract archive - sync api', () => {
 
-    new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').extractArchiveSync(EXTRACT_PATH + '/zip/sync')
+    new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip').extractArchiveSync(EXTRACT_PATH + '/zip/sync')
 })
 
 test('integration test should assert extract archive - promise api', async () => {
 
-    await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').extractArchive(EXTRACT_PATH + '/zip/promise')
+    await new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip').extractArchive(EXTRACT_PATH + '/zip/promise')
 })
 
 test('integration test should assert extract archive callback api', async () => {
 
     await new Promise((resolve, reject) => {
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
             .extractArchive(EXTRACT_PATH + '/zip/callback', (err) => err ? reject(err) : resolve())
     })
 })
 
 test('integration test should assert get entries - sync api', () => {
 
-    new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').getEntries()
+    new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip').getEntries()
 })
 
 test('integration test should assert get entries - promise api', async () => {
 
-    await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').getEntries()
+    await new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip').getEntries()
 })
 
 test('integration test should assert get entries - callback api', async () => {
 
     await new Promise((resolve, reject) => {
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
             .getEntries((err, entries) => err ? reject(err) : resolve(entries))
     })
 })
 
 test('integration test should assert extract entry - sync api', () => {
 
-    new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-        .getEntriesSync()[4].extractSync(EXTRACT_PATH + '/entry/sync')
+    new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
+        .getEntriesSync()[12].extractSync(EXTRACT_PATH + '/entry/sync')
 })
 
 test('integration test should assert extract entry - promise api', async () => {
 
-    (await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-        .getEntries())[4].extract(EXTRACT_PATH + '/entry/promise')
+    (await new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
+        .getEntries())[12].extract(EXTRACT_PATH + '/entry/promise')
 })
 
 test('integration test should assert extract entry - callback api', async () => {
 
     const entries = await new Promise((resolve, reject) => {
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
             .getEntries((err, entries) => err ? reject(err) : resolve(entries))
     })
 
     await new Promise((resolve, reject) => {
 
-        entries[4].extract(EXTRACT_PATH + '/entry/callback', (err) => err ? reject(err) : resolve())
+        entries[12].extract(EXTRACT_PATH + '/entry/callback', (err) => err ? reject(err) : resolve())
     })
 })
 
 test('integration test should assert get as buffer entry - sync api', () => {
 
-    new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-        .getEntriesSync()[4].getAsBufferSync()
+    new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
+        .getEntriesSync()[12].getAsBufferSync()
 })
 
 test('integration test should assert get as buffer entry - promise api', async () => {
 
-    const entries = await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').getEntries()
-    await entries[4].getAsBuffer()
+    const entries = await new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip').getEntries()
+    await entries[12].getAsBuffer()
 })
 
 test('integration test should assert get as buffer entry - callback api', async () => {
 
     const entries = await new Promise((resolve, reject) => {
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
             .getEntries((err, entries) => err ? reject(err) : resolve(entries))
     })
 
     await new Promise((resolve, reject) => {
 
-        entries[10].getAsBuffer((err, buffer) => err ? reject(err) : resolve(buffer))
+        entries[12].getAsBuffer((err, buffer) => err ? reject(err) : resolve(buffer))
     })
 })
 
 test('integration test should assert test entry - sync api', () => {
 
-    new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-        .getEntriesSync()[4].test()
+    new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
+        .getEntriesSync()[12].test()
 })
 
 test('integration test should assert test entry - promise api', async () => {
 
-    (await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
-        .getEntries())[4].test()
+    (await new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
+        .getEntries())[12].test()
 })
 
 test('integration test should assert test entry - callback api', async () => {
 
     const entries = await new Promise((resolve, reject) => {
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
             .getEntries((err, entries) => err ? reject(err) : resolve(entries))
     })
 
     await new Promise((resolve, reject) => {
 
-        entries[4].test((err) => err ? reject(err) : resolve())
+        entries[12].test((err) => err ? reject(err) : resolve())
     })
 })
 
 test('integration test should assert get as stream entry - promise api', async () => {
 
-    const entries = await new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip').getEntries()
-    await entries[10].getAsStream()
+    const entries = await new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip').getEntries()
+    await entries[12].getAsStream()
 })
 
 test('integration test should assert get as stream entry - callback api', async () => {
 
     const entries = await new Promise((resolve, reject) => {
 
-        new UZip(ASSETS_PATH + '/algorithms/win-7z-normal.zip')
+        new UZip(ASSETS_PATH + '/algorithms/win-7z-64w.zip')
             .getEntries((err, entries) => err ? reject(err) : resolve(entries))
     })
 
     await new Promise((resolve, reject) => {
 
-        entries[10].getAsStream((err, stream) => err ? reject(err) : resolve(stream))
+        entries[12].getAsStream((err, stream) => err ? reject(err) : resolve(stream))
     })
 })
 
@@ -301,7 +301,7 @@ test('integration test archive sync api checksum error', () => {
 
 test('integration get entries cached callback api', async () => {
 
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-64w.zip'
     const uzip = new UZip(zipPath)
 
     await new Promise((resolve) =>
@@ -315,7 +315,7 @@ test('integration get entries cached callback api', async () => {
 
 test('integration get entries cached promise api', async () => {
 
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-64w.zip'
     const uzip = new UZip(zipPath)
 
     await uzip.testArchive()
@@ -325,7 +325,7 @@ test('integration get entries cached promise api', async () => {
 
 test('integration get entries cached sync api', () => {
 
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-64w.zip'
     const uzip = new UZip(zipPath)
 
     uzip.testArchiveSync()
@@ -336,7 +336,7 @@ test('integration get entries cached sync api', () => {
 
 test('integration extract by regex callback api', async () => {
 
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-64w.zip'
     const uzip = new UZip(zipPath)
 
     const promise = new Promise((resolve, reject) =>
@@ -348,7 +348,7 @@ test('integration extract by regex callback api', async () => {
 
 test('integration extract by regex promise api', async () => {
 
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-64w.zip'
     const uzip = new UZip(zipPath)
 
     const promise = uzip.extractByRegex(EXTRACT_PATH + '/regex/promise', /.*new.*/)
@@ -357,7 +357,7 @@ test('integration extract by regex promise api', async () => {
 
 test('integration extract by regex sync api', async () => {
 
-    const zipPath = ASSETS_PATH + '/algorithms/win-7z-normal.zip'
+    const zipPath = ASSETS_PATH + '/algorithms/win-7z-64w.zip'
     const uzip = new UZip(zipPath)
 
     expect(() => uzip.extractByRegexSync(EXTRACT_PATH + '/regex/promise', /.*new.*/)).not.toThrow()
