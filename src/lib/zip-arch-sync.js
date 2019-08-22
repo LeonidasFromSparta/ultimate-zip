@@ -22,6 +22,30 @@ const extractArchiveSync = (file, entries, path) => {
     file.closeSync()
 }
 
+const extractByRegex = async (regex, path) => {
+
+            /*
+        if (!(params instanceof Array) && !(params instanceof RegExp))
+            throw new Error(params + ' is not a valid regex or array')
+
+        if (params instanceof RegExp)
+            params = [params]
+
+        for (const regex of params)
+            if (regex instanceof RegExp)
+                throw new Error(regex + ' is not a valid regex')
+        */
+
+    const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
+
+    this.file.openSync()
+
+    for (let i=0; i < entries.length; i++)
+        await entries[i].extract(path)
+
+    this.file.closeFile()
+}
+
 /*
 const testFile = async (fileName) => {
 
@@ -37,17 +61,7 @@ const testFile = async (fileName) => {
     }
 }
 
-const extractByRegex = async (regex, path) => {
 
-    const entries = (await this.getEntries()).filter((obj) => obj.getFilename().test(regex))
-
-    this.file.openFile()
-
-    for (let i=0; i < entries.length; i++)
-        await entries[i].extract(path)
-
-    this.file.closeFile()
-}
 
 const extractFile = async (filename, path) => {
 
@@ -103,4 +117,4 @@ const getEntriesSync = (file) => {
     return entries.map((obj) => new Entry(obj, file))
 }
 
-export {testArchiveSync, extractArchiveSync, getEntriesSync}
+export {testArchiveSync, extractArchiveSync, extractByRegexSync, getEntriesSync}
