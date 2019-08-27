@@ -1,7 +1,7 @@
 import path from 'path'
-import {readLocHeader} from '../utils'
-import {inflaterSync} from '../inflater'
-import {LOC_HDR} from '../constants'
+import {readLocHeader} from './../lib/utils'
+import {inflaterSync} from './../lib/inflater'
+import {LOC_HDR} from './../lib/constants'
 
 const extractSync = (dir, header, file) => {
 

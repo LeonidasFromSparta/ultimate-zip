@@ -1,6 +1,6 @@
-import Entry from '../zip-entry-api'
-import {readCenHeaders} from '../utils'
-import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from '../decoders'
+import Entry from './entry-sync-api'
+import {readCenHeaders} from './../lib/utils'
+import {zip32HeaderDecoder, zip64LocatorDecoder, zip64HeaderDecoder} from './../lib/decoders'
 
 export const testArchiveSync = (file, entries) => {
 
@@ -37,8 +37,8 @@ export const extractByRegexSync = (file, entries, path, regex) => {
     file.closeSync()
 }
 
-import {END_MAX} from '../constants'
-import {ELO_HDR} from '../constants'
+import {END_MAX} from './../lib/constants'
+import {ELO_HDR} from './../lib/constants'
 
 const getZipHeader = (file) => {
 

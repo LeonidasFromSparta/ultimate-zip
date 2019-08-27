@@ -1,2 +1,4 @@
-import UZip from './zip-arch-api'
-export default UZip
+import Arkaiv from './async/arch-api'
+import ArkaivSync from './sync/arch-sync-api'
+
+export {Arkaiv, ArkaivSync}

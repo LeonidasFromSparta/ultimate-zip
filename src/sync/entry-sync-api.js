@@ -1,5 +1,5 @@
-import {extractSync, testSync, getAsBufferSync} from './lib/zip-entry-sync'
-import File from './file'
+import {extractSync, testSync, getAsBufferSync} from './entry-sync'
+import File from './../lib/file'
 
 export default class EntrySync {
 

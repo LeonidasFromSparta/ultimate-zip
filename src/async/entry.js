@@ -1,7 +1,7 @@
 import path from 'path'
-import {readLocHeader} from '../utils'
-import {bufferedInflater, streamingInflater} from '../inflater'
-import {LOC_HDR} from '../constants'
+import {readLocHeader} from './../lib/utils'
+import {bufferedInflater, streamingInflater} from './../lib/inflater'
+import {LOC_HDR} from './../lib/constants'
 
 const extract = async (dir, header, file) => {
 

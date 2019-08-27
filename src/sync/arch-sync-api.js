@@ -1,7 +1,7 @@
-import File from './file'
-import {testArchiveSync, extractArchiveSync, extractByRegexSync, getEntriesSync} from './lib/zip-arch-sync'
+import File from './../lib/file'
+import {testArchiveSync, extractArchiveSync, extractByRegexSync, getEntriesSync} from './arch-sync'
 
-export default class ZipSync {
+export default class ArkaivSync {
 
     constructor(path) {
 
