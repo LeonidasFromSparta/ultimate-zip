@@ -1,27 +1,34 @@
-import {extractSync, testSync, getAsBufferSync} from './entry-sync'
-import File from './../lib/file'
+import {sync} from './../lib/fs-compat'
+import {extractSync, testSync, getAsBufferSync} from './methods'
 
-export default class EntrySync {
+export default class EntrySyncApi {
 
-    constructor(header, file) {
+    constructor(header, path) {
 
         this.header = header
-        this.file = file
-    }
-
-    extractSync = (path) => {
-
-        extractSync(path, this.header, this.file)
-    }
-
-    getAsBufferSync = () => {
-
-        const file = new File(this.file.path)
-        return getAsBufferSync(this.header, file)
+        this.path = path
     }
 
     testSync = () => {
 
-        testSync(this.header, this.file)
+        const fd = sync.openSync(this.path)
+        testSync(fd, this.header)
+        sync.closeSync(fd)
+    }
+
+    extractSync = (path) => {
+
+        const fd = sync.openSync(this.path)
+        extractSync(fd, this.header, path)
+        sync.closeSync(fd)
+    }
+
+    getAsBufferSync = () => {
+
+        const fd = sync.openSync(this.path)
+        const buffer = getAsBufferSync(fd, this.header)
+        sync.closeSync(fd)
+
+        return buffer
     }
 }

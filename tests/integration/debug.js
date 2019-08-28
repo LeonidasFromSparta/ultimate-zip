@@ -8,5 +8,7 @@ const EXTRACT_PATH = './tests/integration/assets/tmp'
 
     debugger
     // const keke = new ArkaivSync(ASSETS_PATH + '/algorithms/win-7z-64w.zip').
-    new ArkaivSync(ASSETS_PATH + '/algorithms/win-7z-64w.zip').testArchiveSync()
+    const kek = new ArkaivSync(ASSETS_PATH + '/algorithms/win-7z-64w.zip').getEntriesSync()
+
+    debugger
 })()

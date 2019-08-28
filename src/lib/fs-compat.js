@@ -38,13 +38,15 @@ const writeFile = (name, data) =>
 const createReadStream = (fd, pos, len) =>
     fs.createReadStream(null, {fd, start: pos, end: pos + len - 1})
 
+const makeDirBackSync = (path) => fs.mkdirSync(path, {recursive: true})
+
 export const sync = {
     openSync: fs.openSync,
     closeSync: fs.closeSync,
     fstatSync: fs.fstatSync,
     existsSync: fs.existsSync,
     readSync,
-    mkdirSync: fs.mkdirSync,
+    makeDirBackSync,
     writeFileSync: fs.writeFile
 }
 
